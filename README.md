@@ -16,15 +16,20 @@
 git clone https://github.com/RenXinghan/ai6127-airline-rag.git
 cd ai6127-airline-rag
 
-# 2. 建独立的 Python 环境（需要 Python ≥ 3.10）
+# 2. ⚠️ 配置 git 身份（第一次用 git 的话必做）
+#    邮箱必须是你 GitHub 账号里已验证的那个，否则提交不会算在你名下
+git config --global user.name "你的GitHub用户名"
+git config --global user.email "绑定GitHub账号的邮箱"
+
+# 3. 建独立的 Python 环境（需要 Python ≥ 3.10）
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
-# 3. 装依赖（约 5–10 分钟）
+# 4. 装依赖（约 5–10 分钟）
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 
-# 4. 验证环境
+# 5. 验证环境
 python scripts/test_env.py
 ```
 
@@ -119,3 +124,6 @@ python scripts/make_fake_data.py     # 生成 100 行假数据供开发用
 - **每做一次实验就往 `experiments/log.md` 加一行**——报告里的表格全靠它
 - 大文件（数据、索引、模型）**走网盘，不要提交进 git**
 - **不要提交任何密钥**（`.env` 已在 `.gitignore` 里）
+- **确认自己的提交被正确关联**：推送后去仓库的 Contributors 页面看有没有自己。
+  没有的话说明 git 邮箱和 GitHub 账号对不上，按上面第 2 步重新配置
+  （不确定用哪个邮箱？去 https://github.com/settings/emails 查）
