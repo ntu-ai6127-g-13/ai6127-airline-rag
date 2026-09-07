@@ -1,20 +1,40 @@
-# ---- 大文件：走网盘同步，不进 git ----
+# =============================================================
+#  什么进 git：能用命令重建的，就不进。
+#  完整说明见 docs/协作规范.md
+#
+#  注意：gitignore 不支持行内注释，说明必须单独成行。
+# =============================================================
+
+# ---- 数据与产物：不进 git，各自本地重建 ----
+# data/raw       原始数据，用 scripts/download_data.py 下载
+# data/processed 清洗/切句结果，用 scripts/make_sample.py 生成
+# index          检索索引，重建约 20 分钟
+# models         训练好的模型，太大
+# outputs        中间结果
 data/raw/*
 data/processed/*
 index/*
 models/*
 outputs/*
-!**/.gitkeep
 
-# 标注结果要进 git（体积小且重要）
+# ---- 标注结果是例外 ----
+# 体积小，且是人工标了几小时的成果，丢了没法重建。
+# 先忽略整个目录，再逐个放行需要的格式，防止误放大文件进来。
+data/eval/*
 !data/eval/*.csv
 !data/eval/*.xls
 !data/eval/*.xlsx
+!data/eval/*.json
+!data/eval/*.jsonl
 !data/eval/*.md
+
+# 保留空目录结构
+!**/.gitkeep
 
 # ---- Python ----
 .venv/
 venv/
+env/
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -27,8 +47,12 @@ Thumbs.db
 # ---- 编辑器 ----
 .vscode/
 .idea/
+*.swp
 
-# ---- 密钥，绝对不要提交 ----
+# ---- 密钥：绝对不要提交 ----
 .env
+.env.*
 *.key
+*.pem
 secrets.json
+kaggle.json
