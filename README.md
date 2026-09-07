@@ -72,10 +72,10 @@ python scripts/download_data.py
 > ⚠️ 网上同名的航空评论数据集有好几个，规模从 8 千到 1 亿条都有。
 > **以自检数字为准**，对不上就是下错了。
 
-还没同步到数据时，先用假数据开工：
+开发时先用真实数据的一小块（几秒生成，全量建索引要几十分钟）：
 
 ```bash
-python scripts/make_fake_data.py     # 生成 100 行假数据供开发用
+python scripts/make_sample.py        # 从真实数据切一小块供开发用
 ```
 
 ---
