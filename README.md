@@ -13,7 +13,7 @@
 
 ```bash
 # 1. 克隆仓库
-git clone <本仓库地址>
+git clone https://github.com/RenXinghan/ai6127-airline-rag.git
 cd ai6127-airline-rag
 
 # 2. 建独立的 Python 环境（需要 Python ≥ 3.10）
@@ -32,7 +32,9 @@ python scripts/test_env.py
 
 ### 数据
 
-原始数据是 `data/raw/capstone_airline_reviews3.xlsx`（24 MB，**不在 git 里**，走网盘同步）。
+原始数据是 `data/raw/capstone_airline_reviews3.xlsx`（24 MB）。
+**它不在 git 里**（超过 GitHub 建议的单文件大小，且没必要进版本控制）——
+**问组长要网盘链接，下载后放到 `data/raw/` 目录下。**
 
 **实测规模**（跑 `python scripts/profile_data.py` 可复现）：
 
