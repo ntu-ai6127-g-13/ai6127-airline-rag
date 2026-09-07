@@ -31,3 +31,17 @@ matplotlib>=3.8
 
 # 进度条
 tqdm>=4.66
+
+# ---------------------------------------------------------------
+# 2026-09-08 在 macOS (Apple Silicon) + Python 3.11 上实测通过的版本组合。
+# 如果按上面的宽松版本装出问题，可以钉到这一组：
+#
+#   datasets==5.0.1          faiss-cpu==1.15.0      kagglehub==1.0.2
+#   matplotlib==3.11.1       numpy==2.4.6           openpyxl==3.1.5
+#   pandas==3.0.5            pyarrow==25.0.1        ragas==0.4.3
+#   rank-bm25==0.2.2         scikit-learn==1.9.0    sentence-transformers==6.0.1
+#   spacy==3.8.16            streamlit==1.63.0      torch==2.14.0
+#   tqdm==4.70.0             transformers==5.16.1
+#
+# 装完别忘了：python -m spacy download en_core_web_sm
+# ---------------------------------------------------------------

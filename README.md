@@ -33,7 +33,11 @@ python -m spacy download en_core_web_sm
 python scripts/test_env.py
 ```
 
-看到 `全部就绪 ✅` 就说明装好了。
+看到 `全部就绪 ✅` 就说明装好了。自检会验证四件事：依赖版本、spaCy 切句、
+BM25 关键词检索、FAISS 向量检索。
+
+> ✅ **这套流程 2026-09-08 在 macOS (Apple Silicon) + Python 3.11 上完整跑通过**，
+> 依赖无冲突。实测的版本组合记在 `requirements.txt` 末尾。
 
 ### 数据
 
