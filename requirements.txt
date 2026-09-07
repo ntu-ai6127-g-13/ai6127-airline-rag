@@ -1,0 +1,30 @@
+# 数据处理
+pandas>=2.0
+pyarrow>=14.0          # 读写 parquet
+openpyxl>=3.1          # 读写 xls/xlsx（评测集要用）
+
+# 文本处理
+spacy>=3.7             # 切句；装完还要 python -m spacy download en_core_web_sm
+
+# 检索
+rank_bm25>=0.2.2       # 关键词检索
+sentence-transformers>=3.0   # 语义检索（文本转向量）
+faiss-cpu>=1.8         # 向量快速查找
+
+# 分类与训练
+scikit-learn>=1.4      # 基线模型和评测指标
+transformers>=4.40     # 微调 DistilBERT
+torch>=2.2
+datasets>=2.18
+
+# 界面
+streamlit>=1.35
+
+# RAG 评测
+ragas>=0.1
+
+# 画图
+matplotlib>=3.8
+
+# 进度条
+tqdm>=4.66
