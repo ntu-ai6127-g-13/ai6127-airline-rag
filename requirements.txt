@@ -1,3 +1,6 @@
+# 数据获取
+kagglehub>=0.3          # 从 Kaggle 下载数据集
+
 # 数据处理
 pandas>=2.0
 pyarrow>=14.0          # 读写 parquet
