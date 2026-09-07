@@ -13,7 +13,7 @@ random.seed(0)
 np.random.seed(0)
 
 AIRLINES = ["Airline X", "Airline Y", "Airline Z"]
-CABINS = ["Economy", "Business", "Premium Economy"]
+CABINS = ["Economy Class", "Business Class", "Premium Economy", "First Class"]
 
 # (句子, 讲的是哪个方面, 该方面的评分)
 SAMPLES = [
@@ -27,19 +27,21 @@ SAMPLES = [
     ("The screen was broken and could not be fixed.", "entertainment", 1),
     ("Check-in staff were slow and unhelpful.", "ground", 2),
     ("Boarding was efficient and well organised.", "ground", 5),
-    ("Wifi did not work for the entire flight.", "wifi", 1),
     ("Good value for the price paid.", "value", 4),
     ("Overpriced for what you actually get.", "value", 2),
     ("I flew from Singapore to London in March.", "other", 3),
 ]
 
-RATING_COLS = ["r_seat", "r_staff", "r_food", "r_entertainment",
-               "r_ground", "r_wifi", "r_value"]
+# ⚠️ 真实数据只有 6 个维度评分，没有 wifi
+RATING_COLS = ["r_seat", "r_staff", "r_food",
+               "r_entertainment", "r_ground", "r_value"]
 ASPECT_TO_COL = {
     "seat": "r_seat", "staff": "r_staff", "food": "r_food",
     "entertainment": "r_entertainment", "ground": "r_ground",
-    "wifi": "r_wifi", "value": "r_value",
+    "value": "r_value",
 }
+TRAVELLER_TYPES = ["Solo Leisure", "Couple Leisure",
+                   "Family Leisure", "Business"]
 
 
 def main(n: int = 100) -> None:
@@ -55,13 +57,15 @@ def main(n: int = 100) -> None:
             "review_text": text + " Overall an average experience.",
             "airline": random.choice(AIRLINES),
             "cabin": random.choice(CABINS),
+            "traveller_type": random.choice(TRAVELLER_TYPES),
             "route": "Singapore to London",
-            "date": pd.Timestamp("2023-01-01")
-                    + pd.Timedelta(days=random.randint(0, 1000)),
+            # 真实数据的时间范围是 2002-08 ~ 2019-06
+            "date": pd.Timestamp("2014-01-01")
+                    + pd.Timedelta(days=random.randint(0, 1900)),
             "overall_rating": random.randint(1, 10),
             "recommended": random.choice([True, False]),
         }
-        # 七个维度评分随机填，但把这句话对应的那个方面填成它该有的分数
+        # 六个维度评分随机填，但把这句话对应的那个方面填成它该有的分数
         for col in RATING_COLS:
             row[col] = float(random.randint(1, 5))
         if aspect in ASPECT_TO_COL:
