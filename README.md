@@ -39,35 +39,34 @@ python scripts/test_env.py
 
 原始数据**不在 git 里**（24 MB，没必要进版本控制）。
 
-### 自己下载
-
-**来源**：https://www.kaggle.com/datasets/efehandanisman/skytrax-airline-reviews
-（需要 Kaggle 账号，免费）
-
-下载后放到 `data/raw/`，然后**跑一次自检**：
+### 下载数据（一条命令）
 
 ```bash
-python scripts/profile_data.py
+pip install kagglehub          # 只需装一次
+python scripts/download_data.py
 ```
 
-**必须看到这几个数字，否则就是拿错文件了：**
+自动从 Kaggle 下载、复制到 `data/raw/`、并跑自检。
+**公开数据集，不需要 Kaggle 账号或 API token。**
+
+> 想手动下也行：https://www.kaggle.com/datasets/efehandanisman/skytrax-airline-reviews
+> 下载后把 `capstone_airline_reviews3.xlsx` 放进 `data/raw/`，再跑
+> `python scripts/profile_data.py` 自检。
+
+**自检应该看到这些数字：**
 
 | 项 | 应为 |
 |---|---|
+| 原始行数 | 131,895 |
+| 其中空行 | 65,948（**数据集自带的，正常**） |
 | 有正文的评论 | **65,947** |
 | **去重后（真正的语料）** | **61,172** |
 | 总词数 | **8,402,547** |
-| 航司数 | **81** |
-| 时间范围 | **2002-08 ~ 2019-06** |
+| 航司数 / 时间范围 | **81** / **2002-08 ~ 2019-06** |
 | 评价维度 | **6 个**（座位、客舱服务、餐饮、娱乐、地勤、性价比——**没有 wifi**） |
 
-> ⚠️ **原始行数可能是 65,948 或 131,895，两个都对。**
-> Xinghan（@RenXinghan）手上那份 xlsx 存的时候被追加了一大块空行，所以是 13.2 万行；
-> 从 Kaggle 直接下的 csv 是 6.5 万行。
-> **空行会被清洗步骤自动滤掉，清洗后两边完全一样**，不影响任何结果。
->
 > ⚠️ 网上同名的航空评论数据集有好几个，规模从 8 千到 1 亿条都有。
-> **以上面的自检数字为准**，对不上就是下错了。
+> **以自检数字为准**，对不上就是下错了。
 
 还没同步到数据时，先用假数据开工：
 
