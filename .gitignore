@@ -56,3 +56,7 @@ Thumbs.db
 *.pem
 secrets.json
 kaggle.json
+
+# Claude Code 的本地工具目录，不属于项目
+.agents/
+.claude/

@@ -42,11 +42,11 @@ COL_OVERALL = "overall"            # 1–10，不叫 overall_rating
 COL_AUTHOR = "author"
 COL_DATE = "review_date"           # 不叫 date
 COL_TEXT = "customer_review"       # 不叫 review_text
-COL_AIRCRAFT = "aircraft"          # 缺失 85%，基本不可用
+COL_AIRCRAFT = "aircraft"          # 有值 30.2%（不是之前写的 15%），2,088 种机型
 COL_TRAVELLER = "traveller_type"   # Solo/Couple/Family Leisure、Business
 COL_CABIN = "cabin"                # Economy Class / Business Class / ...
 COL_ROUTE = "route"
-COL_DATE_FLOWN = "date_flown"
+COL_DATE_FLOWN = "date_flown"      # 有值 61.2%，**只有月精度**（原始值都是每月 1 号）
 COL_RECOMMENDED = "recommended"
 
 # ---------------- 模型 ----------------
