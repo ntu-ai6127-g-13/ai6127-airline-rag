@@ -28,7 +28,7 @@
 |---|---|
 | Ren Xinghan | |
 | Sun Sijie | |
-| Zhang Yuxuan | |
+| Zhang Yuxuan | G2606145J |
 | Zhu Jindou | |
 | Guo Tailai | |
 | Sun Yuxin | |
