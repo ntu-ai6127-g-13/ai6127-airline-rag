@@ -88,6 +88,9 @@ def main() -> None:
     print(clean[COL_TRAVELLER].value_counts(dropna=False).to_string())
 
     print("\n=== 作业门槛 ===")
+    print("  ⚠️ 下面是【切句之前】的数字。最终进知识库的是 61,167 条 / 546,139 句")
+    print("     / 8,276,082 词（build_kb 还会再滤掉过短的评论和碎片句）。")
+    print("     写报告请用 build_kb 打印的那一组，别用这里的。")
     print(f"  文档数 ≥10,000 : {len(clean):,}  {'✅' if len(clean) >= 10_000 else '❌'}")
     print(f"  词数 ≥100,000  : {words.sum():,}  {'✅' if words.sum() >= 100_000 else '❌'}")
 
