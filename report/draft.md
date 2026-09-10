@@ -22,9 +22,16 @@
 
 ## 组员信息（首页必须有）
 
-| 姓名 | 学号 |
+> 姓名用拼音（姓在前），与学籍一致。**学号各自填，别人代填容易填错。**
+
+| Name | Matriculation No. |
 |---|---|
-| | |
+| Ren Xinghan | |
+| Sun Sijie | |
+| Zhang Yuxuan | |
+| Zhu Jindou | |
+| Guo Tailai | |
+| Sun Yuxin | |
 
 ## Q1 — 语料库　`A 知识库组写`　截止 11/01
 
