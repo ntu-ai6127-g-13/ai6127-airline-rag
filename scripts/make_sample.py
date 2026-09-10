@@ -1,15 +1,24 @@
-"""从真实数据里切一小块出来，供三个组并行开发用。
+"""从建好的 chunks.parquet 里切一小块出来，供三个组并行开发用。
 
-用法：python scripts/make_sample.py [--n 300]
+用法：
+    python -m src.build_kb                 # 先建全量（约 14 分钟）
+    python scripts/make_sample.py          # 再抽样（几秒）
+    python scripts/make_sample.py --n 500  # 抽 500 条评论
 
 为什么要抽样而不是直接用全量：
-  全量 61,172 条评论切句后约 56.6 万句，建索引要几十分钟。
-  开发阶段每改一行代码就等这么久没法干活。
+  全量 546,139 句，建索引要几十分钟。开发阶段每改一行代码就等这么久没法干活。
   抽样后只有几千句，**几秒钟跑完，但数据是真的**。
 
-产出 data/processed/chunks_sample.parquet，
-schema 与将来的全量 chunks.parquet **完全一致**，
-所以代码写好后换个文件路径就能跑全量。
+------------------------------------------------------------------------
+2026-09-08 改写：以前这个脚本**自己重新实现了一遍清洗+切句**，
+结果 chunks.parquet 从 17 列加到 28 列之后，样本文件还停在 17 列，
+数据浏览界面一切到样本就崩（缺 route_from / aircraft 等列）。
+
+现在改成**直接从 chunks.parquet 里按 review_id 抽**：
+  · schema 永远和全量一致，从结构上不可能再漂移
+  · 抽的是完整评论（不是随机句子），parent-document retrieval 才有意义
+  · 快得多 —— 不用再读 23 MB 的 xlsx、不用再跑 spaCy
+------------------------------------------------------------------------
 """
 import argparse
 import sys
@@ -18,105 +27,49 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from src.config import (DATA_RAW, CHUNKS_SAMPLE, ASPECTS,
-                        COL_TEXT, COL_AIRLINE, COL_OVERALL, COL_DATE,
-                        COL_CABIN, COL_TRAVELLER, COL_ROUTE, COL_RECOMMENDED)
-from src.clean_text import clean_review
-
-MIN_WORDS = 3          # 少于这么多词的句子丢掉（"Ok." "Never again."）
-
-
-def load_clean() -> pd.DataFrame:
-    files = [f for f in DATA_RAW.iterdir()
-             if f.suffix.lower() in {".csv", ".xlsx", ".xls"}]
-    if not files:
-        print("❌ data/raw/ 里没有数据。先跑 python scripts/download_data.py")
-        sys.exit(1)
-    path = files[0]
-    df = pd.read_excel(path) if path.suffix.lower() in {".xlsx", ".xls"} \
-        else pd.read_csv(path)
-
-    # 这个文件有一半是全空的填充行
-    df = df[df[COL_TEXT].notna()]
-    df = df.drop_duplicates(subset=[COL_TEXT])
-
-    # 修乱码（42% 的评论有）+ 去掉 "Trip Verified |" 模板前缀（43% 有）
-    df[COL_TEXT] = df[COL_TEXT].astype(str).map(clean_review)
-    df = df[df[COL_TEXT].str.len() > 20]          # 清洗后过短的丢掉
-
-    df[COL_DATE] = pd.to_datetime(df[COL_DATE], errors="coerce")
-    return df
-
-
-def sample_reviews(df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """按总体评分分层抽样，保证好评差评大致各半。"""
-    pos = df[df[COL_OVERALL] >= 7]
-    neg = df[df[COL_OVERALL] <= 4]
-    half = n // 2
-    take = lambda pool, k: pool.sample(min(k, len(pool)), random_state=42)
-    out = pd.concat([take(pos, half), take(neg, n - half)])
-    return out.sample(frac=1, random_state=42)      # 打乱
-
-
-def to_chunks(reviews: pd.DataFrame) -> pd.DataFrame:
-    import spacy
-    nlp = spacy.load("en_core_web_sm", disable=["ner", "lemmatizer", "tagger"])
-
-    rating_cols = {aspect: col for aspect, (col, _) in ASPECTS.items()}
-    rows = []
-    texts = reviews[COL_TEXT].astype(str).tolist()
-
-    for i, doc in enumerate(nlp.pipe(texts, batch_size=100)):
-        r = reviews.iloc[i]
-        review_id = f"R{i:06d}"
-        for j, sent in enumerate(doc.sents):
-            s = sent.text.strip()
-            if len(s.split()) < MIN_WORDS:
-                continue
-            row = {
-                "chunk_id": f"{review_id}_s{j:02d}",
-                "review_id": review_id,
-                "text": s,
-                "review_text": r[COL_TEXT],
-                "airline": r[COL_AIRLINE],
-                "cabin": r.get(COL_CABIN),
-                "traveller_type": r.get(COL_TRAVELLER),
-                "route": r.get(COL_ROUTE),
-                "date": r[COL_DATE],
-                "overall_rating": r.get(COL_OVERALL),
-                "recommended": r.get(COL_RECOMMENDED),
-            }
-            for aspect, col in rating_cols.items():
-                row[f"r_{aspect}"] = r.get(col)
-            rows.append(row)
-
-    return pd.DataFrame(rows)
+from src.config import CHUNKS, CHUNKS_SAMPLE
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=300, help="抽多少条评论（默认 300）")
+    ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
-    print("读取并清洗原始数据 ...")
-    df = load_clean()
-    print(f"  可用评论 {len(df):,} 条")
+    if not CHUNKS.exists():
+        sys.exit(f"❌ 找不到 {CHUNKS}\n   先跑：python -m src.build_kb")
 
-    reviews = sample_reviews(df, args.n)
-    print(f"  抽样 {len(reviews)} 条（好评差评各半）")
+    print(f"读取 {CHUNKS.name} ...")
+    chunks = pd.read_parquet(CHUNKS)
+    print(f"   全量 {len(chunks):,} 句 / {chunks['review_id'].nunique():,} 条评论 "
+          f"/ {len(chunks.columns)} 列")
 
-    print("切句中 ...")
-    chunks = to_chunks(reviews)
+    # 按评论的总体评分分层抽，保证好评差评大致各半 ——
+    # 否则随机抽出来可能全是差评（原始数据里差评偏多）。
+    per_review = (chunks.groupby("review_id")["overall_rating"]
+                  .first().dropna())
+    pos = per_review[per_review >= 7].index
+    neg = per_review[per_review <= 4].index
+    half = args.n // 2
+    rng = pd.Series(list(pos)).sample(min(half, len(pos)), random_state=args.seed)
+    rng2 = pd.Series(list(neg)).sample(min(args.n - half, len(neg)),
+                                       random_state=args.seed)
+    keep = set(rng) | set(rng2)
+
+    sample = chunks[chunks["review_id"].isin(keep)].copy()
+    sample = sample.sort_values("chunk_id").reset_index(drop=True)
 
     CHUNKS_SAMPLE.parent.mkdir(parents=True, exist_ok=True)
-    chunks.to_parquet(CHUNKS_SAMPLE)
+    # 和全量用同一套压缩参数，读的一侧行为完全一致
+    sample.to_parquet(CHUNKS_SAMPLE, compression="zstd", compression_level=9)
 
-    print(f"\n✅ 已生成 {len(chunks):,} 句 -> {CHUNKS_SAMPLE}")
-    print(f"   来自 {chunks['review_id'].nunique()} 条真实评论")
-    print(f"   平均每条 {len(chunks)/chunks['review_id'].nunique():.1f} 句")
-    print(f"\n随机看 3 句：")
-    for t in chunks["text"].sample(3, random_state=1):
-        print(f"   · {t[:90]}")
+    size_kb = CHUNKS_SAMPLE.stat().st_size / 1024
+    print(f"\n✅ 已生成 {CHUNKS_SAMPLE}")
+    print(f"   {len(sample):,} 句 / {sample['review_id'].nunique():,} 条评论 "
+          f"/ {len(sample.columns)} 列 / {size_kb:.0f} KB")
+    print(f"   好评(≥7) {len(rng):,} 条 · 差评(≤4) {len(rng2):,} 条")
+    assert list(sample.columns) == list(chunks.columns), "列不一致！"
+    print("   schema 与全量完全一致 ✅")
 
 
 if __name__ == "__main__":
