@@ -39,6 +39,44 @@ BM25 关键词检索、FAISS 向量检索。
 > ✅ **这套流程 2026-09-08 在 macOS (Apple Silicon) + Python 3.11 上完整跑通过**，
 > 依赖无冲突。实测的版本组合记在 `requirements.txt` 末尾。
 
+### 先把数据"看一眼"
+
+跑完 `python -m src.build_kb` 生成 `chunks.parquet` 之后，用这个界面直观地看表：
+
+```bash
+source .venv/bin/activate                  # Windows: .venv\Scripts\activate
+python -m src.build_kb                     # 先建全量（约 14 分钟）
+python scripts/make_sample.py              # 可选：抽个小样本给开发用（几秒）
+streamlit run app/data_explorer.py
+```
+
+> ⚠️ **必须先激活 venv**。直接敲 `streamlit` 很可能用到系统里另一个 streamlit
+> （macOS 上常见的是 Homebrew 装的 `/opt/homebrew/bin/streamlit`），
+> 那个环境里没有项目依赖，会报 `ModuleNotFoundError: No module named 'duckdb'`。
+> 嫌麻烦就不激活、直接指定 venv 里的那个：
+>
+> ```bash
+> .venv/bin/streamlit run app/data_explorer.py     # Windows: .venv\Scripts\streamlit run ...
+> ```
+>
+> 想确认自己用对了没有：`which streamlit` 的输出里应该带 `.venv`。
+
+浏览器会自动打开。左边选筛选条件（航司 / 舱位 / 出行类型 / 日期 / 评分 / 关键词），
+右边四个标签页：
+
+| 标签页 | 用来干什么 |
+|---|---|
+| 📋 表格 | 翻页看原始行，可以排序、导出当前页 CSV |
+| 📖 逐条精读 | 随机抽几句，**把句子放回它所在的整条评论里**看（就是 parent-document retrieval 的效果） |
+| 📊 图表 | 六个维度的平均分、航司排名、评分分布、每年评论量、舱位×维度热力图 |
+| 🛠 自己写 SQL | 直接写 DuckDB SQL，附常用模板（含 C10 参考排名那条） |
+
+> 这个界面**只读**，不参与评分，纯粹是给大家熟悉数据用的。
+> 它和 `app/streamlit_app.py`（检索组负责的 RAG 查询界面）是两个东西，别改错文件。
+
+**看数据前先展开「各列的空值情况」**：六个维度的评分很稀疏（value 覆盖最好、ground 最差），
+而且约 **21.6%** 的评论没有日期。不知道这两件事很容易把统计数字算错。
+
 ### 数据
 
 原始数据**不在 git 里**（24 MB，没必要进版本控制）。
@@ -64,8 +102,9 @@ python scripts/download_data.py
 | 原始行数 | 131,895 |
 | 其中空行 | 65,948（**数据集自带的，正常**） |
 | 有正文的评论 | **65,947** |
-| **去重后（真正的语料）** | **61,172** |
-| 总词数 | **8,402,547** |
+| 去重后 | 61,172 |
+| **最终进知识库** | **61,167 条评论 / 546,139 句** |
+| **最终总词数** | **8,276,082** |
 | 航司数 / 时间范围 | **81** / **2002-08 ~ 2019-06** |
 | 评价维度 | **6 个**（座位、客舱服务、餐饮、娱乐、地勤、性价比——**没有 wifi**） |
 
@@ -110,7 +149,8 @@ python scripts/make_sample.py        # 从真实数据切一小块供开发用
 │   ├── generate.py         下游组
 │   └── evaluate.py         评测
 │
-├── app/streamlit_app.py    网页界面
+├── app/streamlit_app.py    RAG 查询界面（检索组）
+├── app/data_explorer.py    数据浏览界面（公共工具，谁都能改）
 ├── scripts/                辅助脚本
 ├── experiments/log.md      ⭐ 每做一次实验记一行
 └── report/                 报告草稿与图表
@@ -123,12 +163,16 @@ python scripts/make_sample.py        # 从真实数据切一小块供开发用
 > **完整分工见 [`docs/分工与任务清单.md`](docs/分工与任务清单.md)** ——
 > 每个人的任务清单、交付物、截止日、验收标准都在里面。
 
-| 小组 | 人数 | 分值 | 负责 | 主要文件 |
-|---|---|---|---|---|
-| **A 知识库** | 1 | 20 | 清洗、切句、建库、抽样 | `src/build_kb.py`、`src/clean_text.py` |
-| **B 检索** | 2 | 40 | 两种检索 + 融合 + 重排 + 界面 + 评测 | `src/retriever.py`、`app/` |
-| **C 下游** | 2 | 40 | 弱标签、分类、生成、RAG 评测 | `src/classify.py`、`src/generate.py` |
-| **D 统筹** | 1 | — | 标注协调、进度、报告汇总 | — |
+| 小组 | 人数 | 分值 | 负责 | 主要文件 | 自己写的报告 |
+|---|---|---|---|---|---|
+| **A 知识库** | 1 | 20 | 清洗、切句、建库、抽样 | `src/build_kb.py`、`src/clean_text.py` | **Q1** |
+| **B 检索** | **3** | 40 | 两种检索 + 融合 + 重排 + 界面 + 评测 | `src/retriever.py`、`app/` | **Q2 + Q3** |
+| **C 下游** | 2 | 40 | 弱标签、分类、生成、RAG 评测 | `src/classify.py`、`src/generate.py` | **Q4 + Q5** |
+
+**没有单独的统筹岗位**——标注协调、周会、合稿、格式检查由 B 组某人兼任（约 8–10 h）。
+**也没有报告组和 PPT 组**：五个 Question 天然对应三个小组，**谁做的谁写**，
+统筹只负责把三份拼成一份 PDF，不代写章节。详见
+[分工文档第 9 节](docs/分工与任务清单.md)。
 
 标注那 1,000 句由其中 3 人共同完成（各 3–4 小时），规范见
 [`docs/选题与标注方案.md`](docs/选题与标注方案.md)。
