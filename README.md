@@ -13,7 +13,7 @@
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/RenXinghan/ai6127-airline-rag.git
+git clone https://github.com/ntu-ai6127-g-13/ai6127-airline-rag.git
 cd ai6127-airline-rag
 
 # 2. ⚠️ 配置 git 身份（第一次用 git 的话必做）
