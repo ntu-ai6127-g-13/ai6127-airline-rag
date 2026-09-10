@@ -8,6 +8,7 @@ openpyxl>=3.1          # 读写 xls/xlsx（评测集要用）
 
 # 文本处理
 spacy>=3.7             # 切句；装完还要 python -m spacy download en_core_web_sm
+ftfy>=6.0              # 修乱码；实测残留率 2.14% -> 0.03%，见 src/clean_text.py 顶部注释
 
 # 检索
 rank_bm25>=0.2.2       # 关键词检索
@@ -22,6 +23,8 @@ datasets>=2.18
 
 # 界面
 streamlit>=1.35
+duckdb>=1.0            # app/data_explorer.py 直接查 parquet 用，不用把 92 MB 读进内存
+altair>=5.0            # 数据浏览界面的图表（streamlit 会顺带装上，这里显式钉一下）
 
 # RAG 评测
 ragas>=0.1
@@ -40,6 +43,7 @@ tqdm>=4.66
 #   matplotlib==3.11.1       numpy==2.4.6           openpyxl==3.1.5
 #   pandas==3.0.5            pyarrow==25.0.1        ragas==0.4.3
 #   rank-bm25==0.2.2         scikit-learn==1.9.0    sentence-transformers==6.0.1
+#   duckdb==1.5.5            altair==6.2.2          ftfy==6.3.1
 #   spacy==3.8.16            streamlit==1.63.0      torch==2.14.0
 #   tqdm==4.70.0             transformers==5.16.1
 #
