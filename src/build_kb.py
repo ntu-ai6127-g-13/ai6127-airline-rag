@@ -21,8 +21,9 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.clean_text import (clean_field, clean_review, extract_route_from_text,
-                            is_route_only, parse_date_flown, parse_review_date,
-                            parse_route)
+                            is_clearly_non_english, is_mixed_sentiment,
+                            is_obvious_fragment, is_route_only,
+                            parse_date_flown, parse_review_date, parse_route)
 from src.config import (ASPECTS, CHUNKS, COL_AIRCRAFT, COL_AIRLINE, COL_CABIN,
                         COL_DATE, COL_DATE_FLOWN, COL_OVERALL, COL_RECOMMENDED,
                         COL_ROUTE, COL_TEXT, COL_TRAVELLER, DATA_PROC, DATA_RAW,
@@ -240,6 +241,30 @@ def add_derived(chunks: pd.DataFrame) -> pd.DataFrame:
     return chunks
 
 
+def filter_quality(chunks: pd.DataFrame) -> pd.DataFrame:
+    """只删混合情感、明显残片和非英语句，保留行的内容和列完全不变。"""
+    route_only = chunks["is_route_only"].fillna(False).astype(bool)
+    masks = {
+        "混合情感": chunks["text"].map(is_mixed_sentiment) & ~route_only,
+        "明显残片": chunks["text"].map(is_obvious_fragment) & ~route_only,
+        "非英语": chunks["text"].map(is_clearly_non_english) & ~route_only,
+    }
+    drop = pd.Series(False, index=chunks.index)
+    for mask in masks.values():
+        drop |= mask
+
+    filtered = chunks.loc[~drop].copy()
+    # 这两条断言保证该步骤只删除整行，不改写文本、评分或任何其他字段。
+    assert filtered.columns.tolist() == chunks.columns.tolist()
+    assert filtered.equals(chunks.loc[filtered.index])
+
+    print("      句子质量筛选：")
+    for reason, mask in masks.items():
+        print(f"        {reason:8s} {int(mask.sum()):>8,} 句")
+    print(f"        实际删除 {int(drop.sum()):>8,} 句 → 剩 {len(filtered):,}")
+    return filtered
+
+
 def report(chunks: pd.DataFrame) -> None:
     """打印语料统计（报告 Q1 需要这些数字）。"""
     print("\n[3/3] 语料统计（报告 Q1 用）")
@@ -284,6 +309,7 @@ def main() -> None:
     t_start = time.perf_counter()
     reviews = load_and_clean(args.limit)
     chunks = to_chunks(reviews)
+    chunks = filter_quality(chunks)
 
     # --limit 是调试用的，**绝不能覆盖正式文件** ——
     # 否则跑一次 --limit 200 就把全组共用的 54 万行契约悄悄换成 2,100 行，

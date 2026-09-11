@@ -283,3 +283,110 @@ def is_route_only(text) -> bool:
     if not isinstance(text, str):
         return False
     return bool(_ROUTE_ONLY.match(text.strip()))
+
+
+# ---------------------------------------------------------------------
+# 句子质量筛选。只在 spaCy 完成原版切句之后使用，不重新切分或改写文本。
+# ---------------------------------------------------------------------
+_POSITIVE_SENTIMENT = re.compile(
+    r"\b(?:good|great|excellent|comfortable|friendly|helpful|delicious|"
+    r"wonderful|decent|satisfying|satisfied|pleasant|adequate|fine|best|"
+    r"recommend(?:ed)?|efficient|courteous|professional|smooth|clean|"
+    r"easy|enjoy(?:ed|able)?|love(?:d)?|perfect)\b",
+    flags=re.IGNORECASE)
+
+_NEGATIVE_SENTIMENT = re.compile(
+    r"\b(?:bad|poor|terrible|uncomfortable|rude|awful|cramped|"
+    r"disappoint(?:ing|ed)?|unacceptable|limited|narrow|hard|outdated|"
+    r"mediocre|disgusting|worst|damaged|cancel(?:led|ed)|delay(?:ed)?|"
+    r"broken|failed|slow|suffer(?:ed)?|dirty|filthy|horrible|scam(?:med)?|"
+    r"unhappy|waste(?:d)?|crowded|nothing\s+exceptional)\b",
+    flags=re.IGNORECASE)
+
+_OBVIOUS_FRAGMENT = re.compile(
+    r"(?:"
+    r"^[,;:!?)]|"
+    r"^(?:with|without)\b[^.!?]*$|"
+    r"^went\s+to\b|"
+    r"\b(?:and|or|but|because|with|for|to)$|"
+    r"^(?:a|an|the)\s+(?:simple|nice|good|bad|small|great)\s+"
+    r"(?:act|thing|one|touch|gesture)(?:\s+of\s+\w+)?[.!?]?$"
+    r")",
+    flags=re.IGNORECASE)
+
+_NON_LATIN = re.compile(
+    r"[\u0370-\u052f\u0600-\u06ff\u0900-\u097f\u3040-\u30ff\u3400-\u9fff]")
+
+_ENGLISH_MARKERS = set(
+    "the a an and or but is are was were be been being to of in on for with "
+    "from at as by this that these those it they we i you he she my our your "
+    "their his her not very had has have do did does can could would should "
+    "will flight flights airline airlines seat seats crew service food airport"
+    .split())
+
+_FOREIGN_MARKER_SETS = [
+    set("le la les un une des du de et est sont avec pour mais pas tres très "
+        "nous vous ils elles dans sur que qui cette ces aux au".split()),
+    set("el la los las un una unos unas de del y es son con para pero muy "
+        "nosotros ustedes ellos ellas estaba estaban en que por".split()),
+    set("o a os as um uma uns umas de do da dos das e é são com para mas não "
+        "muito nós vocês eles elas em que por".split()),
+    set("der die das ein eine einer eines und ist sind mit für aber nicht sehr "
+        "wir ihr sie war waren im am zu von auf".split()),
+    set("il lo la i gli le un una uno di del della e è sono con per ma non "
+        "molto noi voi loro che nel sul".split()),
+    set("de het een en is zijn met voor maar niet zeer wij jullie zij was waren "
+        "op van naar".split()),
+]
+
+
+def is_mixed_sentiment(text) -> bool:
+    """是否同时含明确正面词和负面词。
+
+    多个方面本身不算混合；只有正负信号同时出现才返回 True。
+
+    >>> is_mixed_sentiment("The seat was comfortable, but the food was terrible.")
+    True
+    >>> is_mixed_sentiment("Seat and food were excellent.")
+    False
+    >>> is_mixed_sentiment("The service was not good.")
+    False
+    """
+    if not isinstance(text, str):
+        return False
+    return bool(_POSITIVE_SENTIMENT.search(text) and _NEGATIVE_SENTIMENT.search(text))
+
+
+def is_obvious_fragment(text) -> bool:
+    """是否命中保守的明显残片规则。
+
+    >>> is_obvious_fragment("A nice touch.")
+    True
+    >>> is_obvious_fragment("The seat was comfortable.")
+    False
+    """
+    if not isinstance(text, str):
+        return False
+    return bool(_OBVIOUS_FRAGMENT.search(text.strip()))
+
+
+def is_clearly_non_english(text) -> bool:
+    """保守识别明显非英语句子，短句证据不足时保留。
+
+    >>> is_clearly_non_english("Les bagages arrivent à temps et intacts !")
+    True
+    >>> is_clearly_non_english("The cabin crew were friendly.")
+    False
+    """
+    if not isinstance(text, str):
+        return False
+    value = text.casefold()
+    if len(_NON_LATIN.findall(value)) >= 2:
+        return True
+    tokens = re.findall(r"[^\W\d_]+", value, flags=re.UNICODE)
+    if len(tokens) < 4:
+        return False
+    token_set = set(tokens)
+    english_hits = len(token_set & _ENGLISH_MARKERS)
+    foreign_hits = max(len(token_set & markers) for markers in _FOREIGN_MARKER_SETS)
+    return foreign_hits >= 2 and foreign_hits > english_hits
