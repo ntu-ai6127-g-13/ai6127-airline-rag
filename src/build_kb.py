@@ -21,8 +21,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.clean_text import (clean_field, clean_review, extract_route_from_text,
-                            is_route_only, parse_date_flown, parse_review_date,
-                            parse_route)
+                            is_clearly_non_english, is_obvious_fragment, is_route_only,
+                            parse_date_flown, parse_review_date, parse_route)
 from src.config import (ASPECTS, CHUNKS, COL_AIRCRAFT, COL_AIRLINE, COL_CABIN,
                         COL_DATE, COL_DATE_FLOWN, COL_OVERALL, COL_RECOMMENDED,
                         COL_ROUTE, COL_TEXT, COL_TRAVELLER, DATA_PROC, DATA_RAW,
@@ -230,6 +230,11 @@ def add_derived(chunks: pd.DataFrame) -> pd.DataFrame:
     # 不去重会把 top-K 占满（见 docs/实验发现记录.md B6）。
     chunks["dup_count"] = chunks.groupby("text")["text"].transform("size").astype("int32")
 
+    # 质量问题只打标记，不删除。检索、分类和语料统计可以按各自需求筛选，
+    # 同时保持全组共用数据契约的 546,139 行不变。
+    chunks["is_fragment"] = chunks["text"].map(is_obvious_fragment)
+    chunks["is_non_english"] = chunks["text"].map(is_clearly_non_english)
+
     # 数值列瘦身：1–10 / 1–5 用不着 8 字节浮点。省空间是次要的（才 0.5 MB），
     # 主要是语义正确 —— 评分是整数，不该显示成 7.0。Int8 是 pandas 的可空整数。
     for col in ["overall_rating"] + [f"r_{a}" for a in ASPECTS]:
@@ -262,8 +267,12 @@ def report(chunks: pd.DataFrame) -> None:
     print("\n      v3 新增列：")
     ro = int(chunks["is_route_only"].sum())
     dup = int((chunks["dup_count"] > 1).sum())
+    fragments = int(chunks["is_fragment"].sum())
+    non_english = int(chunks["is_non_english"].sum())
     print(f"        纯航线元数据句  {ro:>8,} 句 ({ro/len(chunks)*100:.2f}%)  <- 建索引时建议排除")
     print(f"        属于重复组的句  {dup:>8,} 句 ({dup/len(chunks)*100:.2f}%)  <- 检索后建议去重")
+    print(f"        明显残片标记    {fragments:>8,} 句 ({fragments/len(chunks)*100:.2f}%)")
+    print(f"        非英语标记      {non_english:>8,} 句 ({non_english/len(chunks)*100:.2f}%)")
     print(f"        每句平均 {chunks['n_words'].mean():.1f} 词，"
           f"每条评论平均 {chunks['n_sents'].mean():.1f} 句")
 
