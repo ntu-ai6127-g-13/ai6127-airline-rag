@@ -21,8 +21,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.clean_text import (clean_field, clean_review, extract_route_from_text,
-                            is_clearly_non_english, is_mixed_sentiment,
-                            is_obvious_fragment, is_route_only,
+                            is_clearly_non_english, is_obvious_fragment, is_route_only,
                             parse_date_flown, parse_review_date, parse_route)
 from src.config import (ASPECTS, CHUNKS, COL_AIRCRAFT, COL_AIRLINE, COL_CABIN,
                         COL_DATE, COL_DATE_FLOWN, COL_OVERALL, COL_RECOMMENDED,
@@ -231,6 +230,11 @@ def add_derived(chunks: pd.DataFrame) -> pd.DataFrame:
     # 不去重会把 top-K 占满（见 docs/实验发现记录.md B6）。
     chunks["dup_count"] = chunks.groupby("text")["text"].transform("size").astype("int32")
 
+    # 质量问题只打标记，不删除。检索、分类和语料统计可以按各自需求筛选，
+    # 同时保持全组共用数据契约的 546,139 行不变。
+    chunks["is_fragment"] = chunks["text"].map(is_obvious_fragment)
+    chunks["is_non_english"] = chunks["text"].map(is_clearly_non_english)
+
     # 数值列瘦身：1–10 / 1–5 用不着 8 字节浮点。省空间是次要的（才 0.5 MB），
     # 主要是语义正确 —— 评分是整数，不该显示成 7.0。Int8 是 pandas 的可空整数。
     for col in ["overall_rating"] + [f"r_{a}" for a in ASPECTS]:
@@ -239,30 +243,6 @@ def add_derived(chunks: pd.DataFrame) -> pd.DataFrame:
 
     print(f"      派生列完成  ({time.perf_counter()-t0:.0f}s)")
     return chunks
-
-
-def filter_quality(chunks: pd.DataFrame) -> pd.DataFrame:
-    """只删混合情感、明显残片和非英语句，保留行的内容和列完全不变。"""
-    route_only = chunks["is_route_only"].fillna(False).astype(bool)
-    masks = {
-        "混合情感": chunks["text"].map(is_mixed_sentiment) & ~route_only,
-        "明显残片": chunks["text"].map(is_obvious_fragment) & ~route_only,
-        "非英语": chunks["text"].map(is_clearly_non_english) & ~route_only,
-    }
-    drop = pd.Series(False, index=chunks.index)
-    for mask in masks.values():
-        drop |= mask
-
-    filtered = chunks.loc[~drop].copy()
-    # 这两条断言保证该步骤只删除整行，不改写文本、评分或任何其他字段。
-    assert filtered.columns.tolist() == chunks.columns.tolist()
-    assert filtered.equals(chunks.loc[filtered.index])
-
-    print("      句子质量筛选：")
-    for reason, mask in masks.items():
-        print(f"        {reason:8s} {int(mask.sum()):>8,} 句")
-    print(f"        实际删除 {int(drop.sum()):>8,} 句 → 剩 {len(filtered):,}")
-    return filtered
 
 
 def report(chunks: pd.DataFrame) -> None:
@@ -287,8 +267,12 @@ def report(chunks: pd.DataFrame) -> None:
     print("\n      v3 新增列：")
     ro = int(chunks["is_route_only"].sum())
     dup = int((chunks["dup_count"] > 1).sum())
+    fragments = int(chunks["is_fragment"].sum())
+    non_english = int(chunks["is_non_english"].sum())
     print(f"        纯航线元数据句  {ro:>8,} 句 ({ro/len(chunks)*100:.2f}%)  <- 建索引时建议排除")
     print(f"        属于重复组的句  {dup:>8,} 句 ({dup/len(chunks)*100:.2f}%)  <- 检索后建议去重")
+    print(f"        明显残片标记    {fragments:>8,} 句 ({fragments/len(chunks)*100:.2f}%)")
+    print(f"        非英语标记      {non_english:>8,} 句 ({non_english/len(chunks)*100:.2f}%)")
     print(f"        每句平均 {chunks['n_words'].mean():.1f} 词，"
           f"每条评论平均 {chunks['n_sents'].mean():.1f} 句")
 
@@ -309,7 +293,6 @@ def main() -> None:
     t_start = time.perf_counter()
     reviews = load_and_clean(args.limit)
     chunks = to_chunks(reviews)
-    chunks = filter_quality(chunks)
 
     # --limit 是调试用的，**绝不能覆盖正式文件** ——
     # 否则跑一次 --limit 200 就把全组共用的 54 万行契约悄悄换成 2,100 行，

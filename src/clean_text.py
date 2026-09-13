@@ -286,42 +286,31 @@ def is_route_only(text) -> bool:
 
 
 # ---------------------------------------------------------------------
-# 句子质量筛选。只在 spaCy 完成原版切句之后使用，不重新切分或改写文本。
+# 句子质量标记。只在 spaCy 完成原版切句之后使用，不删行、不重新切分或改写文本。
 # ---------------------------------------------------------------------
-_POSITIVE_SENTIMENT = re.compile(
-    r"\b(?:good|great|excellent|comfortable|friendly|helpful|delicious|"
-    r"wonderful|decent|satisfying|satisfied|pleasant|adequate|fine|best|"
-    r"recommend(?:ed)?|efficient|courteous|professional|smooth|clean|"
-    r"easy|enjoy(?:ed|able)?|love(?:d)?|perfect)\b",
-    flags=re.IGNORECASE)
-
-_NEGATIVE_SENTIMENT = re.compile(
-    r"\b(?:bad|poor|terrible|uncomfortable|rude|awful|cramped|"
-    r"disappoint(?:ing|ed)?|unacceptable|limited|narrow|hard|outdated|"
-    r"mediocre|disgusting|worst|damaged|cancel(?:led|ed)|delay(?:ed)?|"
-    r"broken|failed|slow|suffer(?:ed)?|dirty|filthy|horrible|scam(?:med)?|"
-    r"unhappy|waste(?:d)?|crowded|nothing\s+exceptional)\b",
-    flags=re.IGNORECASE)
-
-_OBVIOUS_FRAGMENT = re.compile(
-    r"(?:"
-    r"^[,;:!?)]|"
-    r"^(?:with|without)\b[^.!?]*$|"
-    r"^went\s+to\b|"
-    r"\b(?:and|or|but|because|with|for|to)$|"
-    r"^(?:a|an|the)\s+(?:simple|nice|good|bad|small|great)\s+"
-    r"(?:act|thing|one|touch|gesture)(?:\s+of\s+\w+)?[.!?]?$"
-    r")",
-    flags=re.IGNORECASE)
+_OBVIOUS_FRAGMENT = re.compile(r"^[,;:!?)]")
 
 _NON_LATIN = re.compile(
     r"[\u0370-\u052f\u0600-\u06ff\u0900-\u097f\u3040-\u30ff\u3400-\u9fff]")
+
+# is_route_only 对地名大小写要求很严；语言识别再放宽一点，避免把
+# "Los Angeles to Rio de Janeiro" 中的 de 当成西语证据。
+_ROUTE_LIKE_FOR_LANGUAGE = re.compile(
+    r"^(?:[A-Z0-9][\w'-]*|de|del|da|do|of|la|las|los|to|via)"
+    r"(?:\s+(?:[A-Z0-9][\w'-]*|de|del|da|do|of|la|las|los|to|via)){1,10}"
+    r"\s*[.!]?$")
 
 _ENGLISH_MARKERS = set(
     "the a an and or but is are was were be been being to of in on for with "
     "from at as by this that these those it they we i you he she my our your "
     "their his her not very had has have do did does can could would should "
-    "will flight flights airline airlines seat seats crew service food airport"
+    "will flight flights airline airlines seat seats crew service food airport "
+    "book booked booking fly flew flown flying travel travelled traveled trip "
+    "journey got class miles mile year years time route about after all also "
+    "any back before better boarding both cabin connection day delayed doing "
+    "eat end eventually good great help hours however many meat non offers out "
+    "passenger passengers price reached received saved slept so sometimes staff "
+    "stop than then traveller usually via confirmation"
     .split())
 
 _FOREIGN_MARKER_SETS = [
@@ -340,28 +329,15 @@ _FOREIGN_MARKER_SETS = [
 ]
 
 
-def is_mixed_sentiment(text) -> bool:
-    """是否同时含明确正面词和负面词。
-
-    多个方面本身不算混合；只有正负信号同时出现才返回 True。
-
-    >>> is_mixed_sentiment("The seat was comfortable, but the food was terrible.")
-    True
-    >>> is_mixed_sentiment("Seat and food were excellent.")
-    False
-    >>> is_mixed_sentiment("The service was not good.")
-    False
-    """
-    if not isinstance(text, str):
-        return False
-    return bool(_POSITIVE_SENTIMENT.search(text) and _NEGATIVE_SENTIMENT.search(text))
-
-
 def is_obvious_fragment(text) -> bool:
-    """是否命中保守的明显残片规则。
+    """是否以标点开头，命中高精度的明显残片规则。
 
-    >>> is_obvious_fragment("A nice touch.")
+    >>> is_obvious_fragment(", and the return flight was delayed.")
     True
+    >>> is_obvious_fragment("Went to the gate and boarded the plane.")
+    False
+    >>> is_obvious_fragment("With a Kindle, the flight passed quickly.")
+    False
     >>> is_obvious_fragment("The seat was comfortable.")
     False
     """
@@ -375,13 +351,28 @@ def is_clearly_non_english(text) -> bool:
 
     >>> is_clearly_non_english("Les bagages arrivent à temps et intacts !")
     True
+    >>> is_clearly_non_english("The beer served was Yan Jing Beer 燕京啤酒。")
+    False
+    >>> is_clearly_non_english("Booked to fly Las Vegas to Los Angeles.")
+    False
+    >>> is_clearly_non_english("Los Angeles to Rio de Janeiro via Houston.")
+    False
+    >>> is_clearly_non_english("I don't eat non-kosher meat")
+    False
     >>> is_clearly_non_english("The cabin crew were friendly.")
     False
     """
     if not isinstance(text, str):
         return False
+    stripped = text.strip()
+    if (is_route_only(stripped) or
+            (" to " in stripped and _ROUTE_LIKE_FOR_LANGUAGE.match(stripped))):
+        return False
     value = text.casefold()
-    if len(_NON_LATIN.findall(value)) >= 2:
+    alphabetic = [char for char in value if char.isalpha()]
+    non_latin_ratio = (len(_NON_LATIN.findall(value)) / len(alphabetic)
+                       if alphabetic else 0.0)
+    if non_latin_ratio >= 0.30:
         return True
     tokens = re.findall(r"[^\W\d_]+", value, flags=re.UNICODE)
     if len(tokens) < 4:
