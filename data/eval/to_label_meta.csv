@@ -1,1001 +1,1001 @@
 ﻿id,chunk_id,review_id,airline,cabin,date,overall_rating,r_seat,r_staff,r_food,r_entertainment,r_ground,r_value,weak_polarity,aspect_keyword_guess
-E0001,R055820_s08,R055820,Frontier Airlines,Economy Class,2015-07-27,1.0,1.0,1.0,1.0,,2.0,1.0,negative,seat
-E0002,R011350_s07,R011350,Delta Air Lines,First Class,2015-05-20,2.0,4.0,4.0,1.0,1.0,,1.0,negative,entertainment
-E0003,R006091_s03,R006091,KLM Royal Dutch Airlines,Economy Class,2019-04-09,2.0,5.0,5.0,5.0,3.0,3.0,2.0,negative,ground
+E0001,R019345_s06,R019345,Air New Zealand,Economy Class,2013-08-15,3.0,1.0,2.0,4.0,3.0,,2.0,negative,seat
+E0002,R016586_s09,R016586,Aeroflot Russian Airlines,Economy Class,2019-05-10,3.0,2.0,3.0,2.0,1.0,1.0,3.0,negative,entertainment
+E0003,R049058_s03,R049058,Spirit Airlines,Economy Class,2018-08-13,1.0,2.0,1.0,,,1.0,1.0,negative,ground
 E0004,R008640_s04,R008640,American Airlines,Economy Class,2017-07-11,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0005,R046952_s12,R046952,Cathay Pacific Airways,Economy Class,2017-02-20,9.0,4.0,5.0,5.0,5.0,2.0,4.0,positive,none
+E0005,R006048_s00,R006048,Lufthansa,Economy Class,2014-01-21,8.0,4.0,4.0,3.0,4.0,,4.0,positive,none
 E0006,R011540_s05,R011540,Delta Air Lines,Economy Class,2014-06-25,2.0,1.0,2.0,2.0,,,2.0,negative,food
 E0007,R003194_s03,R003194,Emirates,Economy Class,2018-04-06,1.0,3.0,1.0,1.0,3.0,1.0,1.0,negative,food
-E0008,R028144_s13,R028144,Egyptair,Economy Class,2014-09-01,3.0,2.0,2.0,2.0,1.0,,3.0,negative,seat
-E0009,R013281_s13,R013281,United Airlines,Premium Economy,2018-06-22,1.0,2.0,1.0,1.0,2.0,1.0,1.0,negative,value
+E0008,R019097_s06,R019097,Air New Zealand,Economy Class,2015-07-14,4.0,1.0,2.0,2.0,3.0,3.0,3.0,negative,seat
+E0009,R013288_s09,R013288,United Airlines,Economy Class,2018-06-20,2.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,value
 E0010,R000635_s03,R000635,Turkish Airlines,Business Class,2016-07-28,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,food
-E0011,R011137_s05,R011137,Delta Air Lines,First Class,2015-12-24,1.0,3.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0012,R035989_s14,R035989,Pegasus Airlines,Economy Class,2015-09-22,9.0,4.0,4.0,4.0,,4.0,4.0,positive,staff
+E0011,R011144_s03,R011144,Delta Air Lines,Economy Class,2015-12-22,3.0,4.0,4.0,,,1.0,1.0,negative,value
+E0012,R016031_s04,R016031,Jetblue Airways,,2011-06-04,10.0,,,,,,4.0,positive,staff
 E0013,R045454_s02,R045454,Air Canada rouge,Economy Class,2014-09-06,1.0,1.0,4.0,1.0,1.0,,1.0,negative,food
-E0014,R049576_s09,R049576,Spirit Airlines,Economy Class,2017-07-16,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0015,R038096_s03,R038096,South African Airways,Economy Class,2015-04-12,1.0,1.0,2.0,1.0,4.0,,,negative,none
-E0016,R037794_s08,R037794,Ryanair,Economy Class,2014-01-08,1.0,1.0,1.0,1.0,,,1.0,negative,none
+E0014,R011904_s04,R011904,Southwest Airlines,,2018-07-04,1.0,,,,,,,negative,none
+E0015,R059064_s00,R059064,Norwegian,Economy Class,2016-08-24,3.0,2.0,2.0,,1.0,1.0,3.0,negative,none
+E0016,R008808_s00,R008808,American Airlines,Economy Class,2017-02-02,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
 E0017,R048136_s03,R048136,Wizz Air,Economy Class,2016-07-08,9.0,3.0,5.0,,,4.0,5.0,positive,ground
-E0018,R048792_s04,R048792,Spirit Airlines,Economy Class,2019-01-19,1.0,,,,,,1.0,negative,none
-E0019,R048628_s06,R048628,Spirit Airlines,Economy Class,2019-04-22,2.0,1.0,3.0,,1.0,1.0,2.0,negative,ground
+E0018,R043390_s11,R043390,Thai Airways,First Class,2014-11-06,3.0,4.0,2.0,2.0,2.0,,2.0,negative,none
+E0019,R003991_s04,R003991,Emirates,Business Class,2015-08-29,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,ground
 E0020,R055262_s05,R055262,Frontier Airlines,Economy Class,2018-04-08,9.0,5.0,5.0,4.0,,5.0,5.0,positive,value
-E0021,R045566_s03,R045566,Air Canada rouge,Economy Class,2014-05-13,1.0,1.0,2.0,1.0,1.0,,1.0,negative,seat
-E0022,R045867_s04,R045867,airBaltic,Business Class,2011-07-28,8.0,,,,,,4.0,positive,food
-E0023,R039723_s05,R039723,EVA Air,Business Class,2018-09-18,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0024,R024637_s04,R024637,British Airways,First Class,2011-10-09,4.0,4.0,5.0,5.0,2.0,,2.0,negative,seat
-E0025,R025711_s01,R025711,China Southern Airlines,Business Class,2019-02-20,9.0,4.0,5.0,5.0,5.0,4.0,5.0,positive,entertainment
-E0026,R045101_s07,R045101,Air Canada rouge,Economy Class,2015-06-12,8.0,4.0,4.0,,2.0,,5.0,positive,entertainment
-E0027,R031492_s03,R031492,Korean Air,Economy Class,2013-05-06,7.0,4.0,2.0,3.0,5.0,,3.0,positive,staff
-E0028,R043090_s16,R043090,Thai Airways,Economy Class,2017-02-11,2.0,4.0,2.0,3.0,3.0,1.0,1.0,negative,none
-E0029,R034434_s07,R034434,Air France,Economy Class,2014-01-22,1.0,1.0,1.0,1.0,4.0,,1.0,negative,none
-E0030,R052605_s01,R052605,Sunwing Airlines,Economy Class,2016-04-06,1.0,1.0,1.0,1.0,2.0,2.0,1.0,negative,none
+E0021,R043938_s13,R043938,Air India,Business Class,2016-03-13,2.0,1.0,2.0,2.0,2.0,4.0,3.0,negative,seat
+E0022,R020004_s03,R020004,Alitalia,Business Class,2012-08-28,8.0,5.0,5.0,4.0,4.0,,4.0,positive,food
+E0023,R045861_s03,R045861,airBaltic,Economy Class,2011-10-31,7.0,,,,,,4.0,positive,none
+E0024,R005013_s01,R005013,Lufthansa,Economy Class,2017-10-18,4.0,4.0,4.0,3.0,4.0,1.0,3.0,negative,seat
+E0025,R020971_s04,R020971,Asiana Airlines,Economy Class,2012-10-11,9.0,4.0,5.0,5.0,2.0,,4.0,positive,entertainment
+E0026,R004542_s10,R004542,Emirates,Economy Class,2014-03-19,9.0,4.0,5.0,5.0,5.0,,5.0,positive,entertainment
+E0027,R002090_s01,R002090,Qatar Airways,First Class,2016-10-04,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,staff
+E0028,R010422_s00,R010422,Delta Air Lines,,2018-09-07,3.0,,,,,,,negative,none
+E0029,R049702_s10,R049702,Spirit Airlines,Economy Class,2017-04-25,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0030,R037720_s08,R037720,Ryanair,Economy Class,2014-04-22,4.0,2.0,3.0,2.0,,,3.0,negative,none
 E0031,R057832_s07,R057832,Air Arabia,Economy Class,2018-08-29,7.0,4.0,4.0,3.0,2.0,4.0,5.0,positive,value
 E0032,R016727_s04,R016727,Aeroflot Russian Airlines,Economy Class,2017-06-19,8.0,3.0,4.0,4.0,4.0,5.0,4.0,positive,food
 E0033,R058822_s02,R058822,Norwegian,Economy Class,2018-03-22,1.0,1.0,1.0,,1.0,1.0,1.0,negative,food
-E0034,R057156_s27,R057156,Aer Lingus,Economy Class,2017-02-14,10.0,5.0,5.0,5.0,,5.0,5.0,positive,none
-E0035,R059009_s01,R059009,Norwegian,Economy Class,2016-12-04,10.0,4.0,4.0,3.0,5.0,4.0,5.0,positive,none
-E0036,R057049_s03,R057049,Aer Lingus,Economy Class,2018-11-30,8.0,4.0,5.0,5.0,4.0,5.0,5.0,positive,entertainment
-E0037,R059156_s07,R059156,Norwegian,Premium Economy,2015-12-16,1.0,1.0,1.0,1.0,1.0,1.0,3.0,negative,entertainment
-E0038,R038918_s04,R038918,TAP Portugal,Business Class,2017-03-09,2.0,1.0,1.0,1.0,1.0,2.0,1.0,negative,staff
-E0039,R052100_s00,R052100,Vueling Airlines,Economy Class,2015-10-05,1.0,1.0,2.0,,,1.0,1.0,negative,none
-E0040,R048209_s13,R048209,Wizz Air,Economy Class,2015-09-16,7.0,1.0,3.0,,,2.0,5.0,positive,seat
+E0034,R058501_s03,R058501,Tunisair,Economy Class,2015-01-28,8.0,4.0,4.0,4.0,3.0,,5.0,positive,none
+E0035,R001786_s08,R001786,Qatar Airways,Economy Class,2017-12-11,8.0,4.0,5.0,3.0,3.0,4.0,5.0,positive,none
+E0036,R008510_s07,R008510,American Airlines,Economy Class,2017-10-23,7.0,4.0,4.0,4.0,4.0,5.0,5.0,positive,entertainment
+E0037,R047560_s03,R047560,Cathay Pacific Airways,Economy Class,2014-06-10,3.0,3.0,3.0,2.0,4.0,,3.0,negative,entertainment
+E0038,R015080_s07,R015080,United Airlines,Economy Class,2014-08-08,2.0,2.0,1.0,1.0,1.0,,3.0,negative,staff
+E0039,R044983_s00,R044983,Air Canada rouge,Economy Class,2016-01-09,2.0,1.0,3.0,1.0,1.0,2.0,2.0,negative,none
+E0040,R037430_s03,R037430,Ryanair,Economy Class,2015-03-23,10.0,3.0,3.0,3.0,,,5.0,positive,seat
 E0041,R025237_s06,R025237,China Eastern Airlines,Economy Class,2017-02-06,10.0,4.0,5.0,2.0,4.0,5.0,5.0,positive,value
-E0042,R005152_s09,R005152,Lufthansa,Economy Class,2017-02-13,9.0,4.0,5.0,5.0,,4.0,4.0,positive,staff
+E0042,R057693_s06,R057693,Aer Lingus,Economy Class,2011-05-21,8.0,,,,,,4.0,positive,staff
 E0043,R022809_s00,R022809,British Airways,Premium Economy,2017-03-06,7.0,5.0,3.0,2.0,5.0,5.0,3.0,positive,value
-E0044,R038844_s01,R038844,TAP Portugal,Economy Class,2017-09-25,1.0,2.0,2.0,1.0,1.0,1.0,1.0,negative,none
+E0044,R031143_s09,R031143,easyJet,Economy Class,2013-05-13,2.0,3.0,2.0,,,,3.0,negative,none
 E0045,R016104_s12,R016104,Aegean Airlines,Economy Class,2018-07-13,10.0,3.0,5.0,4.0,,5.0,4.0,positive,ground
 E0046,R060728_s05,R060728,WOW air,Economy Class,2016-11-08,9.0,4.0,5.0,,,3.0,5.0,positive,ground
-E0047,R022642_s10,R022642,British Airways,Economy Class,2017-06-06,2.0,2.0,1.0,,,1.0,1.0,negative,none
-E0048,R019863_s02,R019863,Alitalia,Economy Class,2013-11-14,2.0,2.0,1.0,2.0,1.0,,3.0,negative,staff
-E0049,R002800_s03,R002800,Qatar Airways,Economy Class,2014-01-28,10.0,4.0,4.0,3.0,3.0,,5.0,positive,none
+E0047,R003169_s00,R003169,Emirates,Economy Class,2018-05-13,2.0,1.0,1.0,1.0,3.0,1.0,2.0,negative,none
+E0048,R028128_s18,R028128,Egyptair,Economy Class,2015-08-06,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0049,R005214_s01,R005214,Lufthansa,First Class,2016-09-30,8.0,4.0,5.0,4.0,3.0,2.0,5.0,positive,none
 E0050,R003753_s13,R003753,Emirates,Economy Class,2016-03-22,4.0,2.0,4.0,4.0,2.0,1.0,2.0,negative,value
-E0051,R009303_s03,R009303,American Airlines,Economy Class,2016-01-06,1.0,2.0,4.0,4.0,4.0,1.0,1.0,negative,staff
-E0052,R045152_s06,R045152,Air Canada rouge,Economy Class,2015-04-08,1.0,1.0,5.0,1.0,1.0,,1.0,negative,none
+E0051,R031188_s13,R031188,Korean Air,Business Class,2018-11-23,4.0,2.0,2.0,2.0,2.0,3.0,4.0,negative,staff
+E0052,R004680_s01,R004680,Lufthansa,,2019-04-22,2.0,,,,,,,negative,none
 E0053,R000778_s03,R000778,Turkish Airlines,Economy Class,2016-01-15,7.0,3.0,4.0,5.0,3.0,1.0,4.0,positive,ground
-E0054,R044190_s02,R044190,Air India,Economy Class,2014-02-17,2.0,2.0,2.0,2.0,,,3.0,negative,staff
+E0054,R024746_s01,R024746,Brussels Airlines,Economy Class,2017-05-23,1.0,,,,,,1.0,negative,staff
 E0055,R004253_s07,R004253,Emirates,Business Class,2014-11-17,7.0,4.0,3.0,3.0,5.0,,4.0,positive,seat
-E0056,R019202_s03,R019202,Air New Zealand,Premium Economy,2014-07-27,8.0,4.0,5.0,4.0,4.0,,5.0,positive,seat
-E0057,R025293_s07,R025293,China Eastern Airlines,Business Class,2016-07-29,1.0,2.0,1.0,1.0,2.0,1.0,1.0,negative,staff
-E0058,R039850_s04,R039850,EVA Air,Business Class,2016-10-18,7.0,4.0,2.0,1.0,3.0,4.0,4.0,positive,seat
-E0059,R043503_s02,R043503,Thai Airways,Economy Class,2013-12-25,8.0,3.0,5.0,3.0,3.0,,3.0,positive,entertainment
-E0060,R052632_s07,R052632,Sunwing Airlines,Economy Class,2016-01-25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
+E0056,R016312_s07,R016312,Aegean Airlines,Business Class,2015-11-23,9.0,3.0,5.0,4.0,,3.0,4.0,positive,seat
+E0057,R004042_s02,R004042,Emirates,Business Class,2015-07-10,1.0,5.0,1.0,1.0,2.0,2.0,2.0,negative,staff
+E0058,R040801_s01,R040801,Singapore Airlines,Business Class,2017-06-02,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,seat
+E0059,R033140_s06,R033140,Qantas Airways,Economy Class,2015-05-27,8.0,2.0,5.0,4.0,2.0,,3.0,positive,entertainment
+E0060,R050546_s07,R050546,Spirit Airlines,Economy Class,2015-06-30,1.0,4.0,3.0,1.0,,2.0,1.0,negative,value
 E0061,R056898_s01,R056898,IndiGo,Economy Class,2015-10-10,8.0,5.0,5.0,,,5.0,5.0,positive,ground
-E0062,R046880_s06,R046880,Cathay Pacific Airways,Economy Class,2017-07-31,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,seat
+E0062,R035969_s04,R035969,Pegasus Airlines,Economy Class,2015-11-16,8.0,3.0,4.0,1.0,,3.0,5.0,positive,seat
 E0063,R002133_s03,R002133,Qatar Airways,Economy Class,2016-07-12,3.0,2.0,3.0,4.0,3.0,4.0,2.0,negative,seat
-E0064,R023949_s05,R023949,British Airways,Business Class,2015-06-11,8.0,4.0,5.0,5.0,2.0,,5.0,positive,entertainment
-E0065,R061071_s00,R061071,Ukraine International,Economy Class,2015-07-18,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
-E0066,R059750_s03,R059750,Gulf Air,Economy Class,2019-03-24,2.0,2.0,1.0,2.0,,3.0,2.0,negative,entertainment
+E0064,R027223_s04,R027223,China Southern Airlines,Premium Economy,2014-01-07,7.0,4.0,4.0,3.0,2.0,,5.0,positive,entertainment
+E0065,R035235_s02,R035235,Etihad Airways,Business Class,2015-11-28,3.0,2.0,1.0,1.0,2.0,4.0,1.0,negative,staff
+E0066,R012757_s10,R012757,United Airlines,Economy Class,2019-03-16,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
 E0067,R052713_s02,R052713,Sunwing Airlines,Economy Class,2015-03-25,3.0,1.0,3.0,1.0,1.0,,3.0,negative,food
-E0068,R029106_s14,R029106,Iberia,Economy Class,2018-08-08,1.0,3.0,2.0,,,1.0,3.0,negative,none
-E0069,R037528_s07,R037528,Ryanair,Economy Class,2014-10-01,10.0,5.0,5.0,4.0,,,5.0,positive,staff
-E0070,R040437_s06,R040437,Royal Air Maroc,Economy Class,2011-11-17,4.0,,,,,,1.0,negative,seat
-E0071,R031633_s01,R031633,Korean Air,Economy Class,2011-11-09,9.0,3.0,4.0,5.0,4.0,,4.0,positive,staff
-E0072,R005303_s07,R005303,Lufthansa,Economy Class,2016-03-29,7.0,4.0,3.0,3.0,1.0,4.0,2.0,positive,none
-E0073,R015834_s05,R015834,Jetblue Airways,,2015-05-29,1.0,3.0,1.0,,,,3.0,negative,staff
-E0074,R051301_s01,R051301,Spirit Airlines,Economy Class,2014-03-04,1.0,1.0,1.0,1.0,1.0,,1.0,negative,ground
+E0068,R045679_s00,R045679,Air Canada rouge,Economy Class,2014-03-24,2.0,1.0,4.0,1.0,1.0,,1.0,negative,none
+E0069,R042532_s02,R042532,Swiss Intl Air Lines,Economy Class,2015-07-31,9.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,staff
+E0070,R052116_s00,R052116,Vueling Airlines,Economy Class,2015-09-23,1.0,1.0,2.0,,,1.0,1.0,negative,seat
+E0071,R029871_s03,R029871,ANA All Nippon Airways,Business Class,2015-08-21,10.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,staff
+E0072,R033204_s01,R033204,Qantas Airways,Economy Class,2015-01-28,7.0,4.0,4.0,4.0,4.0,,3.0,positive,none
+E0073,R028069_s02,R028069,Egyptair,Economy Class,2017-09-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
+E0074,R049018_s03,R049018,Spirit Airlines,Economy Class,2018-09-04,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
 E0075,R056461_s06,R056461,Icelandair,Economy Class,2015-09-22,8.0,3.0,4.0,3.0,4.0,3.0,4.0,positive,ground
 E0076,R010266_s02,R010266,Delta Air Lines,Economy Class,2019-02-21,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,ground
 E0077,R015050_s08,R015050,United Airlines,Premium Economy,2014-08-28,3.0,2.0,2.0,1.0,1.0,,2.0,negative,food
-E0078,R024314_s05,R024314,British Airways,Business Class,2014-10-28,9.0,4.0,5.0,5.0,3.0,,5.0,positive,seat
-E0079,R044088_s12,R044088,Air India,Economy Class,2015-01-05,4.0,5.0,2.0,3.0,2.0,,3.0,negative,staff
+E0078,R035442_s03,R035442,Etihad Airways,,2015-03-19,9.0,,,,,,,positive,seat
+E0079,R041510_s04,R041510,Singapore Airlines,Economy Class,2013-08-18,4.0,4.0,2.0,3.0,4.0,,2.0,negative,staff
 E0080,R005911_s03,R005911,Lufthansa,Premium Economy,2014-05-05,7.0,3.0,4.0,3.0,4.0,,2.0,positive,value
 E0081,R009359_s01,R009359,American Airlines,Economy Class,2015-12-14,2.0,2.0,4.0,1.0,5.0,2.0,1.0,negative,food
-E0082,R004444_s04,R004444,Emirates,Economy Class,2014-05-27,9.0,4.0,5.0,5.0,5.0,,5.0,positive,staff
+E0082,R017921_s01,R017921,Air Canada,Economy Class,2017-08-08,9.0,4.0,4.0,4.0,,5.0,5.0,positive,staff
 E0083,R002851_s06,R002851,Qatar Airways,Economy Class,2013-11-22,7.0,4.0,5.0,4.0,4.0,,5.0,positive,ground
-E0084,R047442_s10,R047442,Cathay Pacific Airways,,2014-11-20,8.0,,,,,,,positive,staff
+E0084,R019360_s07,R019360,Air New Zealand,Economy Class,2013-07-21,9.0,4.0,4.0,4.0,4.0,,4.0,positive,staff
 E0085,R027013_s13,R027013,China Southern Airlines,Business Class,2015-06-12,8.0,4.0,4.0,3.0,2.0,,5.0,positive,value
-E0086,R012392_s03,R012392,Southwest Airlines,Economy Class,2014-04-30,3.0,2.0,4.0,3.0,,,2.0,negative,seat
-E0087,R034586_s05,R034586,Etihad Airways,Economy Class,2019-04-22,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0088,R022257_s03,R022257,British Airways,Economy Class,2018-04-14,2.0,3.0,3.0,1.0,1.0,2.0,1.0,negative,entertainment
-E0089,R056875_s01,R056875,IndiGo,Economy Class,2016-05-11,1.0,2.0,3.0,3.0,3.0,1.0,3.0,negative,ground
+E0086,R044525_s02,R044525,Air Europa,Business Class,2015-06-16,1.0,1.0,1.0,1.0,1.0,4.0,5.0,negative,seat
+E0087,R027039_s01,R027039,China Southern Airlines,Economy Class,2015-04-08,4.0,5.0,5.0,4.0,3.0,,5.0,negative,none
+E0088,R045639_s01,R045639,Air Canada rouge,Economy Class,2014-04-24,1.0,1.0,1.0,1.0,1.0,,1.0,negative,entertainment
+E0089,R041875_s09,R041875,SAS Scandinavian,Economy Class,2015-06-06,3.0,3.0,3.0,1.0,1.0,,4.0,negative,ground
 E0090,R040165_s01,R040165,EVA Air,Business Class,2011-11-30,7.0,3.0,4.0,4.0,4.0,,4.0,positive,value
-E0091,R040729_s03,R040729,Singapore Airlines,Economy Class,2017-11-13,9.0,3.0,5.0,4.0,3.0,5.0,4.0,positive,none
-E0092,R004204_s00,R004204,Emirates,Business Class,2015-01-14,10.0,5.0,5.0,5.0,5.0,,5.0,positive,none
-E0093,R006649_s00,R006649,KLM Royal Dutch Airlines,Business Class,2015-09-17,3.0,1.0,4.0,2.0,1.0,4.0,2.0,negative,seat
-E0094,R015892_s06,R015892,Jetblue Airways,,2014-03-06,10.0,4.0,4.0,5.0,5.0,,5.0,positive,entertainment
-E0095,R005964_s08,R005964,Lufthansa,Economy Class,2014-03-26,1.0,2.0,1.0,1.0,1.0,,3.0,negative,ground
-E0096,R059114_s00,R059114,Norwegian,Economy Class,2016-04-12,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0097,R022742_s09,R022742,British Airways,Economy Class,2017-04-17,2.0,4.0,1.0,1.0,,1.0,1.0,negative,ground
-E0098,R006248_s04,R006248,KLM Royal Dutch Airlines,Economy Class,2018-03-12,8.0,3.0,3.0,2.0,,4.0,3.0,positive,staff
-E0099,R000653_s04,R000653,Turkish Airlines,Economy Class,2016-06-22,10.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,staff
-E0100,R052622_s02,R052622,Sunwing Airlines,Economy Class,2016-02-04,1.0,1.0,1.0,1.0,2.0,1.0,1.0,negative,value
-E0101,R059567_s09,R059567,Norwegian,Economy Class,2013-12-29,1.0,1.0,2.0,2.0,1.0,,1.0,negative,entertainment
+E0091,R047101_s05,R047101,Cathay Pacific Airways,Economy Class,2016-04-13,7.0,3.0,3.0,3.0,3.0,4.0,4.0,positive,none
+E0092,R041456_s04,R041456,Singapore Airlines,Economy Class,2013-10-29,9.0,4.0,5.0,4.0,4.0,,5.0,positive,none
+E0093,R035942_s02,R035942,Pegasus Airlines,Economy Class,2016-03-20,4.0,1.0,2.0,2.0,1.0,2.0,4.0,negative,seat
+E0094,R006679_s07,R006679,KLM Royal Dutch Airlines,Business Class,2015-08-06,7.0,3.0,4.0,3.0,4.0,4.0,5.0,positive,entertainment
+E0095,R009748_s09,R009748,American Airlines,Economy Class,2015-03-17,2.0,1.0,3.0,1.0,1.0,,3.0,negative,ground
+E0096,R004290_s07,R004290,Emirates,Economy Class,2014-10-13,9.0,4.0,3.0,5.0,5.0,,4.0,positive,none
+E0097,R021141_s02,R021141,Avianca,Economy Class,2018-06-22,2.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,ground
+E0098,R021700_s04,R021700,Austrian Airlines,Business Class,2014-09-17,10.0,5.0,5.0,5.0,4.0,,4.0,positive,staff
+E0099,R044202_s14,R044202,Air India,Economy Class,2014-01-21,7.0,4.0,3.0,3.0,3.0,,5.0,positive,staff
+E0100,R041923_s06,R041923,SAS Scandinavian,Economy Class,2014-09-17,1.0,3.0,3.0,1.0,1.0,,1.0,negative,value
+E0101,R045142_s02,R045142,Air Canada rouge,Economy Class,2015-04-22,1.0,1.0,4.0,3.0,1.0,,1.0,negative,entertainment
 E0102,R049653_s03,R049653,Spirit Airlines,Economy Class,2017-05-25,10.0,4.0,5.0,3.0,,5.0,5.0,positive,value
-E0103,R003439_s01,R003439,Emirates,Economy Class,2017-05-10,1.0,4.0,1.0,3.0,3.0,1.0,1.0,negative,none
+E0103,R007391_s01,R007391,American Airlines,Economy Class,2019-04-21,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
 E0104,R021390_s08,R021390,Avianca,Economy Class,2011-02-24,8.0,,,,,,4.0,positive,ground
 E0105,R015274_s05,R015274,United Airlines,Premium Economy,2014-04-23,2.0,2.0,2.0,1.0,1.0,,1.0,negative,food
 E0106,R047745_s03,R047745,Cathay Pacific Airways,Economy Class,2013-08-21,3.0,1.0,2.0,2.0,2.0,,3.0,negative,food
-E0107,R049919_s06,R049919,Spirit Airlines,Economy Class,2016-08-28,2.0,1.0,4.0,1.0,1.0,2.0,4.0,negative,seat
-E0108,R043919_s03,R043919,Air India,Economy Class,2016-05-24,1.0,2.0,2.0,2.0,1.0,1.0,3.0,negative,none
-E0109,R026695_s02,R026695,China Southern Airlines,Business Class,2016-04-29,9.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,food
-E0110,R038616_s09,R038616,TAP Portugal,Economy Class,2019-04-01,1.0,,,,,1.0,1.0,negative,none
-E0111,R055416_s08,R055416,Frontier Airlines,Economy Class,2017-11-07,1.0,2.0,2.0,,,1.0,3.0,negative,seat
-E0112,R009139_s00,R009139,American Airlines,Economy Class,2016-05-02,1.0,1.0,1.0,1.0,,1.0,1.0,negative,value
-E0113,R054692_s22,R054692,Frontier Airlines,Economy Class,2019-04-06,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0114,R052490_s03,R052490,Sunwing Airlines,Economy Class,2019-04-23,1.0,1.0,1.0,,1.0,1.0,1.0,negative,value
-E0115,R030664_s04,R030664,easyJet,Economy Class,2015-12-10,9.0,3.0,3.0,3.0,,3.0,4.0,positive,staff
-E0116,R027695_s13,R027695,Ethiopian Airlines,Economy Class,2017-09-29,10.0,4.0,5.0,5.0,5.0,5.0,4.0,positive,none
-E0117,R059020_s11,R059020,Norwegian,Economy Class,2016-11-21,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
-E0118,R042315_s04,R042315,Swiss Intl Air Lines,Economy Class,2017-11-24,1.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,none
-E0119,R045267_s01,R045267,Air Canada rouge,Economy Class,2015-01-11,1.0,1.0,2.0,2.0,1.0,,1.0,negative,seat
+E0107,R017897_s01,R017897,Air Canada,Premium Economy,2017-09-06,3.0,1.0,3.0,3.0,3.0,3.0,1.0,negative,seat
+E0108,R031807_s06,R031807,LATAM Airlines,Economy Class,2017-12-23,1.0,3.0,3.0,,,1.0,1.0,negative,none
+E0109,R030939_s05,R030939,easyJet,Economy Class,2014-04-10,10.0,5.0,5.0,4.0,,,4.0,positive,food
+E0110,R010185_s02,R010185,American Airlines,Business Class,2013-12-12,1.0,3.0,1.0,3.0,3.0,,1.0,negative,none
+E0111,R047776_s05,R047776,Wizz Air,Economy Class,2019-05-25,1.0,2.0,,,,1.0,1.0,negative,seat
+E0112,R009140_s00,R009140,American Airlines,Business Class,2016-05-01,2.0,1.0,1.0,3.0,2.0,3.0,4.0,negative,value
+E0113,R060973_s02,R060973,Ukraine International,Economy Class,2017-10-15,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0114,R052499_s03,R052499,Sunwing Airlines,Economy Class,2019-04-09,1.0,,,,,,1.0,negative,value
+E0115,R027198_s04,R027198,China Southern Airlines,Economy Class,2014-02-04,9.0,3.0,4.0,3.0,4.0,,4.0,positive,staff
+E0116,R042859_s05,R042859,Swiss Intl Air Lines,Business Class,2012-09-05,10.0,3.0,5.0,4.0,5.0,,4.0,positive,none
+E0117,R010863_s05,R010863,Delta Air Lines,Premium Economy,2017-01-31,8.0,4.0,4.0,3.0,3.0,4.0,4.0,positive,entertainment
+E0118,R010899_s10,R010899,Delta Air Lines,Premium Economy,2016-12-17,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0119,R007198_s04,R007198,Virgin America,Economy Class,2013-09-18,3.0,1.0,2.0,3.0,4.0,,3.0,negative,seat
 E0120,R006179_s01,R006179,KLM Royal Dutch Airlines,Economy Class,2018-09-06,7.0,3.0,4.0,4.0,2.0,4.0,3.0,positive,ground
-E0121,R009525_s05,R009525,American Airlines,Economy Class,2015-09-17,1.0,2.0,1.0,,,1.0,1.0,negative,none
-E0122,R017613_s06,R017613,Air Canada,Economy Class,2018-12-06,8.0,3.0,4.0,1.0,,3.0,3.0,positive,none
-E0123,R023045_s03,R023045,British Airways,Business Class,2016-11-01,4.0,3.0,3.0,2.0,1.0,3.0,2.0,negative,entertainment
+E0121,R012519_s02,R012519,Southwest Airlines,Economy Class,2012-09-16,4.0,3.0,3.0,3.0,,,2.0,negative,none
+E0122,R036178_s09,R036178,Royal Jordanian Airlines,Business Class,2018-05-25,8.0,4.0,4.0,5.0,4.0,4.0,5.0,positive,none
+E0123,R058435_s04,R058435,Alaska Airlines,Economy Class,2011-07-29,3.0,,,,,,1.0,negative,entertainment
 E0124,R054029_s02,R054029,Garuda Indonesia,Economy Class,2016-06-17,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,ground
-E0125,R029889_s07,R029889,ANA All Nippon Airways,Economy Class,2015-05-31,7.0,4.0,5.0,4.0,3.0,,3.0,positive,entertainment
-E0126,R018394_s12,R018394,Air Canada,Economy Class,2015-04-22,2.0,1.0,2.0,1.0,4.0,,3.0,negative,seat
-E0127,R054904_s02,R054904,Frontier Airlines,Economy Class,2018-09-23,2.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,staff
-E0128,R044012_s03,R044012,Air India,Economy Class,2015-08-26,8.0,4.0,4.0,5.0,4.0,3.0,4.0,positive,none
-E0129,R058049_s00,R058049,Alaska Airlines,Economy Class,2018-05-31,4.0,1.0,2.0,,,2.0,2.0,negative,none
-E0130,R060758_s05,R060758,WOW air,Economy Class,2016-08-17,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0131,R027822_s03,R027822,Ethiopian Airlines,Economy Class,2015-08-27,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
-E0132,R018216_s17,R018216,Air Canada,Economy Class,2015-12-20,1.0,3.0,1.0,,3.0,1.0,3.0,negative,value
+E0125,R005217_s10,R005217,Lufthansa,Economy Class,2016-09-26,8.0,4.0,4.0,3.0,,4.0,4.0,positive,entertainment
+E0126,R016182_s03,R016182,Aegean Airlines,Economy Class,2017-08-16,1.0,1.0,1.0,1.0,,1.0,1.0,negative,seat
+E0127,R059081_s06,R059081,Norwegian,Economy Class,2016-07-10,2.0,3.0,5.0,4.0,3.0,2.0,2.0,negative,staff
+E0128,R012731_s09,R012731,United Airlines,Economy Class,2019-03-29,8.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,none
+E0129,R060816_s14,R060816,WOW air,Economy Class,2015-10-22,1.0,3.0,4.0,1.0,,1.0,2.0,negative,none
+E0130,R032343_s01,R032343,Qantas Airways,Economy Class,2019-03-14,4.0,3.0,3.0,2.0,2.0,3.0,3.0,negative,value
+E0131,R017451_s02,R017451,Aeromexico,Economy Class,2013-11-11,1.0,1.0,1.0,1.0,1.0,,1.0,negative,staff
+E0132,R018228_s02,R018228,Air Canada,Economy Class,2015-11-26,1.0,1.0,1.0,,,1.0,1.0,negative,value
 E0133,R037018_s08,R037018,Ryanair,Economy Class,2016-10-14,9.0,3.0,4.0,3.0,,3.0,4.0,positive,ground
-E0134,R012144_s00,R012144,Southwest Airlines,Economy Class,2016-08-18,1.0,1.0,2.0,1.0,1.0,2.0,2.0,negative,none
-E0135,R058776_s06,R058776,Norwegian,Premium Economy,2018-05-30,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,seat
-E0136,R044023_s00,R044023,Air India,Economy Class,2015-07-31,9.0,5.0,5.0,4.0,3.0,4.0,5.0,positive,seat
-E0137,R044296_s06,R044296,Air India,Business Class,2013-01-02,8.0,5.0,5.0,5.0,4.0,,4.0,positive,food
-E0138,R033558_s04,R033558,Qantas Airways,Business Class,2013-12-09,10.0,5.0,5.0,3.0,4.0,,5.0,positive,entertainment
+E0134,R055322_s08,R055322,Frontier Airlines,Economy Class,2018-02-05,1.0,1.0,1.0,2.0,1.0,1.0,1.0,negative,none
+E0135,R050661_s02,R050661,Spirit Airlines,,2015-05-31,1.0,1.0,2.0,2.0,1.0,,1.0,negative,seat
+E0136,R018479_s05,R018479,Air Canada,Economy Class,2014-11-03,8.0,4.0,3.0,3.0,4.0,,4.0,positive,seat
+E0137,R040838_s03,R040838,Singapore Airlines,Premium Economy,2017-02-22,9.0,5.0,5.0,4.0,4.0,5.0,4.0,positive,food
+E0138,R019992_s03,R019992,Alitalia,Economy Class,2012-10-08,10.0,5.0,5.0,4.0,4.0,,5.0,positive,entertainment
 E0139,R014230_s03,R014230,United Airlines,Premium Economy,2016-04-04,8.0,4.0,4.0,2.0,5.0,4.0,4.0,positive,seat
-E0140,R003774_s05,R003774,Emirates,Economy Class,2016-03-06,7.0,5.0,4.0,4.0,5.0,4.0,4.0,positive,staff
+E0140,R030915_s04,R030915,easyJet,Economy Class,2014-05-25,9.0,5.0,5.0,3.0,,,5.0,positive,staff
 E0141,R005483_s10,R005483,Lufthansa,Economy Class,2015-08-21,9.0,4.0,4.0,3.0,4.0,3.0,4.0,positive,seat
 E0142,R042569_s03,R042569,Swiss Intl Air Lines,First Class,2015-03-09,10.0,5.0,5.0,3.0,4.0,,3.0,positive,ground
-E0143,R044971_s12,R044971,Air Canada rouge,Economy Class,2016-01-26,1.0,1.0,4.0,1.0,1.0,1.0,1.0,negative,entertainment
+E0143,R023878_s07,R023878,British Airways,Business Class,2015-07-15,4.0,2.0,3.0,1.0,1.0,3.0,2.0,negative,entertainment
 E0144,R041814_s01,R041814,SAS Scandinavian,Business Class,2016-01-05,9.0,5.0,5.0,4.0,5.0,3.0,5.0,positive,ground
-E0145,R009108_s06,R009108,American Airlines,Economy Class,2016-06-10,2.0,3.0,3.0,2.0,1.0,3.0,3.0,negative,none
-E0146,R031221_s19,R031221,Korean Air,Business Class,2018-02-10,3.0,4.0,2.0,1.0,2.0,1.0,2.0,negative,none
-E0147,R037598_s06,R037598,Ryanair,Economy Class,2014-07-31,4.0,2.0,2.0,1.0,,,2.0,negative,value
+E0145,R004177_s07,R004177,Emirates,Economy Class,2015-02-18,1.0,1.0,1.0,2.0,1.0,,2.0,negative,none
+E0146,R055962_s03,R055962,Frontier Airlines,Economy Class,2014-09-01,1.0,4.0,,1.0,,,1.0,negative,none
+E0147,R050502_s00,R050502,Spirit Airlines,Economy Class,2015-07-12,1.0,1.0,1.0,,,1.0,1.0,negative,value
 E0148,R032716_s01,R032716,Qantas Airways,Economy Class,2017-04-18,9.0,5.0,5.0,4.0,,5.0,5.0,positive,ground
-E0149,R043100_s00,R043100,Thai Airways,Business Class,2017-01-25,2.0,2.0,2.0,2.0,2.0,2.0,1.0,negative,value
+E0149,R049344_s06,R049344,Spirit Airlines,Economy Class,2018-01-27,1.0,1.0,1.0,,,1.0,1.0,negative,value
 E0150,R011330_s00,R011330,Delta Air Lines,Premium Economy,2015-06-17,8.0,4.0,3.0,4.0,5.0,5.0,5.0,positive,value
 E0151,R003228_s15,R003228,Emirates,Economy Class,2018-02-11,2.0,1.0,1.0,1.0,2.0,1.0,1.0,negative,food
 E0152,R016217_s04,R016217,Aegean Airlines,Economy Class,2017-03-06,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,food
-E0153,R019448_s06,R019448,Alitalia,Economy Class,2018-08-16,2.0,2.0,1.0,2.0,1.0,1.0,3.0,negative,none
-E0154,R035086_s00,R035086,Etihad Airways,Business Class,2016-09-12,9.0,5.0,4.0,4.0,4.0,4.0,5.0,positive,none
-E0155,R002963_s04,R002963,Emirates,Economy Class,2019-03-01,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0156,R041246_s08,R041246,Singapore Airlines,Business Class,2014-10-31,9.0,4.0,5.0,5.0,4.0,,4.0,positive,none
+E0153,R032351_s02,R032351,Qantas Airways,Economy Class,2019-02-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0154,R006259_s00,R006259,KLM Royal Dutch Airlines,Economy Class,2018-02-21,8.0,3.0,5.0,4.0,4.0,3.0,4.0,positive,none
+E0155,R052515_s21,R052515,Sunwing Airlines,Economy Class,2019-01-27,2.0,2.0,3.0,2.0,1.0,1.0,2.0,negative,none
+E0156,R029721_s01,R029721,ANA All Nippon Airways,Economy Class,2018-03-05,9.0,4.0,5.0,3.0,3.0,5.0,5.0,positive,none
 E0157,R004380_s01,R004380,Emirates,Business Class,2014-07-22,7.0,4.0,4.0,4.0,4.0,,5.0,positive,value
-E0158,R006752_s05,R006752,KLM Royal Dutch Airlines,Economy Class,2015-01-19,4.0,2.0,3.0,2.0,1.0,,3.0,negative,entertainment
-E0159,R059407_s08,R059407,Norwegian,Economy Class,2014-09-28,9.0,3.0,5.0,,5.0,,5.0,positive,staff
-E0160,R000609_s08,R000609,Turkish Airlines,Business Class,2016-09-17,1.0,4.0,4.0,3.0,3.0,1.0,1.0,negative,none
-E0161,R038437_s03,R038437,Saudi Arabian Airlines,Economy Class,2016-10-21,2.0,3.0,2.0,2.0,1.0,2.0,1.0,negative,staff
-E0162,R041873_s06,R041873,SAS Scandinavian,Economy Class,2015-06-13,3.0,3.0,4.0,3.0,,,3.0,negative,ground
+E0158,R043100_s04,R043100,Thai Airways,Business Class,2017-01-25,2.0,2.0,2.0,2.0,2.0,2.0,1.0,negative,entertainment
+E0159,R010812_s02,R010812,Delta Air Lines,Economy Class,2017-05-18,9.0,3.0,5.0,3.0,,3.0,3.0,positive,staff
+E0160,R051510_s04,R051510,Vueling Airlines,Economy Class,2019-06-25,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0161,R033525_s03,R033525,Qantas Airways,Economy Class,2014-01-06,3.0,4.0,2.0,1.0,1.0,,2.0,negative,staff
+E0162,R060707_s04,R060707,WOW air,Economy Class,2016-12-29,2.0,3.0,2.0,,,1.0,2.0,negative,ground
 E0163,R052799_s03,R052799,Sunwing Airlines,Premium Economy,2014-06-20,1.0,1.0,1.0,1.0,1.0,,1.0,negative,food
 E0164,R029313_s02,R029313,Iberia,Business Class,2015-07-09,2.0,3.0,1.0,3.0,,3.0,4.0,negative,food
-E0165,R054812_s11,R054812,Frontier Airlines,Economy Class,2018-11-17,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0165,R022323_s01,R022323,British Airways,Premium Economy,2018-02-05,1.0,2.0,1.0,1.0,1.0,2.0,1.0,negative,none
 E0166,R052990_s05,R052990,Sunwing Airlines,Economy Class,2013-05-15,1.0,1.0,2.0,3.0,1.0,,1.0,negative,food
 E0167,R046870_s07,R046870,Cathay Pacific Airways,Business Class,2017-08-21,10.0,5.0,5.0,4.0,4.0,4.0,5.0,positive,ground
-E0168,R035240_s27,R035240,Etihad Airways,Economy Class,2015-11-23,2.0,2.0,1.0,1.0,1.0,2.0,1.0,negative,entertainment
+E0168,R027498_s02,R027498,Copa Airlines,Business Class,2014-11-25,3.0,2.0,5.0,1.0,1.0,,2.0,negative,entertainment
 E0169,R017374_s00,R017374,Aeromexico,Economy Class,2015-09-26,7.0,5.0,1.0,4.0,,4.0,4.0,positive,value
 E0170,R004417_s00,R004417,Emirates,First Class,2014-06-18,10.0,5.0,5.0,5.0,5.0,,5.0,positive,value
-E0171,R039850_s07,R039850,EVA Air,Business Class,2016-10-18,7.0,4.0,2.0,1.0,3.0,4.0,4.0,positive,none
-E0172,R009281_s00,R009281,American Airlines,Economy Class,2016-01-20,7.0,4.0,3.0,3.0,1.0,5.0,3.0,positive,none
-E0173,R032637_s08,R032637,Qantas Airways,Business Class,2017-10-12,7.0,5.0,4.0,4.0,3.0,3.0,4.0,positive,staff
-E0174,R014291_s08,R014291,United Airlines,Economy Class,2016-02-14,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0175,R034110_s02,R034110,Air France,Business Class,2015-11-08,9.0,5.0,5.0,4.0,4.0,4.0,4.0,positive,none
-E0176,R046419_s03,R046419,Air China,Economy Class,2014-07-15,10.0,5.0,5.0,4.0,4.0,,5.0,positive,none
+E0171,R031250_s15,R031250,Korean Air,Economy Class,2017-06-28,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
+E0172,R050761_s14,R050761,Spirit Airlines,,2015-03-04,10.0,4.0,5.0,1.0,1.0,,5.0,positive,none
+E0173,R017643_s05,R017643,Air Canada,Economy Class,2018-10-26,9.0,4.0,5.0,3.0,4.0,5.0,5.0,positive,staff
+E0174,R007083_s07,R007083,Virgin America,Economy Class,2017-01-07,4.0,3.0,3.0,3.0,4.0,2.0,2.0,negative,none
+E0175,R053238_s04,R053238,Bangkok Airways,Economy Class,2017-02-05,9.0,4.0,5.0,4.0,,5.0,4.0,positive,none
+E0176,R026286_s04,R026286,China Southern Airlines,Economy Class,2017-06-24,8.0,5.0,4.0,3.0,,4.0,5.0,positive,none
 E0177,R011880_s02,R011880,Southwest Airlines,Economy Class,2018-08-08,10.0,4.0,5.0,4.0,3.0,5.0,5.0,positive,ground
 E0178,R060990_s08,R060990,Ukraine International,Economy Class,2017-06-03,7.0,4.0,4.0,4.0,1.0,3.0,5.0,positive,ground
-E0179,R049004_s05,R049004,Spirit Airlines,Economy Class,2018-09-10,1.0,1.0,2.0,1.0,,1.0,1.0,negative,value
+E0179,R049008_s00,R049008,Spirit Airlines,Economy Class,2018-09-08,1.0,2.0,2.0,,,2.0,1.0,negative,value
 E0180,R011268_s04,R011268,Delta Air Lines,Economy Class,2015-08-14,4.0,4.0,2.0,1.0,4.0,4.0,2.0,negative,food
-E0181,R005456_s16,R005456,Lufthansa,Business Class,2015-09-20,10.0,4.0,5.0,5.0,5.0,5.0,4.0,positive,none
+E0181,R002211_s19,R002211,Qatar Airways,Business Class,2016-04-08,9.0,4.0,5.0,4.0,4.0,3.0,5.0,positive,none
 E0182,R009605_s06,R009605,American Airlines,Economy Class,2015-08-02,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0183,R031727_s05,R031727,LATAM Airlines,Economy Class,2018-10-13,8.0,3.0,5.0,3.0,4.0,1.0,4.0,positive,none
-E0184,R045519_s02,R045519,Air Canada rouge,Premium Economy,2014-06-04,1.0,1.0,1.0,2.0,1.0,,1.0,negative,seat
-E0185,R045097_s02,R045097,Air Canada rouge,Economy Class,2015-06-17,1.0,1.0,1.0,1.0,,2.0,1.0,negative,value
+E0183,R008707_s11,R008707,American Airlines,Economy Class,2017-05-12,7.0,4.0,4.0,3.0,5.0,4.0,3.0,positive,none
+E0184,R007890_s07,R007890,American Airlines,Premium Economy,2018-09-07,1.0,1.0,2.0,1.0,3.0,2.0,1.0,negative,seat
+E0185,R048011_s01,R048011,Wizz Air,Economy Class,2017-09-25,4.0,2.0,3.0,,,1.0,2.0,negative,value
 E0186,R048438_s06,R048438,Wizz Air,Economy Class,2011-09-26,9.0,,,,,,4.0,positive,food
 E0187,R041719_s15,R041719,SAS Scandinavian,Business Class,2016-12-29,8.0,3.0,5.0,5.0,3.0,5.0,5.0,positive,value
-E0188,R001497_s06,R001497,Qatar Airways,Economy Class,2019-04-09,7.0,3.0,5.0,5.0,4.0,5.0,4.0,positive,none
-E0189,R011054_s03,R011054,Delta Air Lines,Economy Class,2016-02-22,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0190,R052156_s00,R052156,Vueling Airlines,Economy Class,2015-08-09,4.0,3.0,5.0,5.0,3.0,1.0,2.0,negative,ground
-E0191,R011303_s05,R011303,Delta Air Lines,Economy Class,2015-07-09,1.0,1.0,2.0,1.0,1.0,1.0,3.0,negative,none
-E0192,R050618_s03,R050618,Spirit Airlines,,2015-06-17,1.0,1.0,1.0,,,1.0,1.0,negative,value
+E0188,R004473_s18,R004473,Emirates,Economy Class,2014-05-07,7.0,4.0,3.0,4.0,4.0,,3.0,positive,none
+E0189,R038719_s11,R038719,TAP Portugal,Economy Class,2018-06-25,2.0,4.0,3.0,,,2.0,2.0,negative,none
+E0190,R009225_s03,R009225,American Airlines,Economy Class,2016-03-01,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0191,R034712_s02,R034712,Etihad Airways,Business Class,2018-09-06,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
+E0192,R050623_s09,R050623,Spirit Airlines,Economy Class,2015-06-16,1.0,1.0,1.0,,,1.0,2.0,negative,value
 E0193,R034002_s14,R034002,Air France,Economy Class,2016-09-18,3.0,2.0,1.0,3.0,4.0,2.0,1.0,negative,food
-E0194,R044309_s03,R044309,Air India,Economy Class,2012-10-30,8.0,3.0,3.0,5.0,,,4.0,positive,entertainment
-E0195,R027031_s05,R027031,China Southern Airlines,Economy Class,2015-05-06,8.0,2.0,3.0,5.0,4.0,,5.0,positive,entertainment
-E0196,R025605_s04,R025605,China Eastern Airlines,Economy Class,2012-07-19,7.0,3.0,4.0,4.0,2.0,,3.0,positive,none
+E0194,R001197_s04,R001197,Turkish Airlines,,2014-09-01,9.0,,,,,,,positive,entertainment
+E0195,R047577_s05,R047577,Cathay Pacific Airways,Business Class,2014-05-11,9.0,5.0,5.0,5.0,5.0,,5.0,positive,entertainment
+E0196,R038317_s03,R038317,South African Airways,Economy Class,2011-05-11,9.0,,,,,,4.0,positive,none
 E0197,R017146_s01,R017146,Aeromexico,Economy Class,2018-03-13,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,value
-E0198,R039546_s04,R039546,Eurowings,Economy Class,2018-05-10,9.0,5.0,5.0,,,4.0,5.0,positive,entertainment
-E0199,R058585_s02,R058585,Norwegian,Economy Class,2019-04-22,1.0,1.0,2.0,1.0,,1.0,1.0,negative,staff
-E0200,R034088_s02,R034088,Air France,Economy Class,2016-01-18,8.0,4.0,4.0,4.0,,4.0,4.0,positive,staff
+E0198,R003648_s08,R003648,Emirates,Economy Class,2016-08-12,7.0,5.0,5.0,3.0,4.0,5.0,4.0,positive,entertainment
+E0199,R033928_s07,R033928,Air France,Economy Class,2017-06-18,1.0,1.0,1.0,1.0,3.0,1.0,1.0,negative,staff
+E0200,R021944_s05,R021944,British Airways,Business Class,2019-03-29,10.0,3.0,5.0,5.0,,4.0,4.0,positive,staff
 E0201,R039431_s06,R039431,TAP Portugal,Economy Class,2012-02-22,9.0,5.0,5.0,5.0,4.0,,5.0,positive,seat
-E0202,R040190_s05,R040190,EVA Air,Premium Economy,2011-07-18,4.0,,,,,,1.0,negative,seat
-E0203,R007272_s04,R007272,Virgin America,Economy Class,2012-03-06,3.0,5.0,1.0,2.0,1.0,,2.0,negative,entertainment
+E0202,R036234_s06,R036234,Royal Jordanian Airlines,Economy Class,2016-01-19,1.0,1.0,1.0,1.0,1.0,3.0,1.0,negative,seat
+E0203,R007272_s07,R007272,Virgin America,Economy Class,2012-03-06,3.0,5.0,1.0,2.0,1.0,,2.0,negative,entertainment
 E0204,R002167_s08,R002167,Qatar Airways,,2016-05-22,4.0,,,,,,,negative,seat
-E0205,R055321_s06,R055321,Frontier Airlines,Economy Class,2018-02-05,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0206,R030692_s04,R030692,easyJet,Economy Class,2015-10-12,2.0,3.0,3.0,,,1.0,2.0,negative,staff
-E0207,R036367_s03,R036367,Royal Jordanian Airlines,Economy Class,2011-10-16,7.0,3.0,4.0,3.0,4.0,,4.0,positive,food
-E0208,R045986_s11,R045986,Air China,Premium Economy,2018-07-25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0209,R052011_s00,R052011,Vueling Airlines,Economy Class,2016-04-18,8.0,3.0,4.0,3.0,,4.0,4.0,positive,none
-E0210,R044571_s07,R044571,Air Europa,Economy Class,2014-02-19,2.0,3.0,3.0,1.0,1.0,,2.0,negative,value
-E0211,R001909_s01,R001909,Qatar Airways,Economy Class,2017-06-30,9.0,4.0,5.0,4.0,4.0,5.0,4.0,positive,staff
-E0212,R032888_s06,R032888,Qantas Airways,Economy Class,2016-05-11,9.0,4.0,5.0,4.0,3.0,4.0,5.0,positive,food
-E0213,R055889_s01,R055889,Frontier Airlines,Economy Class,2015-03-09,4.0,1.0,3.0,1.0,1.0,,2.0,negative,none
-E0214,R016216_s00,R016216,Aegean Airlines,Business Class,2017-03-12,2.0,3.0,4.0,4.0,1.0,1.0,1.0,negative,value
+E0205,R048007_s25,R048007,Wizz Air,Economy Class,2017-10-07,2.0,3.0,3.0,,,1.0,1.0,negative,value
+E0206,R014060_s05,R014060,United Airlines,Economy Class,2016-09-27,3.0,2.0,4.0,1.0,1.0,4.0,2.0,negative,staff
+E0207,R036363_s03,R036363,Royal Jordanian Airlines,Economy Class,2011-12-16,8.0,4.0,4.0,3.0,4.0,,4.0,positive,food
+E0208,R009924_s02,R009924,American Airlines,Economy Class,2014-08-18,1.0,2.0,1.0,1.0,1.0,,1.0,negative,none
+E0209,R037091_s02,R037091,Ryanair,Economy Class,2016-04-24,9.0,5.0,5.0,4.0,2.0,5.0,5.0,positive,none
+E0210,R044571_s08,R044571,Air Europa,Economy Class,2014-02-19,2.0,3.0,3.0,1.0,1.0,,2.0,negative,value
+E0211,R030141_s05,R030141,ANA All Nippon Airways,Economy Class,2009-09-02,9.0,,,,,,4.0,positive,staff
+E0212,R027452_s07,R027452,Copa Airlines,Business Class,2016-05-23,7.0,4.0,4.0,4.0,1.0,4.0,3.0,positive,food
+E0213,R050329_s02,R050329,Spirit Airlines,Economy Class,2015-10-04,1.0,1.0,,,,1.0,1.0,negative,none
+E0214,R016244_s01,R016244,Aegean Airlines,Economy Class,2016-10-27,3.0,1.0,5.0,1.0,,3.0,2.0,negative,value
 E0215,R000110_s03,R000110,Turkish Airlines,Economy Class,2019-01-05,1.0,2.0,1.0,2.0,1.0,1.0,1.0,negative,food
 E0216,R041832_s08,R041832,SAS Scandinavian,Economy Class,2015-11-03,9.0,3.0,4.0,3.0,,5.0,5.0,positive,value
 E0217,R048899_s01,R048899,Spirit Airlines,Economy Class,2018-11-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
 E0218,R028578_s03,R028578,Finnair,Business Class,2016-06-10,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,ground
-E0219,R051057_s02,R051057,Spirit Airlines,,2014-07-03,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
-E0220,R044124_s14,R044124,Air India,Economy Class,2014-09-22,1.0,2.0,1.0,1.0,1.0,,2.0,negative,entertainment
+E0219,R058400_s04,R058400,Alaska Airlines,Economy Class,2012-06-12,1.0,3.0,3.0,4.0,4.0,,2.0,negative,none
+E0220,R045160_s03,R045160,Air Canada rouge,Economy Class,2015-03-28,2.0,1.0,2.0,2.0,1.0,,2.0,negative,entertainment
 E0221,R050858_s03,R050858,Spirit Airlines,,2014-11-17,10.0,3.0,5.0,5.0,3.0,,5.0,positive,value
-E0222,R042576_s08,R042576,Swiss Intl Air Lines,Business Class,2015-01-14,2.0,4.0,1.0,3.0,3.0,,3.0,negative,entertainment
-E0223,R051303_s01,R051303,Spirit Airlines,,2014-02-27,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
+E0222,R014896_s04,R014896,United Airlines,Business Class,2015-01-11,1.0,1.0,3.0,1.0,1.0,,1.0,negative,entertainment
+E0223,R048162_s08,R048162,Wizz Air,Economy Class,2016-04-05,1.0,1.0,1.0,,,1.0,1.0,negative,none
 E0224,R014835_s02,R014835,United Airlines,Economy Class,2015-03-04,7.0,3.0,3.0,3.0,2.0,,5.0,positive,seat
-E0225,R060073_s05,R060073,Kuwait Airways,,2017-09-12,1.0,,,,,,,negative,none
+E0225,R035386_s11,R035386,Etihad Airways,Economy Class,2015-06-17,1.0,1.0,1.0,1.0,1.0,2.0,1.0,negative,none
 E0226,R043164_s05,R043164,Thai Airways,Business Class,2016-08-21,7.0,5.0,3.0,3.0,4.0,4.0,3.0,positive,seat
-E0227,R013807_s03,R013807,United Airlines,Economy Class,2017-06-20,1.0,1.0,1.0,,,1.0,1.0,negative,seat
+E0227,R044752_s03,R044752,Air Canada rouge,Economy Class,2018-06-05,3.0,1.0,2.0,,1.0,2.0,2.0,negative,seat
 E0228,R034800_s06,R034800,Etihad Airways,Business Class,2018-03-13,7.0,5.0,4.0,3.0,4.0,3.0,5.0,positive,value
-E0229,R013497_s02,R013497,United Airlines,Economy Class,2018-02-15,2.0,1.0,3.0,1.0,1.0,1.0,1.0,negative,none
-E0230,R019566_s05,R019566,Alitalia,Economy Class,2016-11-23,3.0,4.0,2.0,2.0,1.0,1.0,3.0,negative,seat
+E0229,R034551_s02,R034551,Air France,Economy Class,2013-07-08,3.0,3.0,1.0,3.0,3.0,,2.0,negative,none
+E0230,R017653_s16,R017653,Air Canada,Economy Class,2018-10-10,1.0,1.0,1.0,,,1.0,1.0,negative,seat
 E0231,R035464_s03,R035464,Etihad Airways,Economy Class,2015-01-28,8.0,4.0,5.0,4.0,4.0,,5.0,positive,value
-E0232,R009130_s06,R009130,American Airlines,Economy Class,2016-05-22,1.0,2.0,3.0,1.0,,1.0,1.0,negative,none
-E0233,R046697_s04,R046697,Cathay Pacific Airways,Business Class,2018-08-09,10.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0234,R040264_s12,R040264,Royal Air Maroc,Economy Class,2018-04-23,1.0,,,,,1.0,1.0,negative,staff
-E0235,R041316_s14,R041316,Singapore Airlines,Economy Class,2014-06-08,7.0,3.0,4.0,5.0,4.0,,4.0,positive,seat
-E0236,R030332_s06,R030332,easyJet,Economy Class,2018-03-26,9.0,4.0,5.0,4.0,,4.0,5.0,positive,seat
-E0237,R022108_s16,R022108,British Airways,Economy Class,2018-09-15,7.0,4.0,4.0,3.0,3.0,4.0,3.0,positive,entertainment
-E0238,R049756_s01,R049756,Spirit Airlines,Economy Class,2017-03-01,3.0,,,,,1.0,1.0,negative,none
-E0239,R043120_s01,R043120,Thai Airways,Business Class,2016-12-11,8.0,4.0,4.0,3.0,,1.0,4.0,positive,entertainment
+E0232,R040337_s05,R040337,Royal Air Maroc,Economy Class,2015-08-05,2.0,1.0,2.0,1.0,1.0,1.0,3.0,negative,none
+E0233,R058191_s05,R058191,Alaska Airlines,Economy Class,2016-06-22,9.0,4.0,5.0,5.0,4.0,5.0,4.0,positive,none
+E0234,R032125_s05,R032125,LOT Polish Airlines,Economy Class,2016-05-31,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0235,R036315_s04,R036315,Royal Jordanian Airlines,Economy Class,2013-03-04,9.0,5.0,5.0,4.0,5.0,,5.0,positive,seat
+E0236,R019246_s01,R019246,Air New Zealand,Economy Class,2014-04-02,7.0,3.0,4.0,4.0,3.0,,3.0,positive,seat
+E0237,R005345_s04,R005345,Lufthansa,Economy Class,2016-01-24,9.0,4.0,5.0,5.0,5.0,4.0,5.0,positive,entertainment
+E0238,R022058_s01,R022058,British Airways,Economy Class,2018-11-30,3.0,3.0,1.0,,,1.0,2.0,negative,none
+E0239,R044073_s01,R044073,Air India,Business Class,2015-02-11,8.0,4.0,4.0,4.0,4.0,,4.0,positive,entertainment
 E0240,R025686_s09,R025686,China Southern Airlines,Economy Class,2019-04-09,7.0,3.0,5.0,4.0,4.0,4.0,4.0,positive,value
 E0241,R013025_s07,R013025,United Airlines,Economy Class,2018-10-20,10.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,seat
-E0242,R047688_s08,R047688,Cathay Pacific Airways,Economy Class,2013-12-03,10.0,5.0,5.0,4.0,5.0,,5.0,positive,entertainment
-E0243,R052955_s04,R052955,Sunwing Airlines,Economy Class,2013-11-22,2.0,2.0,3.0,2.0,2.0,,3.0,negative,seat
-E0244,R048949_s02,R048949,Spirit Airlines,Economy Class,2018-10-19,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0242,R031443_s13,R031443,Korean Air,Business Class,2014-02-25,7.0,1.0,5.0,5.0,3.0,,4.0,positive,entertainment
+E0243,R017285_s01,R017285,Aeromexico,Economy Class,2016-01-06,2.0,1.0,5.0,2.0,1.0,3.0,3.0,negative,seat
+E0244,R032003_s01,R032003,LOT Polish Airlines,Economy Class,2018-07-13,1.0,2.0,1.0,,,1.0,1.0,negative,ground
 E0245,R059642_s06,R059642,Norwegian,Economy Class,2012-07-25,8.0,,,,,,4.0,positive,value
-E0246,R024276_s08,R024276,British Airways,First Class,2014-11-20,10.0,5.0,5.0,5.0,5.0,,5.0,positive,staff
-E0247,R058688_s17,R058688,Norwegian,Economy Class,2018-10-01,8.0,3.0,5.0,3.0,3.0,5.0,5.0,positive,none
-E0248,R046675_s16,R046675,Cathay Pacific Airways,Economy Class,2018-10-09,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
-E0249,R006443_s01,R006443,KLM Royal Dutch Airlines,Business Class,2016-12-13,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
+E0246,R014906_s09,R014906,United Airlines,Business Class,2015-01-05,8.0,5.0,4.0,4.0,4.0,,4.0,positive,staff
+E0247,R036786_s07,R036786,Ryanair,Economy Class,2018-01-16,9.0,4.0,5.0,,,3.0,5.0,positive,none
+E0248,R036305_s03,R036305,Royal Jordanian Airlines,Economy Class,2013-05-23,8.0,2.0,4.0,5.0,4.0,,4.0,positive,staff
+E0249,R054352_s02,R054352,Garuda Indonesia,Economy Class,2013-04-11,10.0,4.0,5.0,4.0,3.0,,4.0,positive,staff
 E0250,R042828_s09,R042828,Swiss Intl Air Lines,Business Class,2012-12-28,9.0,4.0,5.0,5.0,4.0,,5.0,positive,ground
-E0251,R028800_s05,R028800,Finnair,Economy Class,2013-08-26,8.0,3.0,5.0,3.0,3.0,,4.0,positive,staff
-E0252,R050638_s06,R050638,Spirit Airlines,Economy Class,2015-06-14,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0253,R049296_s05,R049296,Spirit Airlines,Economy Class,2018-03-14,1.0,1.0,1.0,1.0,,1.0,1.0,negative,ground
-E0254,R042256_s00,R042256,Swiss Intl Air Lines,Economy Class,2018-06-16,4.0,4.0,4.0,2.0,,1.0,4.0,negative,none
-E0255,R030367_s05,R030367,easyJet,Economy Class,2017-12-15,10.0,5.0,5.0,,,5.0,5.0,positive,none
+E0251,R001692_s04,R001692,Qatar Airways,Economy Class,2018-05-12,8.0,5.0,5.0,3.0,5.0,3.0,4.0,positive,staff
+E0252,R052185_s15,R052185,Vueling Airlines,Economy Class,2015-07-14,2.0,2.0,2.0,3.0,,1.0,2.0,negative,none
+E0253,R016530_s08,R016530,Aegean Airlines,Economy Class,2012-05-30,4.0,4.0,4.0,1.0,4.0,,2.0,negative,ground
+E0254,R052958_s00,R052958,Sunwing Airlines,Economy Class,2013-10-29,3.0,1.0,4.0,2.0,4.0,,3.0,negative,none
+E0255,R033436_s02,R033436,Qantas Airways,Economy Class,2014-04-07,9.0,4.0,5.0,5.0,4.0,,5.0,positive,none
 E0256,R041297_s04,R041297,Singapore Airlines,Economy Class,2014-07-13,9.0,5.0,5.0,3.0,4.0,,4.0,positive,value
-E0257,R029078_s04,R029078,Iberia,Economy Class,2018-11-15,4.0,3.0,2.0,2.0,5.0,3.0,3.0,negative,seat
-E0258,R022380_s15,R022380,British Airways,First Class,2017-12-01,2.0,3.0,4.0,2.0,2.0,3.0,1.0,negative,none
-E0259,R050836_s01,R050836,Spirit Airlines,,2014-12-18,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
+E0257,R057204_s02,R057204,Aer Lingus,Economy Class,2016-07-24,2.0,1.0,1.0,1.0,2.0,2.0,2.0,negative,seat
+E0258,R003635_s09,R003635,Emirates,Business Class,2016-08-30,2.0,3.0,1.0,2.0,1.0,2.0,1.0,negative,none
+E0259,R048949_s04,R048949,Spirit Airlines,Economy Class,2018-10-19,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
 E0260,R008942_s05,R008942,American Airlines,Business Class,2016-10-11,7.0,4.0,3.0,3.0,4.0,2.0,3.0,positive,seat
-E0261,R045205_s06,R045205,Air Canada rouge,Economy Class,2015-02-18,1.0,1.0,1.0,1.0,1.0,,1.0,negative,entertainment
-E0262,R058984_s04,R058984,Norwegian,Economy Class,2017-02-06,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,none
-E0263,R007220_s02,R007220,Virgin America,Premium Economy,2013-04-18,10.0,4.0,4.0,4.0,4.0,,5.0,positive,staff
+E0261,R029241_s04,R029241,Iberia,Economy Class,2016-05-02,1.0,1.0,1.0,1.0,1.0,3.0,1.0,negative,entertainment
+E0262,R058870_s02,R058870,Norwegian,Economy Class,2017-12-07,7.0,4.0,4.0,,,3.0,4.0,positive,none
+E0263,R006694_s01,R006694,KLM Royal Dutch Airlines,Economy Class,2015-07-13,7.0,3.0,5.0,4.0,3.0,1.0,4.0,positive,staff
 E0264,R024127_s12,R024127,British Airways,First Class,2015-02-18,9.0,5.0,4.0,4.0,3.0,,5.0,positive,ground
 E0265,R040260_s04,R040260,Royal Air Maroc,Economy Class,2018-06-04,8.0,4.0,5.0,,2.0,5.0,5.0,positive,value
-E0266,R027178_s07,R027178,China Southern Airlines,Business Class,2014-04-01,4.0,2.0,4.0,3.0,3.0,,3.0,negative,none
-E0267,R051490_s02,R051490,TAROM Romanian,,2008-03-12,4.0,,,,,,,negative,ground
-E0268,R060534_s06,R060534,WOW air,Economy Class,2017-11-21,7.0,4.0,3.0,1.0,1.0,4.0,4.0,positive,none
+E0266,R012748_s01,R012748,United Airlines,Economy Class,2019-03-21,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0267,R012661_s03,R012661,United Airlines,Economy Class,2019-04-28,1.0,3.0,3.0,1.0,1.0,1.0,1.0,negative,ground
+E0268,R034176_s06,R034176,Air France,Business Class,2015-08-04,7.0,1.0,4.0,4.0,,3.0,3.0,positive,none
 E0269,R029808_s10,R029808,ANA All Nippon Airways,Economy Class,2016-09-04,4.0,2.0,3.0,2.0,3.0,2.0,2.0,negative,food
-E0270,R006744_s00,R006744,KLM Royal Dutch Airlines,Business Class,2015-02-12,8.0,4.0,4.0,4.0,3.0,,4.0,positive,none
-E0271,R021715_s07,R021715,Austrian Airlines,Business Class,2014-07-12,8.0,4.0,4.0,5.0,5.0,,5.0,positive,none
-E0272,R007249_s01,R007249,Virgin America,Economy Class,2012-07-31,9.0,5.0,5.0,3.0,5.0,,5.0,positive,staff
-E0273,R003295_s08,R003295,Emirates,Economy Class,2017-12-10,3.0,2.0,2.0,1.0,1.0,1.0,1.0,negative,none
+E0270,R030121_s04,R030121,ANA All Nippon Airways,Economy Class,2010-07-11,9.0,,,,,,4.0,positive,none
+E0271,R035045_s02,R035045,Etihad Airways,Business Class,2016-11-28,8.0,4.0,2.0,3.0,4.0,5.0,5.0,positive,none
+E0272,R026193_s02,R026193,China Southern Airlines,,2017-10-08,8.0,,,,,,,positive,staff
+E0273,R004856_s02,R004856,Lufthansa,Economy Class,2018-07-07,1.0,2.0,2.0,2.0,2.0,2.0,2.0,negative,none
 E0274,R047388_s08,R047388,Cathay Pacific Airways,Premium Economy,2015-02-18,7.0,4.0,1.0,1.0,4.0,,3.0,positive,ground
-E0275,R025337_s05,R025337,China Eastern Airlines,Economy Class,2016-01-04,3.0,2.0,2.0,1.0,2.0,2.0,2.0,negative,seat
-E0276,R041455_s00,R041455,Singapore Airlines,Economy Class,2013-10-29,10.0,4.0,5.0,5.0,5.0,,5.0,positive,seat
-E0277,R044114_s10,R044114,Air India,Economy Class,2014-10-22,8.0,5.0,3.0,4.0,1.0,,5.0,positive,entertainment
-E0278,R013912_s08,R013912,United Airlines,Business Class,2017-03-07,4.0,4.0,4.0,4.0,4.0,4.0,2.0,negative,staff
-E0279,R039031_s08,R039031,TAP Portugal,Economy Class,2015-10-27,10.0,4.0,5.0,4.0,,5.0,5.0,positive,staff
-E0280,R010124_s04,R010124,American Airlines,Economy Class,2014-02-10,2.0,1.0,1.0,2.0,1.0,,2.0,negative,ground
-E0281,R010402_s03,R010402,Delta Air Lines,Economy Class,2018-10-11,2.0,1.0,2.0,,,1.0,2.0,negative,staff
-E0282,R057196_s01,R057196,Aer Lingus,Economy Class,2016-08-24,4.0,3.0,3.0,3.0,3.0,3.0,1.0,negative,ground
-E0283,R033984_s10,R033984,Air France,Economy Class,2016-11-18,9.0,4.0,5.0,4.0,4.0,5.0,5.0,positive,entertainment
+E0275,R051487_s07,R051487,TAROM Romanian,,2008-08-10,2.0,,,,,,,negative,seat
+E0276,R040745_s07,R040745,Singapore Airlines,,2017-10-29,9.0,,,,,,,positive,seat
+E0277,R047656_s06,R047656,Cathay Pacific Airways,Business Class,2014-01-13,10.0,5.0,5.0,5.0,4.0,,5.0,positive,entertainment
+E0278,R035958_s07,R035958,Pegasus Airlines,Economy Class,2016-01-06,1.0,1.0,1.0,1.0,,1.0,1.0,negative,staff
+E0279,R054000_s05,R054000,Garuda Indonesia,Economy Class,2016-08-14,9.0,4.0,4.0,5.0,5.0,4.0,5.0,positive,staff
+E0280,R050074_s04,R050074,Spirit Airlines,Economy Class,2016-04-26,1.0,1.0,1.0,5.0,,1.0,5.0,negative,ground
+E0281,R041255_s05,R041255,Singapore Airlines,Economy Class,2014-10-20,1.0,1.0,4.0,1.0,1.0,,1.0,negative,staff
+E0282,R014148_s07,R014148,United Airlines,Economy Class,2016-06-29,1.0,1.0,1.0,,,1.0,1.0,negative,ground
+E0283,R014614_s06,R014614,United Airlines,Economy Class,2015-08-14,8.0,3.0,4.0,3.0,3.0,4.0,4.0,positive,entertainment
 E0284,R036033_s05,R036033,Pegasus Airlines,Economy Class,2015-01-19,10.0,4.0,4.0,1.0,,,5.0,positive,ground
-E0285,R040334_s01,R040334,Royal Air Maroc,Economy Class,2015-08-28,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
-E0286,R045509_s11,R045509,Air Canada rouge,Economy Class,2014-06-09,1.0,2.0,2.0,3.0,1.0,,1.0,negative,entertainment
+E0285,R047146_s04,R047146,Cathay Pacific Airways,Business Class,2016-02-20,10.0,5.0,5.0,5.0,5.0,5.0,4.0,positive,entertainment
+E0286,R015363_s06,R015363,United Airlines,Economy Class,2014-03-03,1.0,2.0,2.0,1.0,1.0,,1.0,negative,entertainment
 E0287,R045983_s06,R045983,Air China,Business Class,2018-08-13,8.0,5.0,5.0,4.0,3.0,4.0,5.0,positive,value
-E0288,R006216_s00,R006216,KLM Royal Dutch Airlines,Economy Class,2018-06-22,9.0,5.0,4.0,5.0,5.0,4.0,5.0,positive,none
-E0289,R040972_s03,R040972,Singapore Airlines,Economy Class,2016-05-25,9.0,4.0,5.0,5.0,3.0,4.0,4.0,positive,entertainment
-E0290,R031929_s05,R031929,LOT Polish Airlines,Economy Class,2019-02-04,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0291,R051257_s01,R051257,Spirit Airlines,,2014-03-22,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
-E0292,R000482_s03,R000482,Turkish Airlines,Economy Class,2017-06-01,1.0,,,,,1.0,1.0,negative,ground
-E0293,R050586_s00,R050586,Spirit Airlines,Economy Class,2015-06-20,1.0,1.0,1.0,,,1.0,1.0,negative,seat
-E0294,R017487_s03,R017487,Aeromexico,Economy Class,2012-06-06,8.0,,,,,,4.0,positive,none
-E0295,R004599_s06,R004599,Emirates,Economy Class,2014-02-05,7.0,3.0,4.0,4.0,5.0,,4.0,positive,none
-E0296,R042386_s07,R042386,Swiss Intl Air Lines,First Class,2017-02-06,7.0,5.0,5.0,3.0,3.0,1.0,2.0,positive,none
-E0297,R003454_s00,R003454,Emirates,Economy Class,2017-04-19,4.0,5.0,1.0,2.0,5.0,3.0,2.0,negative,none
-E0298,R026848_s02,R026848,China Southern Airlines,Business Class,2016-01-09,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0299,R043165_s08,R043165,Thai Airways,Economy Class,2016-08-20,10.0,5.0,5.0,4.0,3.0,5.0,4.0,positive,seat
-E0300,R025553_s04,R025553,China Eastern Airlines,First Class,2013-04-01,10.0,4.0,5.0,5.0,4.0,,5.0,positive,food
-E0301,R030832_s14,R030832,easyJet,Economy Class,2014-11-12,2.0,2.0,2.0,,,,2.0,negative,seat
-E0302,R002576_s29,R002576,Qatar Airways,Business Class,2015-01-21,10.0,5.0,5.0,5.0,4.0,,5.0,positive,none
-E0303,R025870_s03,R025870,China Southern Airlines,Economy Class,2018-07-31,9.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,none
-E0304,R028526_s08,R028526,Finnair,Business Class,2017-03-23,7.0,3.0,3.0,3.0,3.0,3.0,4.0,positive,none
-E0305,R000688_s18,R000688,Turkish Airlines,Business Class,2016-04-14,3.0,3.0,5.0,5.0,2.0,1.0,3.0,negative,ground
-E0306,R010442_s02,R010442,Delta Air Lines,Economy Class,2018-08-16,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0288,R005799_s02,R005799,Lufthansa,Economy Class,2014-07-25,9.0,5.0,5.0,3.0,3.0,,5.0,positive,none
+E0289,R014062_s03,R014062,United Airlines,Economy Class,2016-09-26,8.0,4.0,5.0,3.0,4.0,4.0,4.0,positive,entertainment
+E0290,R009657_s07,R009657,American Airlines,Business Class,2015-06-28,2.0,2.0,2.0,2.0,2.0,2.0,2.0,negative,none
+E0291,R055005_s06,R055005,Frontier Airlines,Economy Class,2018-08-06,1.0,2.0,2.0,2.0,1.0,1.0,2.0,negative,none
+E0292,R000927_s07,R000927,Turkish Airlines,Economy Class,2015-10-06,4.0,3.0,4.0,4.0,3.0,1.0,4.0,negative,ground
+E0293,R060383_s20,R060383,WOW air,Economy Class,2018-07-24,1.0,1.0,3.0,1.0,,2.0,1.0,negative,seat
+E0294,R001497_s06,R001497,Qatar Airways,Economy Class,2019-04-09,7.0,3.0,5.0,5.0,4.0,5.0,4.0,positive,none
+E0295,R056373_s00,R056373,Icelandair,Business Class,2017-01-15,8.0,3.0,5.0,4.0,3.0,4.0,4.0,positive,none
+E0296,R046714_s03,R046714,Cathay Pacific Airways,Business Class,2018-07-02,9.0,5.0,4.0,5.0,5.0,5.0,5.0,positive,none
+E0297,R044917_s01,R044917,Air Canada rouge,Economy Class,2016-07-09,1.0,5.0,1.0,3.0,2.0,5.0,1.0,negative,none
+E0298,R033470_s03,R033470,Qantas Airways,Economy Class,2014-02-21,7.0,3.0,3.0,3.0,4.0,,3.0,positive,none
+E0299,R027623_s02,R027623,Ethiopian Airlines,Economy Class,2019-01-02,8.0,4.0,5.0,3.0,3.0,4.0,4.0,positive,seat
+E0300,R025534_s01,R025534,China Eastern Airlines,Economy Class,2013-06-30,7.0,4.0,4.0,4.0,1.0,,5.0,positive,food
+E0301,R035739_s04,R035739,Etihad Airways,Economy Class,2014-01-06,2.0,1.0,4.0,3.0,2.0,,2.0,negative,seat
+E0302,R049876_s00,R049876,Spirit Airlines,Economy Class,2016-10-27,10.0,5.0,5.0,,,5.0,5.0,positive,none
+E0303,R005543_s06,R005543,Lufthansa,Business Class,2015-06-13,8.0,3.0,5.0,4.0,,3.0,3.0,positive,none
+E0304,R002048_s07,R002048,Qatar Airways,Business Class,2016-12-04,9.0,4.0,4.0,5.0,4.0,4.0,5.0,positive,none
+E0305,R013523_s11,R013523,United Airlines,Economy Class,2018-01-18,1.0,1.0,2.0,,1.0,1.0,3.0,negative,ground
+E0306,R031740_s01,R031740,LATAM Airlines,Economy Class,2018-09-08,1.0,2.0,1.0,1.0,2.0,1.0,2.0,negative,none
 E0307,R004223_s07,R004223,Emirates,Economy Class,2014-12-22,8.0,3.0,4.0,5.0,3.0,,4.0,positive,value
-E0308,R013354_s03,R013354,United Airlines,Economy Class,2018-05-18,1.0,1.0,1.0,,,1.0,1.0,negative,staff
-E0309,R010193_s12,R010193,American Airlines,Business Class,2013-12-05,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
-E0310,R008448_s14,R008448,American Airlines,Economy Class,2017-11-27,3.0,2.0,2.0,2.0,,1.0,1.0,negative,staff
-E0311,R036506_s04,R036506,Ryanair,Economy Class,2019-01-13,2.0,3.0,3.0,2.0,2.0,1.0,1.0,negative,staff
-E0312,R028205_s06,R028205,Egyptair,Business Class,2013-06-13,2.0,2.0,1.0,3.0,2.0,,3.0,negative,seat
-E0313,R043920_s13,R043920,Air India,Economy Class,2016-05-21,2.0,2.0,2.0,2.0,1.0,1.0,2.0,negative,staff
-E0314,R052608_s05,R052608,Sunwing Airlines,Economy Class,2016-03-22,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0315,R035132_s03,R035132,Etihad Airways,Economy Class,2016-06-18,9.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,none
-E0316,R022336_s00,R022336,British Airways,Business Class,2018-01-19,7.0,2.0,4.0,4.0,,2.0,3.0,positive,none
-E0317,R057349_s06,R057349,Aer Lingus,Economy Class,2015-01-26,10.0,5.0,5.0,5.0,4.0,,4.0,positive,entertainment
+E0308,R003230_s06,R003230,Emirates,Economy Class,2018-02-10,1.0,1.0,1.0,2.0,1.0,1.0,1.0,negative,staff
+E0309,R017961_s16,R017961,Air Canada,Economy Class,2017-05-29,1.0,3.0,4.0,1.0,3.0,4.0,2.0,negative,none
+E0310,R013580_s10,R013580,United Airlines,Economy Class,2017-12-20,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
+E0311,R010309_s04,R010309,Delta Air Lines,,2019-01-06,1.0,,,,,,,negative,staff
+E0312,R011123_s01,R011123,Delta Air Lines,Economy Class,2015-12-30,2.0,3.0,1.0,2.0,1.0,1.0,2.0,negative,seat
+E0313,R012008_s03,R012008,Southwest Airlines,Economy Class,2018-01-09,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0314,R019193_s04,R019193,Air New Zealand,Business Class,2014-08-11,4.0,3.0,4.0,1.0,1.0,,2.0,negative,entertainment
+E0315,R031459_s00,R031459,Korean Air,Economy Class,2013-11-19,8.0,3.0,5.0,5.0,5.0,,5.0,positive,none
+E0316,R032629_s09,R032629,Qantas Airways,Economy Class,2017-10-28,10.0,5.0,5.0,5.0,,5.0,4.0,positive,none
+E0317,R019591_s03,R019591,Alitalia,Economy Class,2016-09-09,7.0,2.0,3.0,2.0,4.0,4.0,4.0,positive,entertainment
 E0318,R012791_s15,R012791,United Airlines,Premium Economy,2019-03-01,10.0,4.0,5.0,4.0,4.0,4.0,5.0,positive,value
-E0319,R060385_s07,R060385,WOW air,Economy Class,2018-07-19,1.0,1.0,3.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0320,R001720_s16,R001720,Qatar Airways,Business Class,2018-03-26,9.0,5.0,4.0,4.0,3.0,4.0,5.0,positive,entertainment
-E0321,R003684_s07,R003684,Emirates,Business Class,2016-07-12,8.0,4.0,4.0,4.0,5.0,4.0,4.0,positive,staff
-E0322,R029858_s04,R029858,ANA All Nippon Airways,Economy Class,2015-11-11,7.0,3.0,5.0,1.0,,3.0,3.0,positive,food
+E0319,R023593_s05,R023593,British Airways,Economy Class,2015-11-14,3.0,5.0,4.0,2.0,,5.0,2.0,negative,entertainment
+E0320,R036256_s02,R036256,Royal Jordanian Airlines,Economy Class,2015-05-18,9.0,3.0,3.0,1.0,5.0,,3.0,positive,entertainment
+E0321,R028541_s06,R028541,Finnair,Business Class,2017-01-06,8.0,4.0,4.0,2.0,3.0,5.0,4.0,positive,staff
+E0322,R029858_s03,R029858,ANA All Nippon Airways,Economy Class,2015-11-11,7.0,3.0,5.0,1.0,,3.0,3.0,positive,food
 E0323,R061105_s05,R061105,Ukraine International,Economy Class,2014-07-27,10.0,5.0,5.0,5.0,5.0,,5.0,positive,value
 E0324,R015009_s09,R015009,United Airlines,Business Class,2014-09-19,1.0,1.0,1.0,1.0,1.0,,1.0,negative,food
-E0325,R013099_s04,R013099,United Airlines,Economy Class,2018-09-10,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
-E0326,R038862_s04,R038862,TAP Portugal,Economy Class,2017-08-21,3.0,1.0,2.0,1.0,,1.0,1.0,negative,seat
+E0325,R057196_s01,R057196,Aer Lingus,Economy Class,2016-08-24,4.0,3.0,3.0,3.0,3.0,3.0,1.0,negative,ground
+E0326,R027852_s18,R027852,Ethiopian Airlines,Economy Class,2014-11-17,4.0,3.0,3.0,3.0,3.0,,2.0,negative,seat
 E0327,R022671_s01,R022671,British Airways,Economy Class,2017-05-15,10.0,5.0,5.0,5.0,3.0,5.0,5.0,positive,value
-E0328,R027010_s00,R027010,China Southern Airlines,Economy Class,2015-06-16,10.0,5.0,5.0,3.0,5.0,5.0,3.0,positive,none
-E0329,R014580_s02,R014580,United Airlines,Economy Class,2015-08-31,1.0,4.0,1.0,1.0,1.0,1.0,2.0,negative,entertainment
-E0330,R023447_s11,R023447,British Airways,First Class,2016-02-02,8.0,3.0,4.0,4.0,3.0,3.0,3.0,positive,food
-E0331,R029192_s06,R029192,Iberia,Economy Class,2017-02-20,4.0,3.0,2.0,1.0,5.0,3.0,2.0,negative,entertainment
+E0328,R027204_s03,R027204,China Southern Airlines,Economy Class,2014-01-25,10.0,3.0,5.0,4.0,5.0,,3.0,positive,none
+E0329,R043714_s07,R043714,Air India,Economy Class,2019-01-15,4.0,4.0,1.0,2.0,2.0,2.0,3.0,negative,entertainment
+E0330,R018787_s01,R018787,Air Canada,Business Class,2013-09-09,9.0,5.0,4.0,5.0,4.0,,5.0,positive,food
+E0331,R044517_s03,R044517,Air Europa,,2015-08-15,2.0,,,,,,,negative,entertainment
 E0332,R042951_s01,R042951,Thai Airways,Economy Class,2018-07-04,9.0,5.0,4.0,3.0,,5.0,5.0,positive,value
-E0333,R008543_s05,R008543,American Airlines,Economy Class,2017-09-27,1.0,1.0,1.0,3.0,1.0,1.0,1.0,negative,entertainment
+E0333,R045615_s07,R045615,Air Canada rouge,Economy Class,2014-05-07,3.0,1.0,3.0,2.0,1.0,,1.0,negative,entertainment
 E0334,R038360_s03,R038360,Saudi Arabian Airlines,Economy Class,2019-05-01,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,food
 E0335,R007115_s02,R007115,Virgin America,Economy Class,2015-12-12,9.0,4.0,4.0,4.0,4.0,4.0,5.0,positive,seat
 E0336,R026496_s05,R026496,China Southern Airlines,Economy Class,2016-12-07,9.0,3.0,4.0,4.0,4.0,5.0,5.0,positive,value
-E0337,R028116_s07,R028116,Egyptair,Economy Class,2015-10-12,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
+E0337,R046486_s04,R046486,Air China,Economy Class,2013-04-16,3.0,4.0,1.0,2.0,3.0,,2.0,negative,entertainment
 E0338,R000063_s03,R000063,Turkish Airlines,Business Class,2019-02-20,4.0,4.0,1.0,3.0,3.0,1.0,1.0,negative,seat
-E0339,R014239_s05,R014239,United Airlines,Economy Class,2016-03-29,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
-E0340,R017942_s03,R017942,Air Canada,Economy Class,2017-07-07,4.0,1.0,4.0,,3.0,3.0,3.0,negative,seat
-E0341,R023443_s00,R023443,British Airways,Economy Class,2016-02-05,10.0,4.0,5.0,5.0,,5.0,5.0,positive,none
-E0342,R002001_s10,R002001,Qatar Airways,Business Class,2017-03-03,9.0,4.0,4.0,4.0,4.0,5.0,5.0,positive,none
-E0343,R042192_s03,R042192,Swiss Intl Air Lines,Economy Class,2018-12-12,8.0,3.0,5.0,4.0,5.0,3.0,5.0,positive,food
-E0344,R046348_s03,R046348,Air China,Economy Class,2015-08-05,8.0,5.0,5.0,5.0,3.0,5.0,5.0,positive,food
-E0345,R053740_s00,R053740,Garuda Indonesia,Economy Class,2019-03-24,8.0,3.0,5.0,3.0,,5.0,5.0,positive,none
-E0346,R007723_s16,R007723,American Airlines,Premium Economy,2018-11-20,7.0,5.0,4.0,2.0,3.0,5.0,4.0,positive,none
-E0347,R044998_s10,R044998,Air Canada rouge,Economy Class,2015-11-18,4.0,1.0,2.0,1.0,2.0,4.0,3.0,negative,seat
-E0348,R021924_s03,R021924,British Airways,Economy Class,2019-04-27,1.0,2.0,2.0,,,1.0,1.0,negative,none
-E0349,R026215_s03,R026215,China Southern Airlines,Business Class,2017-09-11,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
-E0350,R043966_s00,R043966,Air India,Economy Class,2015-12-31,3.0,3.0,3.0,3.0,2.0,2.0,3.0,negative,none
-E0351,R013803_s03,R013803,United Airlines,Premium Economy,2017-06-23,8.0,4.0,4.0,4.0,5.0,5.0,5.0,positive,entertainment
+E0339,R008871_s02,R008871,American Airlines,Economy Class,2016-12-15,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0340,R016709_s02,R016709,Aeroflot Russian Airlines,Business Class,2017-09-30,2.0,4.0,4.0,3.0,,3.0,2.0,negative,seat
+E0341,R043821_s07,R043821,Air India,Economy Class,2017-10-19,8.0,5.0,4.0,3.0,5.0,5.0,5.0,positive,none
+E0342,R018963_s00,R018963,Air New Zealand,Economy Class,2017-03-04,8.0,3.0,2.0,1.0,,4.0,4.0,positive,none
+E0343,R042189_s05,R042189,Swiss Intl Air Lines,Business Class,2018-12-23,8.0,3.0,4.0,4.0,4.0,5.0,4.0,positive,food
+E0344,R019314_s05,R019314,Air New Zealand,Economy Class,2013-10-28,8.0,4.0,3.0,4.0,4.0,,4.0,positive,food
+E0345,R004654_s15,R004654,Emirates,First Class,2014-01-03,10.0,5.0,5.0,5.0,5.0,,5.0,positive,none
+E0346,R039360_s03,R039360,TAP Portugal,Economy Class,2012-10-09,7.0,4.0,4.0,4.0,,,4.0,positive,none
+E0347,R044998_s06,R044998,Air Canada rouge,Economy Class,2015-11-18,4.0,1.0,2.0,1.0,2.0,4.0,3.0,negative,seat
+E0348,R018503_s01,R018503,Air Canada,Economy Class,2014-09-28,4.0,3.0,4.0,3.0,1.0,,4.0,negative,none
+E0349,R043076_s01,R043076,Thai Airways,Economy Class,2017-03-19,9.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
+E0350,R011746_s01,R011746,Southwest Airlines,Economy Class,2019-04-22,2.0,3.0,3.0,2.0,3.0,2.0,3.0,negative,none
+E0351,R049888_s32,R049888,Spirit Airlines,Economy Class,2016-10-15,9.0,4.0,5.0,,,5.0,5.0,positive,entertainment
 E0352,R054140_s05,R054140,Garuda Indonesia,Business Class,2015-07-24,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,ground
-E0353,R049867_s06,R049867,Spirit Airlines,Economy Class,2016-11-01,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
-E0354,R023413_s05,R023413,British Airways,Economy Class,2016-02-28,7.0,5.0,5.0,3.0,3.0,1.0,4.0,positive,staff
+E0353,R052310_s11,R052310,Vueling Airlines,Premium Economy,2013-12-29,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
+E0354,R057184_s09,R057184,Aer Lingus,Economy Class,2016-10-16,10.0,3.0,4.0,3.0,,4.0,3.0,positive,staff
 E0355,R050145_s04,R050145,Spirit Airlines,Economy Class,2016-03-01,10.0,4.0,4.0,,,4.0,5.0,positive,ground
-E0356,R033256_s08,R033256,Qantas Airways,Business Class,2014-12-10,10.0,5.0,5.0,3.0,3.0,,4.0,positive,food
+E0356,R043235_s04,R043235,Thai Airways,Economy Class,2016-01-01,9.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,food
 E0357,R042400_s08,R042400,Swiss Intl Air Lines,Economy Class,2016-11-17,10.0,4.0,5.0,5.0,4.0,4.0,5.0,positive,value
-E0358,R031101_s06,R031101,easyJet,Economy Class,2013-06-25,8.0,4.0,4.0,,,,5.0,positive,none
+E0358,R002394_s06,R002394,Qatar Airways,Business Class,2015-09-08,7.0,4.0,5.0,3.0,4.0,4.0,4.0,positive,none
 E0359,R059445_s01,R059445,Norwegian,Economy Class,2014-09-01,9.0,4.0,4.0,4.0,5.0,,5.0,positive,value
 E0360,R000343_s09,R000343,Turkish Airlines,Business Class,2018-01-21,10.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,food
-E0361,R003788_s00,R003788,Emirates,Economy Class,2016-02-22,7.0,1.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0362,R027711_s09,R027711,Ethiopian Airlines,Economy Class,2017-07-05,3.0,4.0,4.0,4.0,4.0,1.0,4.0,negative,staff
-E0363,R027456_s03,R027456,Copa Airlines,Economy Class,2016-05-07,8.0,3.0,4.0,4.0,3.0,3.0,4.0,positive,food
-E0364,R009714_s08,R009714,American Airlines,First Class,2015-04-24,8.0,5.0,5.0,4.0,5.0,,4.0,positive,none
-E0365,R046536_s02,R046536,Air China,Economy Class,2012-08-30,8.0,3.0,4.0,4.0,,,4.0,positive,food
-E0366,R033378_s05,R033378,Qantas Airways,Economy Class,2014-06-25,10.0,5.0,5.0,5.0,5.0,,5.0,positive,seat
-E0367,R036245_s07,R036245,Royal Jordanian Airlines,Economy Class,2015-09-29,2.0,3.0,2.0,3.0,3.0,1.0,1.0,negative,ground
-E0368,R002138_s08,R002138,Qatar Airways,Economy Class,2016-07-04,8.0,5.0,5.0,4.0,5.0,3.0,5.0,positive,entertainment
-E0369,R034078_s06,R034078,Air France,Economy Class,2016-02-15,9.0,4.0,5.0,5.0,5.0,4.0,5.0,positive,none
-E0370,R059406_s05,R059406,Norwegian,Economy Class,2014-09-28,2.0,2.0,,1.0,3.0,,1.0,negative,value
+E0361,R003456_s02,R003456,Emirates,Economy Class,2017-04-16,8.0,4.0,4.0,5.0,5.0,4.0,5.0,positive,none
+E0362,R032397_s22,R032397,Qantas Airways,Economy Class,2018-12-06,4.0,3.0,1.0,1.0,4.0,4.0,3.0,negative,staff
+E0363,R033061_s20,R033061,Qantas Airways,Economy Class,2015-09-23,8.0,4.0,4.0,4.0,5.0,5.0,4.0,positive,food
+E0364,R009418_s00,R009418,American Airlines,Economy Class,2015-11-09,9.0,4.0,5.0,4.0,5.0,4.0,5.0,positive,none
+E0365,R026491_s03,R026491,China Southern Airlines,Business Class,2016-12-11,9.0,4.0,5.0,4.0,3.0,4.0,5.0,positive,food
+E0366,R038249_s02,R038249,South African Airways,,2012-04-30,8.0,,,,,,,positive,seat
+E0367,R016605_s01,R016605,Aeroflot Russian Airlines,Economy Class,2019-02-15,2.0,3.0,4.0,,,1.0,1.0,negative,ground
+E0368,R053930_s01,R053930,Garuda Indonesia,Economy Class,2017-05-03,8.0,4.0,5.0,5.0,5.0,4.0,5.0,positive,entertainment
+E0369,R001110_s03,R001110,Turkish Airlines,Economy Class,2015-02-18,7.0,3.0,5.0,4.0,5.0,,4.0,positive,none
+E0370,R054629_s08,R054629,Frontier Airlines,Economy Class,2019-06-08,1.0,2.0,3.0,3.0,2.0,2.0,1.0,negative,value
 E0371,R000974_s02,R000974,Turkish Airlines,Economy Class,2015-08-27,7.0,3.0,3.0,2.0,4.0,1.0,3.0,positive,food
-E0372,R039644_s03,R039644,Eurowings,Economy Class,2016-08-29,3.0,2.0,3.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0373,R044838_s17,R044838,Air Canada rouge,Premium Economy,2017-04-07,9.0,4.0,5.0,4.0,3.0,4.0,5.0,positive,food
-E0374,R029927_s15,R029927,ANA All Nippon Airways,Economy Class,2014-09-06,9.0,4.0,4.0,5.0,5.0,,5.0,positive,food
-E0375,R036922_s04,R036922,Ryanair,Economy Class,2017-06-11,8.0,3.0,1.0,,,1.0,5.0,positive,seat
-E0376,R058839_s08,R058839,Norwegian,Economy Class,2018-02-01,1.0,1.0,3.0,1.0,3.0,1.0,1.0,negative,ground
-E0377,R002095_s07,R002095,Qatar Airways,Economy Class,2016-09-21,7.0,3.0,5.0,5.0,4.0,2.0,4.0,positive,none
-E0378,R022086_s08,R022086,British Airways,First Class,2018-10-22,9.0,5.0,5.0,4.0,4.0,5.0,5.0,positive,staff
-E0379,R030542_s13,R030542,easyJet,Economy Class,2016-08-08,2.0,1.0,1.0,3.0,,4.0,3.0,negative,none
-E0380,R017348_s15,R017348,Aeromexico,Business Class,2015-11-12,4.0,3.0,2.0,2.0,3.0,2.0,2.0,negative,value
-E0381,R039192_s03,R039192,TAP Portugal,Economy Class,2014-05-17,10.0,5.0,5.0,4.0,3.0,,5.0,positive,entertainment
-E0382,R031267_s24,R031267,Korean Air,Business Class,2017-01-13,7.0,3.0,4.0,3.0,3.0,4.0,4.0,positive,food
-E0383,R009759_s01,R009759,American Airlines,Economy Class,2015-03-04,2.0,1.0,4.0,1.0,2.0,,2.0,negative,ground
-E0384,R028952_s02,R028952,Finnair,Economy Class,2012-01-09,7.0,3.0,3.0,3.0,4.0,,3.0,positive,entertainment
-E0385,R060227_s06,R060227,Kuwait Airways,Economy Class,2012-07-05,8.0,,,,,,4.0,positive,entertainment
-E0386,R008834_s01,R008834,American Airlines,Economy Class,2017-01-13,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0387,R049194_s02,R049194,Spirit Airlines,Economy Class,2018-05-28,1.0,1.0,2.0,1.0,1.0,2.0,2.0,negative,seat
+E0372,R020591_s05,R020591,AirAsia,Economy Class,2012-05-25,2.0,4.0,2.0,3.0,,,3.0,negative,entertainment
+E0373,R054063_s07,R054063,Garuda Indonesia,,2016-02-12,9.0,,,,,,,positive,food
+E0374,R043888_s09,R043888,Air India,Economy Class,2016-11-28,7.0,5.0,4.0,2.0,2.0,4.0,4.0,positive,food
+E0375,R030778_s10,R030778,easyJet,Economy Class,2015-05-25,8.0,3.0,4.0,2.0,,,4.0,positive,seat
+E0376,R003625_s10,R003625,Emirates,Economy Class,2016-09-19,4.0,2.0,2.0,3.0,3.0,2.0,2.0,negative,ground
+E0377,R057747_s05,R057747,Adria Airways,Economy Class,2016-07-29,10.0,5.0,5.0,5.0,,5.0,5.0,positive,none
+E0378,R009877_s04,R009877,American Airlines,First Class,2014-10-08,7.0,3.0,5.0,4.0,4.0,,4.0,positive,staff
+E0379,R008319_s09,R008319,American Airlines,Economy Class,2018-02-19,1.0,1.0,3.0,2.0,,1.0,1.0,negative,none
+E0380,R017371_s03,R017371,Aeromexico,Economy Class,2015-09-28,1.0,1.0,1.0,,,1.0,1.0,negative,value
+E0381,R024112_s03,R024112,British Airways,Business Class,2015-03-04,8.0,4.0,5.0,4.0,3.0,,4.0,positive,entertainment
+E0382,R031267_s12,R031267,Korean Air,Business Class,2017-01-13,7.0,3.0,4.0,3.0,3.0,4.0,4.0,positive,food
+E0383,R007821_s02,R007821,American Airlines,Economy Class,2018-10-10,1.0,2.0,5.0,,,1.0,1.0,negative,ground
+E0384,R053957_s04,R053957,Garuda Indonesia,Economy Class,2017-01-27,8.0,5.0,5.0,4.0,4.0,4.0,4.0,positive,entertainment
+E0385,R027442_s07,R027442,Copa Airlines,Economy Class,2016-11-02,9.0,4.0,5.0,4.0,4.0,4.0,4.0,positive,entertainment
+E0386,R024894_s03,R024894,Brussels Airlines,Economy Class,2014-08-13,2.0,2.0,2.0,1.0,1.0,,2.0,negative,none
+E0387,R040940_s19,R040940,Singapore Airlines,Premium Economy,2016-07-30,4.0,2.0,2.0,1.0,4.0,2.0,1.0,negative,seat
 E0388,R000483_s03,R000483,Turkish Airlines,Economy Class,2017-05-30,7.0,3.0,4.0,4.0,3.0,3.0,4.0,positive,food
-E0389,R036409_s11,R036409,Royal Jordanian Airlines,,2009-05-12,2.0,,,,,,,negative,none
-E0390,R036604_s02,R036604,Ryanair,Economy Class,2018-08-19,1.0,1.0,2.0,,,1.0,1.0,negative,ground
-E0391,R024511_s03,R024511,British Airways,Business Class,2014-06-30,7.0,4.0,2.0,4.0,3.0,,5.0,positive,entertainment
-E0392,R018651_s04,R018651,Air Canada,Business Class,2014-03-10,7.0,3.0,4.0,3.0,2.0,,3.0,positive,seat
-E0393,R022651_s10,R022651,British Airways,Business Class,2017-05-30,3.0,4.0,5.0,4.0,3.0,3.0,3.0,negative,entertainment
-E0394,R004898_s11,R004898,Lufthansa,Business Class,2018-05-13,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
-E0395,R051606_s04,R051606,Vueling Airlines,Economy Class,2018-10-02,1.0,1.0,1.0,1.0,,1.0,1.0,negative,staff
-E0396,R030065_s01,R030065,ANA All Nippon Airways,Business Class,2012-05-30,8.0,,,,,,4.0,positive,seat
-E0397,R036862_s01,R036862,Ryanair,Economy Class,2017-09-19,10.0,,,,,,5.0,positive,none
-E0398,R018137_s08,R018137,Air Canada,Premium Economy,2016-06-04,7.0,3.0,5.0,3.0,4.0,4.0,3.0,positive,none
-E0399,R022342_s08,R022342,British Airways,Business Class,2018-01-14,1.0,1.0,1.0,1.0,,1.0,1.0,negative,ground
-E0400,R008629_s05,R008629,American Airlines,Economy Class,2017-07-17,1.0,3.0,5.0,,,2.0,1.0,negative,none
-E0401,R019442_s03,R019442,Alitalia,Economy Class,2018-08-29,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,seat
-E0402,R059299_s03,R059299,Norwegian,Economy Class,2015-04-28,10.0,5.0,5.0,,,,5.0,positive,none
-E0403,R044901_s04,R044901,Air Canada rouge,Economy Class,2016-08-18,2.0,1.0,1.0,1.0,1.0,2.0,1.0,negative,seat
-E0404,R034216_s02,R034216,Air France,Premium Economy,2015-05-27,1.0,1.0,1.0,1.0,2.0,,1.0,negative,seat
-E0405,R017441_s12,R017441,Aeromexico,Economy Class,2014-01-20,2.0,2.0,1.0,3.0,2.0,,2.0,negative,staff
-E0406,R005290_s09,R005290,Lufthansa,Economy Class,2016-04-25,2.0,2.0,1.0,3.0,1.0,1.0,3.0,negative,entertainment
-E0407,R048603_s05,R048603,Spirit Airlines,Economy Class,2019-05-03,1.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,none
+E0389,R049028_s03,R049028,Spirit Airlines,Economy Class,2018-08-29,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0390,R035695_s03,R035695,Etihad Airways,Business Class,2014-03-17,1.0,2.0,2.0,2.0,1.0,,2.0,negative,ground
+E0391,R025215_s03,R025215,China Eastern Airlines,Economy Class,2017-04-20,7.0,4.0,2.0,4.0,4.0,3.0,4.0,positive,entertainment
+E0392,R047003_s03,R047003,Cathay Pacific Airways,Business Class,2016-11-11,7.0,3.0,4.0,4.0,4.0,4.0,3.0,positive,seat
+E0393,R027716_s01,R027716,Ethiopian Airlines,Economy Class,2017-05-25,2.0,1.0,3.0,1.0,1.0,2.0,2.0,negative,entertainment
+E0394,R025935_s01,R025935,China Southern Airlines,Economy Class,2018-05-29,8.0,3.0,5.0,5.0,,5.0,4.0,positive,staff
+E0395,R060436_s05,R060436,WOW air,Economy Class,2018-05-15,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0396,R020084_s11,R020084,AirAsia,Economy Class,2018-09-28,8.0,4.0,4.0,3.0,,4.0,5.0,positive,seat
+E0397,R005591_s00,R005591,Lufthansa,First Class,2015-03-20,9.0,5.0,5.0,5.0,5.0,,5.0,positive,none
+E0398,R025263_s05,R025263,China Eastern Airlines,Business Class,2016-11-15,9.0,4.0,5.0,5.0,4.0,4.0,5.0,positive,none
+E0399,R033717_s01,R033717,Air France,Economy Class,2018-10-18,3.0,1.0,4.0,1.0,3.0,1.0,3.0,negative,ground
+E0400,R007990_s01,R007990,American Airlines,Economy Class,2018-07-25,2.0,1.0,1.0,1.0,,1.0,1.0,negative,none
+E0401,R017852_s21,R017852,Air Canada,Economy Class,2017-12-05,9.0,5.0,5.0,3.0,4.0,4.0,4.0,positive,seat
+E0402,R029229_s00,R029229,Iberia,Economy Class,2016-06-26,8.0,2.0,5.0,,,4.0,4.0,positive,none
+E0403,R030158_s07,R030158,easyJet,Economy Class,2019-04-13,3.0,1.0,5.0,,,1.0,1.0,negative,seat
+E0404,R055124_s09,R055124,Frontier Airlines,Economy Class,2018-06-26,1.0,1.0,1.0,,,1.0,1.0,negative,seat
+E0405,R029339_s01,R029339,Iberia,Business Class,2015-03-25,2.0,1.0,1.0,1.0,1.0,,4.0,negative,staff
+E0406,R045601_s03,R045601,Air Canada rouge,Economy Class,2014-05-08,3.0,1.0,4.0,3.0,3.0,,1.0,negative,entertainment
+E0407,R009804_s01,R009804,American Airlines,Economy Class,2015-01-11,1.0,1.0,2.0,2.0,1.0,,1.0,negative,none
 E0408,R028463_s04,R028463,Finnair,Business Class,2018-01-13,7.0,3.0,3.0,4.0,3.0,3.0,3.0,positive,value
-E0409,R020878_s04,R020878,Asiana Airlines,,2013-10-06,9.0,,,,,,,positive,seat
-E0410,R009832_s01,R009832,American Airlines,Economy Class,2014-12-04,1.0,1.0,1.0,1.0,1.0,,1.0,negative,seat
+E0409,R040158_s03,R040158,EVA Air,Business Class,2012-01-05,8.0,3.0,5.0,4.0,4.0,,4.0,positive,seat
+E0410,R007451_s02,R007451,American Airlines,Economy Class,2019-04-02,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,seat
 E0411,R003970_s03,R003970,Emirates,First Class,2015-09-14,2.0,1.0,1.0,4.0,1.0,5.0,1.0,negative,seat
-E0412,R055137_s06,R055137,Frontier Airlines,Economy Class,2018-06-23,1.0,1.0,1.0,,,2.0,1.0,negative,none
-E0413,R027393_s06,R027393,Copa Airlines,Business Class,2019-04-05,1.0,1.0,5.0,2.0,1.0,1.0,1.0,negative,ground
+E0412,R001448_s06,R001448,Turkish Airlines,Economy Class,2013-10-15,2.0,3.0,2.0,4.0,,,1.0,negative,none
+E0413,R024477_s01,R024477,British Airways,Business Class,2014-07-22,2.0,3.0,1.0,1.0,1.0,,2.0,negative,ground
 E0414,R019455_s01,R019455,Alitalia,Economy Class,2018-07-14,9.0,5.0,5.0,4.0,4.0,4.0,4.0,positive,ground
 E0415,R060456_s06,R060456,WOW air,Economy Class,2018-04-16,1.0,1.0,4.0,,,1.0,1.0,negative,value
-E0416,R013072_s04,R013072,United Airlines,Economy Class,2018-09-24,2.0,2.0,2.0,2.0,2.0,2.0,2.0,negative,entertainment
-E0417,R032304_s01,R032304,Qantas Airways,Business Class,2019-05-09,2.0,3.0,3.0,3.0,1.0,2.0,1.0,negative,entertainment
-E0418,R061058_s05,R061058,Ukraine International,Economy Class,2015-10-07,1.0,1.0,1.0,,,1.0,1.0,negative,value
-E0419,R004372_s04,R004372,Emirates,Economy Class,2014-07-31,2.0,2.0,1.0,3.0,2.0,,2.0,negative,seat
-E0420,R041683_s17,R041683,SAS Scandinavian,Economy Class,2017-07-04,7.0,4.0,4.0,2.0,4.0,3.0,4.0,positive,none
+E0416,R022430_s03,R022430,British Airways,Economy Class,2017-11-02,3.0,1.0,2.0,1.0,1.0,2.0,3.0,negative,entertainment
+E0417,R006464_s03,R006464,KLM Royal Dutch Airlines,Economy Class,2016-10-26,1.0,1.0,3.0,4.0,1.0,3.0,1.0,negative,entertainment
+E0418,R053198_s03,R053198,Bangkok Airways,Economy Class,2018-06-03,1.0,2.0,2.0,,,1.0,1.0,negative,value
+E0419,R054951_s10,R054951,Frontier Airlines,Economy Class,2018-08-29,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,seat
+E0420,R027287_s09,R027287,China Southern Airlines,Economy Class,2013-09-11,10.0,5.0,4.0,4.0,5.0,,5.0,positive,none
 E0421,R023976_s02,R023976,British Airways,Business Class,2015-05-27,8.0,4.0,5.0,5.0,4.0,,4.0,positive,seat
-E0422,R015063_s02,R015063,United Airlines,Economy Class,2014-08-15,1.0,2.0,1.0,1.0,1.0,,1.0,negative,entertainment
-E0423,R047685_s01,R047685,Cathay Pacific Airways,Business Class,2013-12-04,9.0,5.0,4.0,4.0,4.0,,4.0,positive,none
-E0424,R013650_s13,R013650,United Airlines,Economy Class,2017-10-16,1.0,1.0,3.0,1.0,,1.0,1.0,negative,staff
-E0425,R015527_s00,R015527,Jetblue Airways,Economy Class,2018-07-09,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,none
-E0426,R001984_s04,R001984,Qatar Airways,Business Class,2017-03-18,7.0,3.0,3.0,3.0,4.0,4.0,4.0,positive,none
-E0427,R000442_s02,R000442,Turkish Airlines,Economy Class,2017-08-18,8.0,,,,,4.0,3.0,positive,staff
-E0428,R023322_s06,R023322,British Airways,Premium Economy,2016-04-25,7.0,5.0,4.0,5.0,4.0,5.0,4.0,positive,staff
+E0422,R037992_s02,R037992,South African Airways,Economy Class,2018-01-03,3.0,2.0,2.0,2.0,1.0,1.0,2.0,negative,entertainment
+E0423,R049426_s12,R049426,Spirit Airlines,Economy Class,2017-11-10,9.0,3.0,5.0,,,5.0,5.0,positive,none
+E0424,R038218_s07,R038218,South African Airways,Business Class,2012-09-11,2.0,4.0,1.0,1.0,4.0,,1.0,negative,staff
+E0425,R036363_s07,R036363,Royal Jordanian Airlines,Economy Class,2011-12-16,8.0,4.0,4.0,3.0,4.0,,4.0,positive,none
+E0426,R021450_s20,R021450,Austrian Airlines,Economy Class,2018-08-10,8.0,3.0,5.0,5.0,4.0,4.0,5.0,positive,none
+E0427,R025388_s08,R025388,China Eastern Airlines,Economy Class,2015-04-28,9.0,4.0,5.0,4.0,3.0,,5.0,positive,staff
+E0428,R005238_s03,R005238,Lufthansa,Economy Class,2016-08-08,10.0,4.0,5.0,5.0,4.0,5.0,5.0,positive,staff
 E0429,R014376_s00,R014376,United Airlines,Premium Economy,2015-12-22,2.0,2.0,2.0,2.0,,1.0,1.0,negative,food
 E0430,R059794_s10,R059794,Gulf Air,Economy Class,2018-01-01,8.0,4.0,4.0,4.0,2.0,4.0,5.0,positive,ground
 E0431,R039776_s02,R039776,EVA Air,Business Class,2017-12-25,9.0,5.0,5.0,4.0,5.0,4.0,5.0,positive,ground
-E0432,R049759_s08,R049759,Spirit Airlines,Economy Class,2017-02-28,10.0,3.0,5.0,,,5.0,5.0,positive,none
+E0432,R011767_s01,R011767,Southwest Airlines,Economy Class,2019-03-25,9.0,3.0,4.0,,,4.0,4.0,positive,none
 E0433,R005114_s05,R005114,Lufthansa,Premium Economy,2017-04-24,10.0,5.0,5.0,5.0,5.0,5.0,4.0,positive,value
-E0434,R035206_s06,R035206,Etihad Airways,Economy Class,2016-01-03,7.0,4.0,4.0,3.0,4.0,2.0,4.0,positive,none
+E0434,R025059_s02,R025059,China Eastern Airlines,Business Class,2019-05-07,7.0,4.0,5.0,5.0,1.0,3.0,4.0,positive,none
 E0435,R032837_s21,R032837,Qantas Airways,Business Class,2016-08-31,8.0,4.0,4.0,3.0,4.0,4.0,5.0,positive,ground
-E0436,R028313_s02,R028313,Egyptair,Economy Class,2010-12-31,9.0,,,,,,4.0,positive,seat
-E0437,R057990_s05,R057990,Alaska Airlines,Economy Class,2018-11-17,7.0,5.0,5.0,3.0,3.0,5.0,4.0,positive,entertainment
-E0438,R047007_s00,R047007,Cathay Pacific Airways,Economy Class,2016-10-24,9.0,4.0,5.0,4.0,5.0,4.0,4.0,positive,none
-E0439,R050207_s09,R050207,Spirit Airlines,Economy Class,2016-01-21,1.0,,,,,1.0,1.0,negative,none
-E0440,R044911_s07,R044911,Air Canada rouge,Economy Class,2016-07-25,2.0,1.0,3.0,1.0,1.0,1.0,2.0,negative,staff
-E0441,R035801_s06,R035801,Etihad Airways,Business Class,2013-10-15,9.0,5.0,5.0,5.0,4.0,,4.0,positive,entertainment
-E0442,R015750_s06,R015750,Jetblue Airways,Economy Class,2016-05-01,3.0,4.0,2.0,2.0,1.0,1.0,4.0,negative,staff
-E0443,R017637_s02,R017637,Air Canada,Premium Economy,2018-11-09,3.0,1.0,3.0,3.0,4.0,3.0,2.0,negative,none
+E0436,R026237_s01,R026237,China Southern Airlines,Business Class,2017-08-18,9.0,5.0,5.0,5.0,,5.0,5.0,positive,seat
+E0437,R014119_s06,R014119,United Airlines,Business Class,2016-07-27,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
+E0438,R022618_s07,R022618,British Airways,Business Class,2017-06-16,8.0,4.0,5.0,4.0,,4.0,4.0,positive,none
+E0439,R049258_s05,R049258,Spirit Airlines,Economy Class,2018-04-15,1.0,3.0,3.0,,,1.0,5.0,negative,none
+E0440,R022111_s02,R022111,British Airways,Economy Class,2018-09-11,1.0,2.0,2.0,,,1.0,1.0,negative,staff
+E0441,R040540_s07,R040540,Singapore Airlines,Economy Class,2019-02-12,8.0,4.0,4.0,4.0,5.0,5.0,4.0,positive,entertainment
+E0442,R044397_s08,R044397,Air Europa,Economy Class,2017-11-19,2.0,3.0,1.0,,,3.0,3.0,negative,staff
+E0443,R055060_s19,R055060,Frontier Airlines,Economy Class,2018-07-11,1.0,1.0,2.0,1.0,,1.0,1.0,negative,none
 E0444,R046314_s06,R046314,Air China,Economy Class,2015-11-24,2.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0445,R035242_s19,R035242,Etihad Airways,Economy Class,2015-11-19,2.0,2.0,1.0,1.0,3.0,1.0,2.0,negative,seat
-E0446,R044488_s02,R044488,Air Europa,Economy Class,2016-01-22,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,staff
+E0445,R042501_s05,R042501,Swiss Intl Air Lines,Business Class,2015-10-04,4.0,3.0,4.0,3.0,1.0,3.0,3.0,negative,seat
+E0446,R033726_s03,R033726,Air France,Economy Class,2018-10-01,3.0,3.0,5.0,5.0,2.0,1.0,1.0,negative,staff
 E0447,R007719_s01,R007719,American Airlines,Economy Class,2018-11-25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
 E0448,R056877_s10,R056877,IndiGo,Economy Class,2016-03-22,9.0,4.0,5.0,2.0,,5.0,5.0,positive,food
 E0449,R003528_s18,R003528,Emirates,Economy Class,2017-01-07,1.0,1.0,1.0,1.0,2.0,1.0,1.0,negative,food
 E0450,R015034_s04,R015034,United Airlines,Economy Class,2014-09-06,3.0,1.0,2.0,1.0,1.0,,1.0,negative,food
-E0451,R022342_s10,R022342,British Airways,Business Class,2018-01-14,1.0,1.0,1.0,1.0,,1.0,1.0,negative,staff
-E0452,R051548_s03,R051548,Vueling Airlines,Economy Class,2019-02-27,1.0,,,,,,2.0,negative,none
-E0453,R024173_s06,R024173,British Airways,Economy Class,2015-01-19,8.0,3.0,5.0,4.0,3.0,,3.0,positive,none
-E0454,R029736_s08,R029736,ANA All Nippon Airways,Economy Class,2017-11-16,10.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,food
+E0451,R008452_s05,R008452,American Airlines,Premium Economy,2017-11-25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
+E0452,R022945_s01,R022945,British Airways,Premium Economy,2016-12-17,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0453,R042938_s06,R042938,Thai Airways,Economy Class,2018-09-01,7.0,2.0,4.0,4.0,3.0,3.0,5.0,positive,none
+E0454,R042840_s05,R042840,Swiss Intl Air Lines,Business Class,2012-10-30,7.0,4.0,4.0,3.0,4.0,,4.0,positive,food
 E0455,R051861_s08,R051861,Vueling Airlines,Economy Class,2017-03-03,9.0,4.0,5.0,4.0,,3.0,5.0,positive,ground
 E0456,R046153_s05,R046153,Air China,Business Class,2017-01-27,2.0,2.0,1.0,2.0,1.0,3.0,2.0,negative,food
-E0457,R013897_s09,R013897,United Airlines,Premium Economy,2017-03-30,2.0,1.0,1.0,1.0,4.0,3.0,1.0,negative,none
+E0457,R053608_s05,R053608,flydubai,Economy Class,2017-03-27,2.0,2.0,3.0,2.0,1.0,1.0,2.0,negative,none
 E0458,R034678_s04,R034678,Etihad Airways,Economy Class,2018-11-08,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0459,R005929_s03,R005929,Lufthansa,Business Class,2014-04-19,8.0,5.0,5.0,3.0,4.0,,5.0,positive,none
-E0460,R030725_s04,R030725,easyJet,Economy Class,2015-08-27,8.0,1.0,4.0,,,4.0,2.0,positive,none
-E0461,R047114_s02,R047114,Cathay Pacific Airways,Economy Class,2016-04-02,9.0,4.0,4.0,4.0,5.0,5.0,4.0,positive,staff
-E0462,R011648_s08,R011648,Delta Air Lines,Economy Class,2014-01-14,7.0,3.0,4.0,3.0,1.0,,2.0,positive,staff
-E0463,R038734_s12,R038734,TAP Portugal,Economy Class,2018-06-06,1.0,1.0,1.0,,,1.0,1.0,negative,staff
-E0464,R052849_s06,R052849,Sunwing Airlines,Economy Class,2014-02-26,1.0,2.0,2.0,3.0,2.0,,1.0,negative,none
-E0465,R012772_s03,R012772,United Airlines,Economy Class,2019-03-12,9.0,5.0,5.0,5.0,,5.0,4.0,positive,none
-E0466,R024588_s06,R024588,British Airways,Business Class,2014-05-20,10.0,5.0,5.0,5.0,1.0,,5.0,positive,staff
-E0467,R004080_s04,R004080,Emirates,Economy Class,2015-06-13,8.0,4.0,5.0,4.0,5.0,4.0,5.0,positive,staff
-E0468,R000742_s08,R000742,Turkish Airlines,Business Class,2016-02-04,9.0,4.0,4.0,4.0,3.0,4.0,5.0,positive,none
-E0469,R060123_s08,R060123,Kuwait Airways,Economy Class,2016-03-18,1.0,1.0,1.0,1.0,1.0,2.0,2.0,negative,seat
-E0470,R016896_s06,R016896,Aeroflot Russian Airlines,Economy Class,2014-06-04,8.0,5.0,4.0,4.0,,,5.0,positive,none
-E0471,R015799_s05,R015799,Jetblue Airways,Economy Class,2015-10-26,9.0,5.0,5.0,3.0,,5.0,4.0,positive,none
-E0472,R026063_s01,R026063,China Southern Airlines,First Class,2018-02-12,8.0,5.0,5.0,4.0,4.0,5.0,5.0,positive,staff
-E0473,R037931_s00,R037931,Ryanair,Economy Class,2013-09-04,1.0,2.0,1.0,,,,4.0,negative,none
-E0474,R011362_s01,R011362,Delta Air Lines,Economy Class,2015-04-19,8.0,4.0,4.0,4.0,5.0,,4.0,positive,staff
+E0459,R033590_s03,R033590,Qantas Airways,Economy Class,2013-11-10,8.0,4.0,4.0,4.0,3.0,,4.0,positive,none
+E0460,R039801_s06,R039801,EVA Air,Business Class,2017-08-22,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
+E0461,R030778_s02,R030778,easyJet,Economy Class,2015-05-25,8.0,3.0,4.0,2.0,,,4.0,positive,staff
+E0462,R021925_s01,R021925,British Airways,Economy Class,2019-04-23,9.0,3.0,5.0,4.0,2.0,5.0,5.0,positive,staff
+E0463,R029583_s01,R029583,Iberia,Economy Class,2013-05-01,2.0,1.0,2.0,3.0,1.0,,1.0,negative,staff
+E0464,R007686_s07,R007686,American Airlines,Economy Class,2018-12-16,4.0,3.0,4.0,2.0,3.0,1.0,1.0,negative,none
+E0465,R004057_s11,R004057,Emirates,Economy Class,2015-07-03,8.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
+E0466,R057293_s12,R057293,Aer Lingus,Business Class,2015-09-14,7.0,5.0,4.0,3.0,4.0,4.0,4.0,positive,staff
+E0467,R019262_s02,R019262,Air New Zealand,Business Class,2014-02-18,7.0,5.0,5.0,4.0,3.0,,5.0,positive,staff
+E0468,R051351_s11,R051351,Spirit Airlines,,2014-01-13,7.0,4.0,5.0,,,,4.0,positive,none
+E0469,R014606_s03,R014606,United Airlines,Economy Class,2015-08-15,2.0,1.0,2.0,3.0,1.0,3.0,1.0,negative,seat
+E0470,R020451_s03,R020451,AirAsia,Economy Class,2014-02-28,7.0,4.0,5.0,4.0,1.0,,2.0,positive,none
+E0471,R006407_s01,R006407,KLM Royal Dutch Airlines,Economy Class,2017-03-23,8.0,4.0,5.0,3.0,3.0,3.0,5.0,positive,none
+E0472,R016285_s02,R016285,Aegean Airlines,Economy Class,2016-04-25,10.0,5.0,5.0,5.0,,5.0,5.0,positive,staff
+E0473,R023096_s06,R023096,British Airways,Economy Class,2016-09-30,2.0,3.0,1.0,1.0,2.0,3.0,2.0,negative,none
+E0474,R032191_s07,R032191,LOT Polish Airlines,Business Class,2014-01-22,10.0,5.0,5.0,5.0,5.0,,5.0,positive,staff
 E0475,R061064_s05,R061064,Ukraine International,Economy Class,2015-08-28,8.0,4.0,5.0,4.0,,4.0,5.0,positive,value
-E0476,R015646_s05,R015646,Jetblue Airways,Economy Class,2017-08-01,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0477,R031748_s03,R031748,LATAM Airlines,Economy Class,2018-07-29,1.0,3.0,2.0,1.0,,1.0,1.0,negative,none
-E0478,R013652_s03,R013652,United Airlines,Economy Class,2017-10-14,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0479,R057163_s10,R057163,Aer Lingus,Economy Class,2017-01-07,2.0,3.0,2.0,2.0,,1.0,1.0,negative,staff
-E0480,R007218_s05,R007218,Virgin America,Economy Class,2013-05-06,2.0,4.0,2.0,3.0,4.0,,3.0,negative,staff
-E0481,R052627_s01,R052627,Sunwing Airlines,Premium Economy,2016-01-31,3.0,3.0,2.0,1.0,2.0,1.0,1.0,negative,staff
-E0482,R004181_s16,R004181,Emirates,Business Class,2015-02-11,7.0,4.0,4.0,5.0,4.0,,3.0,positive,staff
-E0483,R045705_s02,R045705,Air Canada rouge,Economy Class,2014-01-29,9.0,4.0,4.0,4.0,4.0,,5.0,positive,seat
-E0484,R012772_s05,R012772,United Airlines,Economy Class,2019-03-12,9.0,5.0,5.0,5.0,,5.0,4.0,positive,none
-E0485,R048176_s04,R048176,Wizz Air,Economy Class,2015-12-01,1.0,1.0,1.0,,1.0,1.0,1.0,negative,seat
+E0476,R053232_s04,R053232,Bangkok Airways,Economy Class,2017-03-11,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0477,R022093_s06,R022093,British Airways,Premium Economy,2018-10-13,4.0,1.0,5.0,3.0,2.0,1.0,2.0,negative,none
+E0478,R021115_s08,R021115,Avianca,Premium Economy,2018-11-11,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0479,R044345_s02,R044345,Air Europa,Economy Class,2019-05-10,1.0,1.0,1.0,,,1.0,2.0,negative,staff
+E0480,R003108_s01,R003108,Emirates,Economy Class,2018-08-11,4.0,3.0,2.0,2.0,2.0,4.0,2.0,negative,staff
+E0481,R048352_s05,R048352,Wizz Air,Economy Class,2013-09-02,1.0,1.0,1.0,,1.0,,1.0,negative,staff
+E0482,R006806_s07,R006806,KLM Royal Dutch Airlines,Premium Economy,2014-08-20,7.0,4.0,4.0,4.0,1.0,,3.0,positive,staff
+E0483,R046389_s03,R046389,Air China,Economy Class,2015-01-14,9.0,4.0,5.0,3.0,3.0,,5.0,positive,seat
+E0484,R028438_s30,R028438,Finnair,Economy Class,2018-05-12,7.0,4.0,3.0,3.0,3.0,1.0,4.0,positive,none
+E0485,R046168_s08,R046168,Air China,Economy Class,2016-12-13,2.0,1.0,1.0,3.0,1.0,1.0,1.0,negative,seat
 E0486,R005699_s09,R005699,Lufthansa,Economy Class,2014-11-11,8.0,4.0,4.0,4.0,3.0,,5.0,positive,seat
 E0487,R011575_s02,R011575,Delta Air Lines,Economy Class,2014-05-12,10.0,5.0,5.0,5.0,5.0,,5.0,positive,seat
 E0488,R020052_s03,R020052,AirAsia,Economy Class,2019-01-29,7.0,2.0,2.0,1.0,,3.0,4.0,positive,value
 E0489,R016236_s02,R016236,Aegean Airlines,,2016-11-25,10.0,,,,,,,positive,food
-E0490,R023880_s01,R023880,British Airways,Economy Class,2015-07-14,8.0,3.0,5.0,4.0,3.0,4.0,5.0,positive,none
-E0491,R056859_s03,R056859,IndiGo,Economy Class,2016-12-20,1.0,3.0,3.0,3.0,,1.0,1.0,negative,none
-E0492,R032325_s08,R032325,Qantas Airways,Business Class,2019-04-16,3.0,2.0,5.0,1.0,2.0,4.0,2.0,negative,staff
-E0493,R032992_s06,R032992,Qantas Airways,Business Class,2015-12-11,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
-E0494,R005899_s01,R005899,Lufthansa,Business Class,2014-05-10,8.0,5.0,4.0,5.0,4.0,,3.0,positive,staff
-E0495,R059183_s21,R059183,Norwegian,Economy Class,2015-10-23,10.0,4.0,5.0,,5.0,5.0,5.0,positive,none
-E0496,R025731_s03,R025731,China Southern Airlines,Business Class,2019-01-16,8.0,5.0,5.0,4.0,5.0,5.0,4.0,positive,food
-E0497,R002804_s08,R002804,Qatar Airways,Economy Class,2014-01-23,8.0,4.0,5.0,3.0,4.0,,4.0,positive,none
-E0498,R017327_s07,R017327,Aeromexico,Economy Class,2015-11-21,9.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,none
-E0499,R001433_s01,R001433,Turkish Airlines,Economy Class,2013-10-23,4.0,1.0,5.0,1.0,3.0,,2.0,negative,none
-E0500,R055345_s01,R055345,Frontier Airlines,Economy Class,2018-01-18,1.0,1.0,2.0,,,1.0,1.0,negative,none
-E0501,R045670_s05,R045670,Air Canada rouge,Economy Class,2014-04-01,1.0,1.0,1.0,1.0,1.0,,1.0,negative,entertainment
-E0502,R046302_s02,R046302,Air China,Business Class,2015-12-05,8.0,5.0,5.0,5.0,2.0,4.0,4.0,positive,food
-E0503,R046853_s04,R046853,Cathay Pacific Airways,Business Class,2017-10-04,10.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,none
-E0504,R008536_s10,R008536,American Airlines,First Class,2017-10-05,2.0,3.0,3.0,4.0,,3.0,3.0,negative,none
-E0505,R009024_s03,R009024,American Airlines,Economy Class,2016-08-08,3.0,5.0,1.0,4.0,3.0,4.0,1.0,negative,ground
-E0506,R056281_s26,R056281,Icelandair,Economy Class,2018-07-24,1.0,2.0,1.0,2.0,2.0,1.0,1.0,negative,none
-E0507,R035065_s35,R035065,Etihad Airways,Economy Class,2016-10-30,2.0,1.0,1.0,1.0,2.0,1.0,2.0,negative,entertainment
-E0508,R033926_s01,R033926,Air France,Economy Class,2017-06-20,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0509,R016450_s15,R016450,Aegean Airlines,Economy Class,2013-10-09,3.0,4.0,2.0,4.0,4.0,,1.0,negative,none
-E0510,R035379_s10,R035379,Etihad Airways,Economy Class,2015-06-28,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0490,R011408_s01,R011408,Delta Air Lines,Economy Class,2015-01-26,9.0,3.0,4.0,,,,4.0,positive,none
+E0491,R042866_s02,R042866,Swiss Intl Air Lines,Economy Class,2012-08-23,2.0,1.0,2.0,3.0,3.0,,3.0,negative,none
+E0492,R027218_s03,R027218,China Southern Airlines,Economy Class,2014-01-10,3.0,4.0,2.0,2.0,4.0,,3.0,negative,staff
+E0493,R000915_s05,R000915,Turkish Airlines,Business Class,2015-10-17,4.0,2.0,2.0,2.0,2.0,2.0,3.0,negative,ground
+E0494,R020142_s03,R020142,AirAsia,Economy Class,2018-01-28,7.0,3.0,3.0,4.0,,4.0,5.0,positive,staff
+E0495,R061121_s00,R061121,Ukraine International,Economy Class,2013-05-22,9.0,5.0,4.0,4.0,3.0,,4.0,positive,none
+E0496,R027022_s04,R027022,China Southern Airlines,Business Class,2015-06-01,7.0,5.0,5.0,3.0,4.0,,5.0,positive,food
+E0497,R034338_s06,R034338,Air France,Business Class,2014-06-20,8.0,4.0,4.0,4.0,4.0,,4.0,positive,none
+E0498,R029004_s02,R029004,Finnair,Business Class,2011-06-15,8.0,,,,,,4.0,positive,none
+E0499,R017101_s13,R017101,Aeromexico,Economy Class,2019-01-22,2.0,2.0,3.0,,,1.0,3.0,negative,none
+E0500,R055198_s04,R055198,Frontier Airlines,Economy Class,2018-05-27,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0501,R018602_s06,R018602,Air Canada,Economy Class,2014-06-05,3.0,2.0,3.0,1.0,1.0,,2.0,negative,entertainment
+E0502,R042184_s08,R042184,Swiss Intl Air Lines,Business Class,2019-01-07,9.0,4.0,4.0,5.0,4.0,5.0,4.0,positive,food
+E0503,R042158_s13,R042158,Swiss Intl Air Lines,Business Class,2019-05-03,10.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,none
+E0504,R004375_s05,R004375,Emirates,Business Class,2014-07-29,4.0,3.0,2.0,4.0,4.0,,3.0,negative,none
+E0505,R032491_s02,R032491,Qantas Airways,Business Class,2018-06-25,4.0,4.0,4.0,4.0,3.0,1.0,2.0,negative,ground
+E0506,R008703_s04,R008703,American Airlines,Economy Class,2017-05-19,2.0,3.0,3.0,1.0,,2.0,1.0,negative,none
+E0507,R012187_s04,R012187,Southwest Airlines,Economy Class,2016-02-12,2.0,2.0,2.0,3.0,1.0,4.0,2.0,negative,entertainment
+E0508,R039965_s00,R039965,EVA Air,Business Class,2014-12-18,10.0,5.0,5.0,5.0,4.0,,5.0,positive,none
+E0509,R056275_s05,R056275,Icelandair,Economy Class,2018-08-13,1.0,3.0,2.0,,3.0,1.0,1.0,negative,none
+E0510,R000107_s06,R000107,Turkish Airlines,Economy Class,2019-01-07,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
 E0511,R018252_s01,R018252,Air Canada,Business Class,2015-10-18,7.0,3.0,4.0,3.0,3.0,5.0,2.0,positive,ground
-E0512,R014606_s03,R014606,United Airlines,Economy Class,2015-08-15,2.0,1.0,2.0,3.0,1.0,3.0,1.0,negative,seat
+E0512,R032771_s07,R032771,Qantas Airways,Economy Class,2017-01-03,2.0,2.0,3.0,1.0,3.0,2.0,1.0,negative,seat
 E0513,R060188_s03,R060188,Kuwait Airways,Economy Class,2013-12-02,9.0,4.0,5.0,5.0,1.0,,5.0,positive,value
 E0514,R028948_s03,R028948,Finnair,Business Class,2012-02-08,7.0,3.0,5.0,4.0,2.0,,5.0,positive,seat
 E0515,R052264_s00,R052264,Vueling Airlines,Economy Class,2014-08-08,10.0,4.0,4.0,4.0,,,5.0,positive,value
-E0516,R027426_s02,R027426,Copa Airlines,Economy Class,2017-11-13,3.0,1.0,2.0,1.0,1.0,2.0,1.0,negative,ground
-E0517,R018215_s08,R018215,Air Canada,Business Class,2015-12-22,8.0,4.0,5.0,3.0,4.0,4.0,3.0,positive,entertainment
-E0518,R033478_s06,R033478,Qantas Airways,Economy Class,2014-02-17,8.0,4.0,3.0,4.0,4.0,,4.0,positive,food
-E0519,R059745_s01,R059745,Gulf Air,Economy Class,2019-04-15,2.0,,,,,1.0,1.0,negative,none
-E0520,R036254_s00,R036254,Royal Jordanian Airlines,Economy Class,2015-06-25,9.0,5.0,5.0,5.0,,4.0,4.0,positive,seat
+E0516,R051937_s03,R051937,Vueling Airlines,Economy Class,2016-07-29,1.0,1.0,2.0,1.0,,1.0,1.0,negative,ground
+E0517,R004921_s07,R004921,Lufthansa,Economy Class,2018-04-04,7.0,3.0,5.0,4.0,2.0,3.0,3.0,positive,entertainment
+E0518,R033475_s06,R033475,Qantas Airways,Economy Class,2014-02-19,8.0,3.0,5.0,4.0,3.0,,4.0,positive,food
+E0519,R013003_s12,R013003,United Airlines,Economy Class,2018-11-02,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0520,R058329_s01,R058329,Alaska Airlines,Economy Class,2013-09-15,9.0,4.0,5.0,4.0,,,5.0,positive,seat
 E0521,R037036_s00,R037036,Ryanair,Economy Class,2016-09-14,10.0,3.0,5.0,3.0,,3.0,5.0,positive,value
 E0522,R038652_s04,R038652,TAP Portugal,Economy Class,2018-11-28,1.0,3.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0523,R008441_s23,R008441,American Airlines,Economy Class,2017-12-02,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0523,R050446_s06,R050446,Spirit Airlines,Economy Class,2015-08-03,4.0,2.0,2.0,1.0,1.0,3.0,2.0,negative,none
 E0524,R037420_s10,R037420,Ryanair,Economy Class,2015-04-10,10.0,5.0,5.0,,,,5.0,positive,value
-E0525,R006405_s22,R006405,KLM Royal Dutch Airlines,Business Class,2017-03-25,8.0,4.0,5.0,4.0,4.0,4.0,4.0,positive,none
-E0526,R044508_s02,R044508,Air Europa,Business Class,2015-10-10,2.0,1.0,4.0,1.0,,4.0,1.0,negative,seat
-E0527,R049616_s01,R049616,Spirit Airlines,Economy Class,2017-06-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0528,R014159_s05,R014159,United Airlines,Economy Class,2016-06-21,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
+E0525,R023447_s21,R023447,British Airways,First Class,2016-02-02,8.0,3.0,4.0,4.0,3.0,3.0,3.0,positive,none
+E0526,R044948_s06,R044948,Air Canada rouge,Economy Class,2016-03-01,4.0,1.0,4.0,1.0,3.0,3.0,2.0,negative,seat
+E0527,R049620_s03,R049620,Spirit Airlines,Economy Class,2017-06-17,1.0,1.0,1.0,,,1.0,1.0,negative,value
+E0528,R046291_s06,R046291,Air China,Economy Class,2016-01-01,9.0,3.0,4.0,3.0,4.0,4.0,5.0,positive,entertainment
 E0529,R019127_s09,R019127,Air New Zealand,Economy Class,2015-03-17,1.0,1.0,1.0,1.0,1.0,,1.0,negative,food
-E0530,R020882_s08,R020882,Asiana Airlines,Business Class,2013-09-29,10.0,4.0,5.0,5.0,5.0,,5.0,positive,staff
-E0531,R044339_s02,R044339,Air India,Business Class,2011-12-23,4.0,3.0,3.0,3.0,2.0,,3.0,negative,seat
-E0532,R023151_s10,R023151,British Airways,Economy Class,2016-08-31,8.0,2.0,5.0,4.0,3.0,5.0,5.0,positive,staff
+E0530,R007134_s04,R007134,Virgin America,Economy Class,2015-03-19,10.0,4.0,4.0,4.0,4.0,,5.0,positive,staff
+E0531,R046350_s13,R046350,Air China,First Class,2015-07-31,1.0,5.0,1.0,3.0,3.0,1.0,1.0,negative,seat
+E0532,R033461_s04,R033461,Qantas Airways,Business Class,2014-03-10,7.0,4.0,5.0,1.0,3.0,,1.0,positive,staff
 E0533,R057063_s11,R057063,Aer Lingus,Economy Class,2018-09-23,1.0,3.0,1.0,1.0,,1.0,1.0,negative,food
 E0534,R041465_s01,R041465,Singapore Airlines,Business Class,2013-10-18,10.0,5.0,5.0,4.0,5.0,,5.0,positive,ground
-E0535,R023298_s01,R023298,British Airways,Economy Class,2016-05-14,1.0,3.0,2.0,1.0,1.0,2.0,1.0,negative,value
-E0536,R034321_s02,R034321,Air France,Business Class,2014-08-02,7.0,3.0,4.0,4.0,3.0,,3.0,positive,none
+E0535,R023298_s14,R023298,British Airways,Economy Class,2016-05-14,1.0,3.0,2.0,1.0,1.0,2.0,1.0,negative,value
+E0536,R026848_s05,R026848,China Southern Airlines,Business Class,2016-01-09,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
 E0537,R046545_s05,R046545,Air China,Economy Class,2012-07-24,7.0,5.0,4.0,2.0,3.0,,4.0,positive,food
-E0538,R026323_s12,R026323,China Southern Airlines,Premium Economy,2017-05-17,8.0,4.0,4.0,3.0,,5.0,5.0,positive,staff
-E0539,R043792_s04,R043792,Air India,Economy Class,2018-02-04,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0540,R016192_s09,R016192,Aegean Airlines,Business Class,2017-07-10,9.0,4.0,5.0,5.0,,3.0,4.0,positive,none
-E0541,R039402_s03,R039402,TAP Portugal,Economy Class,2012-07-02,7.0,4.0,3.0,2.0,4.0,,4.0,positive,entertainment
+E0538,R054776_s20,R054776,Frontier Airlines,Economy Class,2018-12-22,10.0,5.0,5.0,5.0,,5.0,5.0,positive,staff
+E0539,R059599_s09,R059599,Norwegian,Economy Class,2013-09-16,3.0,3.0,1.0,1.0,1.0,,4.0,negative,entertainment
+E0540,R024281_s00,R024281,British Airways,Business Class,2014-11-12,9.0,5.0,5.0,4.0,4.0,,5.0,positive,none
+E0541,R043750_s12,R043750,Air India,Economy Class,2018-07-30,9.0,5.0,4.0,5.0,,5.0,5.0,positive,entertainment
 E0542,R040812_s02,R040812,Singapore Airlines,Economy Class,2017-04-21,10.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,ground
-E0543,R015704_s02,R015704,Jetblue Airways,Economy Class,2017-01-25,8.0,4.0,5.0,,1.0,4.0,4.0,positive,entertainment
-E0544,R038395_s00,R038395,Saudi Arabian Airlines,Business Class,2018-03-15,8.0,4.0,4.0,4.0,2.0,4.0,5.0,positive,none
-E0545,R020982_s10,R020982,Asiana Airlines,Economy Class,2012-09-09,7.0,2.0,4.0,5.0,3.0,,4.0,positive,staff
-E0546,R055423_s02,R055423,Frontier Airlines,Premium Economy,2017-10-25,1.0,1.0,3.0,1.0,1.0,1.0,1.0,negative,none
-E0547,R011950_s02,R011950,Southwest Airlines,Economy Class,2018-05-08,1.0,5.0,5.0,5.0,,1.0,1.0,negative,seat
+E0543,R007194_s03,R007194,Virgin America,Economy Class,2013-10-13,10.0,5.0,5.0,4.0,5.0,,5.0,positive,entertainment
+E0544,R040449_s03,R040449,Royal Air Maroc,Business Class,2011-08-02,8.0,,,,,,4.0,positive,none
+E0545,R037434_s06,R037434,Ryanair,Economy Class,2015-03-17,10.0,4.0,4.0,4.0,,,5.0,positive,staff
+E0546,R024033_s05,R024033,British Airways,Economy Class,2015-04-23,1.0,4.0,3.0,3.0,1.0,,1.0,negative,none
+E0547,R022114_s06,R022114,British Airways,Economy Class,2018-09-08,3.0,2.0,3.0,1.0,,2.0,2.0,negative,seat
 E0548,R004699_s04,R004699,Lufthansa,Economy Class,2019-03-06,1.0,1.0,2.0,1.0,,2.0,1.0,negative,value
-E0549,R038386_s08,R038386,Saudi Arabian Airlines,Economy Class,2018-07-04,1.0,4.0,1.0,3.0,4.0,1.0,1.0,negative,staff
+E0549,R013148_s30,R013148,United Airlines,Economy Class,2018-08-20,1.0,1.0,1.0,,1.0,1.0,1.0,negative,staff
 E0550,R002403_s02,R002403,Qatar Airways,Economy Class,2015-09-01,8.0,4.0,3.0,4.0,4.0,3.0,4.0,positive,food
-E0551,R059757_s01,R059757,Gulf Air,Business Class,2019-01-28,10.0,5.0,5.0,5.0,,5.0,5.0,positive,staff
-E0552,R027079_s02,R027079,China Southern Airlines,Economy Class,2015-01-14,10.0,5.0,5.0,4.0,5.0,,5.0,positive,none
-E0553,R046172_s15,R046172,Air China,Economy Class,2016-11-30,3.0,2.0,2.0,2.0,1.0,1.0,1.0,negative,entertainment
-E0554,R028379_s09,R028379,Finnair,Economy Class,2019-01-30,7.0,3.0,2.0,,,3.0,3.0,positive,seat
-E0555,R046229_s06,R046229,Air China,Economy Class,2016-04-18,1.0,1.0,1.0,1.0,2.0,1.0,1.0,negative,none
-E0556,R018210_s04,R018210,Air Canada,Economy Class,2016-01-02,3.0,1.0,1.0,3.0,,5.0,2.0,negative,none
-E0557,R027113_s07,R027113,China Southern Airlines,Business Class,2014-09-17,8.0,4.0,4.0,3.0,3.0,,4.0,positive,none
+E0551,R042415_s04,R042415,Swiss Intl Air Lines,Business Class,2016-09-24,9.0,3.0,5.0,5.0,,5.0,5.0,positive,staff
+E0552,R019146_s14,R019146,Air New Zealand,Premium Economy,2015-01-21,10.0,5.0,5.0,4.0,5.0,,4.0,positive,none
+E0553,R022623_s05,R022623,British Airways,Economy Class,2017-06-13,1.0,1.0,2.0,1.0,1.0,2.0,2.0,negative,entertainment
+E0554,R040905_s02,R040905,Singapore Airlines,,2016-10-17,9.0,,,,,,,positive,seat
+E0555,R014639_s10,R014639,United Airlines,Economy Class,2015-07-26,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
+E0556,R019270_s11,R019270,Air New Zealand,Economy Class,2014-01-17,4.0,4.0,2.0,1.0,1.0,,3.0,negative,none
+E0557,R059422_s04,R059422,Norwegian,Economy Class,2014-09-14,8.0,5.0,4.0,,4.0,,5.0,positive,none
 E0558,R031005_s00,R031005,easyJet,Economy Class,2013-11-14,9.0,3.0,4.0,4.0,,,5.0,positive,ground
 E0559,R002794_s07,R002794,Qatar Airways,Economy Class,2014-02-07,9.0,3.0,4.0,4.0,4.0,,5.0,positive,seat
 E0560,R045316_s03,R045316,Air Canada rouge,Premium Economy,2014-12-01,7.0,2.0,4.0,4.0,3.0,,4.0,positive,value
-E0561,R035807_s05,R035807,Etihad Airways,Business Class,2013-10-03,10.0,4.0,5.0,5.0,4.0,,5.0,positive,entertainment
-E0562,R017253_s04,R017253,Aeromexico,Economy Class,2016-01-18,3.0,3.0,4.0,2.0,,1.0,2.0,negative,none
-E0563,R034995_s08,R034995,Etihad Airways,Economy Class,2017-03-13,3.0,1.0,4.0,1.0,3.0,4.0,3.0,negative,value
-E0564,R009823_s09,R009823,American Airlines,Economy Class,2014-12-18,1.0,2.0,1.0,1.0,1.0,,3.0,negative,entertainment
+E0561,R006660_s03,R006660,KLM Royal Dutch Airlines,Economy Class,2015-09-04,9.0,5.0,5.0,5.0,4.0,1.0,3.0,positive,entertainment
+E0562,R036246_s06,R036246,Royal Jordanian Airlines,Economy Class,2015-09-18,2.0,3.0,2.0,1.0,2.0,1.0,2.0,negative,none
+E0563,R060647_s13,R060647,WOW air,Economy Class,2017-05-07,1.0,3.0,4.0,2.0,,1.0,2.0,negative,value
+E0564,R044766_s09,R044766,Air Canada rouge,Economy Class,2018-02-12,3.0,2.0,1.0,1.0,1.0,2.0,2.0,negative,entertainment
 E0565,R058611_s02,R058611,Norwegian,Economy Class,2019-02-13,10.0,4.0,4.0,,,5.0,5.0,positive,ground
-E0566,R043266_s12,R043266,Thai Airways,Economy Class,2015-10-05,7.0,4.0,3.0,3.0,3.0,4.0,4.0,positive,none
+E0566,R018413_s03,R018413,Air Canada,Economy Class,2015-03-23,7.0,3.0,4.0,4.0,4.0,,3.0,positive,none
 E0567,R003624_s04,R003624,Emirates,Business Class,2016-09-19,2.0,4.0,1.0,1.0,5.0,5.0,2.0,negative,food
 E0568,R002176_s01,R002176,Qatar Airways,Economy Class,2016-05-17,8.0,4.0,4.0,3.0,5.0,3.0,5.0,positive,value
 E0569,R028336_s02,R028336,Egyptair,Economy Class,2010-08-08,7.0,,,,,,4.0,positive,value
-E0570,R034712_s02,R034712,Etihad Airways,Business Class,2018-09-06,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
+E0570,R008240_s15,R008240,American Airlines,Economy Class,2018-04-10,2.0,3.0,2.0,3.0,5.0,1.0,1.0,negative,none
 E0571,R000402_s05,R000402,Turkish Airlines,Business Class,2017-10-30,9.0,5.0,5.0,5.0,3.0,4.0,5.0,positive,food
 E0572,R002694_s05,R002694,Qatar Airways,Business Class,2014-07-03,10.0,5.0,5.0,5.0,5.0,,5.0,positive,food
-E0573,R014233_s04,R014233,United Airlines,Economy Class,2016-04-03,1.0,1.0,1.0,1.0,,1.0,1.0,negative,ground
+E0573,R025931_s06,R025931,China Southern Airlines,Economy Class,2018-05-31,3.0,1.0,1.0,1.0,,5.0,3.0,negative,ground
 E0574,R015227_s05,R015227,United Airlines,Economy Class,2014-05-19,8.0,3.0,4.0,4.0,5.0,,5.0,positive,seat
 E0575,R034542_s03,R034542,Air France,Economy Class,2013-07-22,8.0,4.0,4.0,3.0,3.0,,4.0,positive,value
-E0576,R032860_s05,R032860,Qantas Airways,Economy Class,2016-07-05,1.0,1.0,1.0,1.0,3.0,1.0,2.0,negative,none
-E0577,R028762_s01,R028762,Finnair,Business Class,2014-01-08,10.0,3.0,5.0,4.0,2.0,,4.0,positive,food
-E0578,R041491_s03,R041491,Singapore Airlines,Economy Class,2013-09-15,10.0,4.0,5.0,5.0,5.0,,4.0,positive,none
-E0579,R055993_s00,R055993,Frontier Airlines,Economy Class,2014-07-20,9.0,4.0,5.0,4.0,4.0,,5.0,positive,none
+E0576,R015247_s05,R015247,United Airlines,First Class,2014-05-10,1.0,1.0,1.0,1.0,1.0,,2.0,negative,none
+E0577,R016871_s03,R016871,Aeroflot Russian Airlines,Economy Class,2015-01-11,9.0,5.0,4.0,4.0,5.0,,5.0,positive,food
+E0578,R011355_s01,R011355,Delta Air Lines,Economy Class,2015-05-02,8.0,4.0,4.0,4.0,,,3.0,positive,none
+E0579,R029418_s04,R029418,Iberia,Business Class,2014-08-14,8.0,5.0,5.0,3.0,,,5.0,positive,none
 E0580,R041733_s08,R041733,SAS Scandinavian,Economy Class,2016-11-05,2.0,2.0,3.0,,,4.0,1.0,negative,food
 E0581,R033271_s10,R033271,Qantas Airways,Business Class,2014-11-06,7.0,4.0,3.0,3.0,5.0,,4.0,positive,value
-E0582,R035141_s06,R035141,Etihad Airways,Business Class,2016-06-01,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,seat
-E0583,R017109_s05,R017109,Aeromexico,Economy Class,2018-12-22,1.0,2.0,2.0,1.0,1.0,1.0,1.0,negative,value
-E0584,R052366_s01,R052366,Vueling Airlines,Economy Class,2013-04-02,2.0,2.0,3.0,,,,2.0,negative,ground
+E0582,R059717_s02,R059717,Thai Smile Airways,Economy Class,2017-03-04,8.0,4.0,4.0,4.0,,4.0,4.0,positive,seat
+E0583,R017110_s16,R017110,Aeromexico,Economy Class,2018-12-15,1.0,1.0,1.0,1.0,1.0,1.0,2.0,negative,value
+E0584,R054855_s09,R054855,Frontier Airlines,Economy Class,2018-10-20,1.0,1.0,1.0,,,1.0,1.0,negative,ground
 E0585,R001337_s12,R001337,Turkish Airlines,Economy Class,2014-01-25,2.0,2.0,2.0,4.0,1.0,,3.0,negative,value
-E0586,R046288_s07,R046288,Air China,Economy Class,2016-01-04,9.0,3.0,4.0,3.0,5.0,3.0,5.0,positive,none
-E0587,R023859_s03,R023859,British Airways,Business Class,2015-07-25,1.0,1.0,4.0,2.0,,2.0,1.0,negative,seat
+E0586,R031021_s08,R031021,easyJet,Economy Class,2013-10-23,10.0,4.0,5.0,3.0,,,5.0,positive,none
+E0587,R029895_s03,R029895,ANA All Nippon Airways,Economy Class,2015-04-23,3.0,1.0,4.0,5.0,3.0,,2.0,negative,seat
 E0588,R055111_s06,R055111,Frontier Airlines,Economy Class,2018-06-28,1.0,1.0,1.0,,,1.0,1.0,negative,food
-E0589,R040061_s09,R040061,EVA Air,Business Class,2013-09-05,10.0,4.0,5.0,3.0,3.0,,5.0,positive,seat
-E0590,R054362_s12,R054362,Garuda Indonesia,Economy Class,2013-02-20,8.0,4.0,5.0,5.0,2.0,,3.0,positive,food
+E0589,R025905_s07,R025905,China Southern Airlines,Economy Class,2018-06-23,9.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,seat
+E0590,R020223_s05,R020223,AirAsia,Economy Class,2017-02-05,8.0,4.0,5.0,5.0,,5.0,3.0,positive,food
 E0591,R006351_s03,R006351,KLM Royal Dutch Airlines,Business Class,2017-08-22,7.0,3.0,5.0,3.0,4.0,1.0,4.0,positive,ground
-E0592,R048898_s02,R048898,Spirit Airlines,Economy Class,2018-11-19,1.0,3.0,1.0,1.0,1.0,1.0,1.0,negative,value
+E0592,R032540_s10,R032540,Qantas Airways,First Class,2018-03-28,3.0,3.0,3.0,1.0,1.0,3.0,1.0,negative,value
 E0593,R022872_s05,R022872,British Airways,Economy Class,2017-01-31,1.0,1.0,1.0,1.0,,2.0,1.0,negative,food
-E0594,R051748_s03,R051748,Vueling Airlines,Business Class,2018-03-29,1.0,1.0,3.0,,,1.0,1.0,negative,ground
-E0595,R060817_s05,R060817,WOW air,Economy Class,2015-10-20,2.0,4.0,3.0,1.0,,2.0,1.0,negative,value
+E0594,R049786_s06,R049786,Spirit Airlines,Economy Class,2017-02-10,1.0,1.0,1.0,,,1.0,1.0,negative,ground
+E0595,R056306_s04,R056306,Icelandair,Economy Class,2018-04-15,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
 E0596,R061131_s02,R061131,Ukraine International,Economy Class,2012-06-13,7.0,4.0,4.0,3.0,1.0,,4.0,positive,food
 E0597,R021503_s02,R021503,Austrian Airlines,Economy Class,2017-07-14,8.0,4.0,5.0,,,2.0,4.0,positive,ground
-E0598,R050378_s04,R050378,Spirit Airlines,Economy Class,2015-09-02,1.0,1.0,1.0,,,1.0,1.0,negative,staff
-E0599,R013325_s24,R013325,United Airlines,Economy Class,2018-06-05,1.0,1.0,1.0,1.0,2.0,1.0,1.0,negative,staff
-E0600,R048587_s03,R048587,Spirit Airlines,Economy Class,2019-05-11,1.0,1.0,1.0,,,1.0,1.0,negative,ground
+E0598,R060384_s04,R060384,WOW air,Economy Class,2018-07-20,1.0,,,,,1.0,3.0,negative,staff
+E0599,R030274_s10,R030274,easyJet,Economy Class,2018-07-24,3.0,4.0,4.0,4.0,,1.0,1.0,negative,staff
+E0600,R048475_s02,R048475,Wizz Air,Economy Class,2011-03-17,1.0,,,,,,1.0,negative,ground
 E0601,R004615_s02,R004615,Emirates,Business Class,2014-01-28,9.0,5.0,4.0,4.0,5.0,,5.0,positive,seat
 E0602,R007022_s02,R007022,KLM Royal Dutch Airlines,Economy Class,2013-04-21,7.0,3.0,1.0,1.0,5.0,,3.0,positive,food
 E0603,R048059_s05,R048059,Wizz Air,Economy Class,2017-06-10,10.0,4.0,5.0,,,4.0,5.0,positive,value
 E0604,R029310_s02,R029310,Iberia,First Class,2015-07-24,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,ground
 E0605,R060435_s06,R060435,WOW air,Economy Class,2018-05-17,1.0,1.0,1.0,1.0,1.0,1.0,2.0,negative,food
-E0606,R050215_s05,R050215,Spirit Airlines,Economy Class,2016-01-17,1.0,,,,,1.0,1.0,negative,none
-E0607,R001637_s07,R001637,Qatar Airways,Business Class,2018-08-26,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,entertainment
-E0608,R032098_s02,R032098,LOT Polish Airlines,Economy Class,2016-11-05,8.0,4.0,4.0,3.0,3.0,3.0,4.0,positive,staff
-E0609,R030448_s03,R030448,easyJet,Economy Class,2017-05-19,2.0,3.0,3.0,2.0,,2.0,4.0,negative,staff
-E0610,R059792_s04,R059792,Gulf Air,Economy Class,2018-01-05,1.0,3.0,5.0,4.0,4.0,1.0,1.0,negative,staff
-E0611,R057428_s05,R057428,Aer Lingus,Economy Class,2014-05-10,10.0,5.0,5.0,5.0,4.0,,5.0,positive,entertainment
+E0606,R008504_s03,R008504,American Airlines,Economy Class,2017-10-25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0607,R042906_s04,R042906,Thai Airways,Economy Class,2018-12-19,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,entertainment
+E0608,R040041_s08,R040041,EVA Air,Business Class,2014-01-17,8.0,5.0,3.0,3.0,4.0,,4.0,positive,staff
+E0609,R022423_s11,R022423,British Airways,Economy Class,2017-11-08,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
+E0610,R041943_s09,R041943,SAS Scandinavian,Economy Class,2014-07-29,2.0,4.0,4.0,4.0,2.0,,2.0,negative,staff
+E0611,R007269_s04,R007269,Virgin America,Economy Class,2012-04-03,9.0,4.0,5.0,5.0,5.0,,5.0,positive,entertainment
 E0612,R027208_s05,R027208,China Southern Airlines,Economy Class,2014-01-17,8.0,4.0,4.0,3.0,4.0,,5.0,positive,value
-E0613,R025295_s06,R025295,China Eastern Airlines,Economy Class,2016-07-27,1.0,1.0,1.0,1.0,1.0,2.0,2.0,negative,ground
-E0614,R031520_s02,R031520,Korean Air,Economy Class,2012-12-31,3.0,4.0,5.0,5.0,2.0,,3.0,negative,entertainment
-E0615,R029510_s03,R029510,Iberia,Economy Class,2013-12-03,1.0,1.0,1.0,3.0,1.0,,1.0,negative,entertainment
-E0616,R045254_s06,R045254,Air Canada rouge,,2015-01-19,1.0,,,,,,,negative,entertainment
-E0617,R045956_s10,R045956,Air China,Economy Class,2018-12-04,3.0,1.0,3.0,2.0,4.0,1.0,4.0,negative,none
-E0618,R009603_s01,R009603,American Airlines,Economy Class,2015-08-03,2.0,1.0,1.0,1.0,1.0,3.0,2.0,negative,seat
-E0619,R006245_s09,R006245,KLM Royal Dutch Airlines,Economy Class,2018-03-16,2.0,1.0,2.0,1.0,,3.0,2.0,negative,none
-E0620,R035453_s03,R035453,Etihad Airways,First Class,2015-02-24,7.0,2.0,5.0,4.0,2.0,,3.0,positive,seat
-E0621,R043061_s05,R043061,Thai Airways,Economy Class,2017-05-08,4.0,3.0,3.0,2.0,3.0,3.0,2.0,negative,none
-E0622,R029898_s03,R029898,ANA All Nippon Airways,Business Class,2015-04-17,8.0,5.0,4.0,3.0,3.0,,3.0,positive,food
-E0623,R042023_s04,R042023,SAS Scandinavian,Economy Class,2013-09-22,1.0,3.0,1.0,1.0,1.0,,2.0,negative,value
+E0613,R047870_s03,R047870,Wizz Air,Economy Class,2018-10-23,1.0,1.0,1.0,,,1.0,1.0,negative,ground
+E0614,R034446_s01,R034446,Air France,Business Class,2014-01-07,3.0,3.0,3.0,2.0,2.0,,2.0,negative,entertainment
+E0615,R058566_s05,R058566,Norwegian,Economy Class,2019-05-21,2.0,2.0,1.0,1.0,1.0,4.0,3.0,negative,entertainment
+E0616,R060108_s10,R060108,Kuwait Airways,Economy Class,2016-09-20,2.0,1.0,2.0,3.0,1.0,1.0,3.0,negative,entertainment
+E0617,R032073_s04,R032073,LOT Polish Airlines,Economy Class,2017-06-24,1.0,3.0,3.0,3.0,2.0,1.0,1.0,negative,none
+E0618,R010895_s02,R010895,Delta Air Lines,Economy Class,2016-12-20,1.0,1.0,1.0,,,1.0,1.0,negative,seat
+E0619,R043398_s00,R043398,Thai Airways,Business Class,2014-10-05,3.0,1.0,4.0,3.0,3.0,,2.0,negative,none
+E0620,R031605_s03,R031605,Korean Air,Economy Class,2012-01-23,8.0,4.0,5.0,4.0,4.0,,3.0,positive,seat
+E0621,R038834_s00,R038834,TAP Portugal,Economy Class,2017-10-13,1.0,2.0,2.0,1.0,2.0,1.0,1.0,negative,none
+E0622,R032950_s02,R032950,Qantas Airways,Economy Class,2016-01-31,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,food
+E0623,R060298_s16,R060298,WOW air,Economy Class,2019-02-16,1.0,1.0,1.0,,,1.0,2.0,negative,value
 E0624,R016626_s13,R016626,Aeroflot Russian Airlines,Economy Class,2018-12-19,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,food
-E0625,R048319_s01,R048319,Wizz Air,Economy Class,2014-03-31,9.0,4.0,4.0,3.0,,,5.0,positive,seat
-E0626,R024302_s01,R024302,British Airways,Economy Class,2014-11-03,4.0,4.0,2.0,2.0,2.0,,4.0,negative,seat
-E0627,R040658_s04,R040658,Singapore Airlines,Economy Class,2018-05-02,10.0,5.0,4.0,4.0,5.0,5.0,5.0,positive,seat
-E0628,R054290_s03,R054290,Garuda Indonesia,Economy Class,2013-11-13,1.0,3.0,2.0,2.0,2.0,,2.0,negative,none
-E0629,R009784_s03,R009784,American Airlines,Economy Class,2015-01-26,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
-E0630,R011834_s05,R011834,Southwest Airlines,Business Class,2018-11-15,2.0,1.0,4.0,4.0,1.0,1.0,1.0,negative,seat
-E0631,R036001_s05,R036001,Pegasus Airlines,Economy Class,2015-08-27,2.0,1.0,1.0,1.0,1.0,1.0,3.0,negative,none
-E0632,R027880_s01,R027880,Ethiopian Airlines,Economy Class,2014-05-10,8.0,4.0,5.0,4.0,1.0,,5.0,positive,none
+E0625,R037868_s06,R037868,Ryanair,Economy Class,2013-10-10,10.0,3.0,4.0,3.0,,,5.0,positive,seat
+E0626,R036469_s06,R036469,Ryanair,Economy Class,2019-03-23,4.0,2.0,2.0,,,2.0,4.0,negative,seat
+E0627,R057698_s03,R057698,Aer Lingus,Economy Class,2011-04-12,7.0,,,,,,4.0,positive,seat
+E0628,R020027_s05,R020027,AirAsia,Economy Class,2019-05-04,2.0,1.0,3.0,,1.0,1.0,1.0,negative,none
+E0629,R054682_s02,R054682,Frontier Airlines,,2019-04-14,1.0,,,,,,,negative,none
+E0630,R044399_s07,R044399,Air Europa,Economy Class,2017-10-08,1.0,2.0,1.0,1.0,,1.0,1.0,negative,seat
+E0631,R038153_s05,R038153,South African Airways,Economy Class,2013-10-25,2.0,3.0,1.0,3.0,2.0,,3.0,negative,none
+E0632,R000704_s00,R000704,Turkish Airlines,Economy Class,2016-03-22,7.0,4.0,4.0,4.0,3.0,4.0,4.0,positive,none
 E0633,R026234_s05,R026234,China Southern Airlines,Premium Economy,2017-08-20,8.0,4.0,5.0,5.0,3.0,5.0,4.0,positive,ground
-E0634,R016035_s02,R016035,Jetblue Airways,,2011-04-11,4.0,,,,,,4.0,negative,entertainment
-E0635,R060693_s10,R060693,WOW air,,2017-02-03,2.0,,,,,,,negative,none
-E0636,R018879_s02,R018879,Air New Zealand,Economy Class,2018-06-24,10.0,5.0,5.0,,5.0,5.0,5.0,positive,entertainment
+E0634,R044803_s06,R044803,Air Canada rouge,Economy Class,2017-08-13,1.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,entertainment
+E0635,R060819_s02,R060819,WOW air,Economy Class,2015-10-04,1.0,1.0,2.0,1.0,1.0,1.0,2.0,negative,none
+E0636,R029403_s05,R029403,Iberia,Economy Class,2014-09-28,10.0,4.0,5.0,4.0,5.0,,5.0,positive,entertainment
 E0637,R002095_s09,R002095,Qatar Airways,Economy Class,2016-09-21,7.0,3.0,5.0,5.0,4.0,2.0,4.0,positive,seat
-E0638,R048795_s13,R048795,Spirit Airlines,Economy Class,2019-01-18,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0639,R046667_s02,R046667,Cathay Pacific Airways,Economy Class,2018-10-17,10.0,,,,,,5.0,positive,none
-E0640,R045087_s06,R045087,Air Canada rouge,Economy Class,2015-07-07,1.0,1.0,2.0,2.0,1.0,1.0,2.0,negative,none
-E0641,R015970_s05,R015970,Jetblue Airways,,2012-10-30,8.0,4.0,4.0,3.0,5.0,,5.0,positive,none
-E0642,R007194_s03,R007194,Virgin America,Economy Class,2013-10-13,10.0,5.0,5.0,4.0,5.0,,5.0,positive,entertainment
+E0638,R060640_s03,R060640,WOW air,Premium Economy,2017-05-19,1.0,1.0,1.0,1.0,1.0,2.0,1.0,negative,none
+E0639,R029350_s00,R029350,Iberia,Economy Class,2015-02-18,8.0,4.0,4.0,3.0,5.0,,4.0,positive,none
+E0640,R039575_s08,R039575,Eurowings,Economy Class,2017-12-04,2.0,3.0,3.0,3.0,1.0,1.0,2.0,negative,none
+E0641,R002191_s07,R002191,Qatar Airways,Business Class,2016-05-03,9.0,4.0,5.0,4.0,4.0,5.0,4.0,positive,none
+E0642,R041989_s06,R041989,SAS Scandinavian,Premium Economy,2014-03-10,8.0,4.0,5.0,3.0,2.0,,4.0,positive,entertainment
 E0643,R012289_s04,R012289,Southwest Airlines,Economy Class,2015-05-11,8.0,3.0,4.0,,,,5.0,positive,seat
-E0644,R016604_s07,R016604,Aeroflot Russian Airlines,Economy Class,2019-02-20,1.0,4.0,5.0,5.0,3.0,5.0,4.0,negative,none
-E0645,R030363_s02,R030363,easyJet,Economy Class,2017-12-28,10.0,4.0,5.0,4.0,,5.0,5.0,positive,none
-E0646,R022691_s00,R022691,British Airways,Economy Class,2017-05-04,7.0,3.0,4.0,3.0,4.0,5.0,4.0,positive,none
-E0647,R049590_s05,R049590,Spirit Airlines,Economy Class,2017-07-06,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0648,R048718_s12,R048718,Spirit Airlines,Economy Class,2019-03-06,1.0,1.0,2.0,1.0,,3.0,1.0,negative,value
-E0649,R016592_s03,R016592,Aeroflot Russian Airlines,Economy Class,2019-04-29,3.0,3.0,3.0,1.0,1.0,3.0,3.0,negative,entertainment
-E0650,R047908_s09,R047908,Wizz Air,Economy Class,2018-08-19,3.0,1.0,3.0,,,1.0,3.0,negative,value
-E0651,R002444_s08,R002444,Qatar Airways,Business Class,2015-07-13,8.0,4.0,5.0,3.0,3.0,4.0,4.0,positive,entertainment
-E0652,R057835_s01,R057835,Air Arabia,Economy Class,2018-05-12,2.0,1.0,2.0,,,1.0,3.0,negative,value
-E0653,R012477_s04,R012477,Southwest Airlines,Economy Class,2013-05-27,1.0,1.0,4.0,3.0,,,2.0,negative,none
+E0644,R048320_s04,R048320,Wizz Air,Economy Class,2014-03-31,2.0,1.0,2.0,3.0,,,2.0,negative,none
+E0645,R050330_s03,R050330,Spirit Airlines,,2015-10-03,7.0,,,,,,,positive,none
+E0646,R006433_s06,R006433,KLM Royal Dutch Airlines,Economy Class,2017-01-05,7.0,3.0,4.0,3.0,2.0,4.0,4.0,positive,none
+E0647,R055604_s10,R055604,Frontier Airlines,Economy Class,2016-12-21,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0648,R053568_s03,R053568,flydubai,Economy Class,2018-03-30,2.0,1.0,2.0,,,1.0,1.0,negative,value
+E0649,R045186_s11,R045186,Air Canada rouge,Economy Class,2015-03-04,2.0,1.0,3.0,3.0,1.0,,1.0,negative,entertainment
+E0650,R047909_s01,R047909,Wizz Air,Economy Class,2018-08-19,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
+E0651,R039722_s10,R039722,EVA Air,Economy Class,2018-09-19,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
+E0652,R032015_s01,R032015,LOT Polish Airlines,Economy Class,2018-06-02,1.0,3.0,1.0,,1.0,1.0,1.0,negative,value
+E0653,R013711_s06,R013711,United Airlines,Economy Class,2017-08-28,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
 E0654,R004084_s02,R004084,Emirates,Business Class,2015-06-06,3.0,5.0,1.0,1.0,5.0,,3.0,negative,seat
-E0655,R035529_s10,R035529,Etihad Airways,Economy Class,2014-10-31,3.0,1.0,1.0,1.0,3.0,,1.0,negative,none
-E0656,R012245_s27,R012245,Southwest Airlines,Economy Class,2015-09-18,1.0,1.0,1.0,3.0,,1.0,3.0,negative,value
-E0657,R003575_s00,R003575,Emirates,Economy Class,2016-11-01,2.0,1.0,1.0,1.0,2.0,1.0,2.0,negative,staff
-E0658,R043083_s00,R043083,Thai Airways,Business Class,2017-02-20,4.0,1.0,2.0,2.0,3.0,4.0,3.0,negative,none
+E0655,R028558_s26,R028558,Finnair,Premium Economy,2016-09-07,2.0,1.0,2.0,2.0,3.0,1.0,1.0,negative,none
+E0656,R012260_s03,R012260,Southwest Airlines,Economy Class,2015-08-07,1.0,1.0,3.0,2.0,1.0,1.0,1.0,negative,value
+E0657,R003241_s05,R003241,Emirates,Economy Class,2018-02-01,1.0,4.0,4.0,4.0,4.0,1.0,3.0,negative,staff
+E0658,R014298_s03,R014298,United Airlines,Economy Class,2016-02-04,3.0,2.0,1.0,2.0,1.0,3.0,2.0,negative,none
 E0659,R060824_s05,R060824,WOW air,Economy Class,2015-09-21,9.0,5.0,5.0,5.0,,5.0,5.0,positive,food
-E0660,R051077_s02,R051077,Spirit Airlines,,2014-06-25,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
-E0661,R039935_s07,R039935,EVA Air,Economy Class,2015-06-04,8.0,4.0,4.0,3.0,4.0,,5.0,positive,food
-E0662,R008272_s00,R008272,American Airlines,Economy Class,2018-03-18,2.0,2.0,3.0,2.0,2.0,1.0,2.0,negative,value
-E0663,R034607_s06,R034607,Etihad Airways,Economy Class,2019-04-03,2.0,3.0,3.0,1.0,5.0,1.0,2.0,negative,none
-E0664,R054761_s04,R054761,Frontier Airlines,Economy Class,2018-12-31,1.0,2.0,2.0,1.0,,1.0,1.0,negative,ground
-E0665,R033900_s09,R033900,Air France,Economy Class,2017-08-26,7.0,3.0,4.0,4.0,,4.0,4.0,positive,staff
-E0666,R020819_s05,R020819,Asiana Airlines,Business Class,2015-01-23,9.0,5.0,5.0,4.0,4.0,,5.0,positive,entertainment
-E0667,R024339_s05,R024339,British Airways,Economy Class,2014-10-12,1.0,1.0,1.0,1.0,1.0,,1.0,negative,entertainment
-E0668,R024495_s03,R024495,British Airways,First Class,2014-07-08,8.0,5.0,5.0,1.0,1.0,,5.0,positive,staff
-E0669,R047681_s07,R047681,Cathay Pacific Airways,Premium Economy,2013-12-07,8.0,4.0,4.0,3.0,5.0,,4.0,positive,none
-E0670,R003428_s02,R003428,Emirates,Business Class,2017-06-01,8.0,5.0,4.0,4.0,3.0,4.0,4.0,positive,none
-E0671,R050676_s02,R050676,Spirit Airlines,,2015-05-20,1.0,3.0,1.0,1.0,1.0,,4.0,negative,ground
-E0672,R010154_s04,R010154,American Airlines,Business Class,2014-01-13,1.0,1.0,1.0,1.0,1.0,,1.0,negative,staff
-E0673,R003226_s05,R003226,Emirates,Economy Class,2018-02-15,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0660,R021214_s03,R021214,Avianca,Economy Class,2016-09-22,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
+E0661,R047595_s10,R047595,Cathay Pacific Airways,Economy Class,2014-04-13,7.0,4.0,4.0,3.0,4.0,,4.0,positive,food
+E0662,R008288_s11,R008288,American Airlines,Economy Class,2018-03-03,1.0,2.0,2.0,2.0,2.0,1.0,1.0,negative,value
+E0663,R014005_s02,R014005,United Airlines,Economy Class,2016-11-25,2.0,2.0,3.0,,,1.0,1.0,negative,none
+E0664,R037819_s01,R037819,Ryanair,Economy Class,2013-11-29,2.0,2.0,1.0,1.0,,,2.0,negative,ground
+E0665,R020883_s06,R020883,Asiana Airlines,Business Class,2013-09-29,8.0,5.0,3.0,4.0,4.0,,4.0,positive,staff
+E0666,R060019_s04,R060019,Kuwait Airways,Economy Class,2019-04-17,10.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,entertainment
+E0667,R044424_s03,R044424,Air Europa,Economy Class,2016-12-30,1.0,1.0,1.0,1.0,,1.0,1.0,negative,entertainment
+E0668,R040203_s02,R040203,EVA Air,Economy Class,2011-04-12,7.0,,,,,,4.0,positive,staff
+E0669,R020930_s01,R020930,Asiana Airlines,Economy Class,2013-04-22,7.0,4.0,5.0,3.0,3.0,,4.0,positive,none
+E0670,R012373_s00,R012373,Southwest Airlines,Economy Class,2014-06-23,10.0,4.0,5.0,4.0,,,5.0,positive,none
+E0671,R006144_s14,R006144,KLM Royal Dutch Airlines,Economy Class,2018-11-26,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0672,R052650_s02,R052650,Sunwing Airlines,Economy Class,2016-01-04,3.0,1.0,3.0,2.0,1.0,3.0,3.0,negative,staff
+E0673,R009759_s01,R009759,American Airlines,Economy Class,2015-03-04,2.0,1.0,4.0,1.0,2.0,,2.0,negative,ground
 E0674,R009939_s04,R009939,American Airlines,Economy Class,2014-08-02,1.0,2.0,1.0,1.0,1.0,,1.0,negative,food
-E0675,R001706_s02,R001706,Qatar Airways,Business Class,2018-04-14,8.0,4.0,5.0,3.0,5.0,5.0,4.0,positive,staff
-E0676,R027388_s06,R027388,China Southern Airlines,Economy Class,2013-01-22,7.0,4.0,3.0,4.0,3.0,,5.0,positive,seat
-E0677,R052684_s13,R052684,Sunwing Airlines,Business Class,2015-07-20,10.0,4.0,5.0,4.0,4.0,5.0,5.0,positive,food
-E0678,R006518_s07,R006518,KLM Royal Dutch Airlines,Business Class,2016-07-04,9.0,5.0,4.0,5.0,4.0,4.0,5.0,positive,none
-E0679,R010666_s04,R010666,Delta Air Lines,Economy Class,2017-12-25,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0680,R003684_s05,R003684,Emirates,Business Class,2016-07-12,8.0,4.0,4.0,4.0,5.0,4.0,4.0,positive,entertainment
+E0675,R059133_s03,R059133,Norwegian,Economy Class,2016-02-09,10.0,4.0,5.0,5.0,4.0,5.0,5.0,positive,staff
+E0676,R053830_s05,R053830,Garuda Indonesia,Business Class,2018-03-15,9.0,4.0,5.0,5.0,3.0,4.0,4.0,positive,seat
+E0677,R019012_s06,R019012,Air New Zealand,Economy Class,2016-08-15,7.0,4.0,4.0,1.0,4.0,5.0,3.0,positive,food
+E0678,R046403_s00,R046403,Air China,Business Class,2014-09-28,10.0,5.0,4.0,4.0,3.0,,5.0,positive,none
+E0679,R025449_s01,R025449,China Eastern Airlines,Economy Class,2014-04-24,1.0,3.0,1.0,2.0,2.0,,2.0,negative,none
+E0680,R006369_s15,R006369,KLM Royal Dutch Airlines,Premium Economy,2017-06-18,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,entertainment
 E0681,R001364_s03,R001364,Turkish Airlines,Economy Class,2014-01-06,3.0,1.0,2.0,4.0,3.0,,3.0,negative,food
-E0682,R029213_s21,R029213,Iberia,Economy Class,2016-10-24,1.0,3.0,3.0,3.0,4.0,1.0,3.0,negative,value
-E0683,R049986_s00,R049986,Spirit Airlines,Economy Class,2016-07-06,1.0,1.0,3.0,,,1.0,2.0,negative,ground
+E0682,R029213_s24,R029213,Iberia,Economy Class,2016-10-24,1.0,3.0,3.0,3.0,4.0,1.0,3.0,negative,value
+E0683,R043816_s03,R043816,Air India,Economy Class,2017-11-19,1.0,1.0,1.0,2.0,1.0,1.0,2.0,negative,ground
 E0684,R027265_s02,R027265,China Southern Airlines,Economy Class,2013-10-28,8.0,4.0,3.0,2.0,5.0,,5.0,positive,seat
-E0685,R059317_s12,R059317,Norwegian,Economy Class,2015-04-06,3.0,3.0,3.0,,3.0,,2.0,negative,value
-E0686,R031602_s01,R031602,Korean Air,Economy Class,2012-01-31,9.0,4.0,5.0,3.0,4.0,,5.0,positive,seat
-E0687,R053991_s11,R053991,Garuda Indonesia,Business Class,2016-09-19,8.0,5.0,5.0,5.0,3.0,2.0,5.0,positive,none
+E0685,R050404_s23,R050404,Spirit Airlines,Economy Class,2015-08-23,1.0,1.0,1.0,,,1.0,1.0,negative,value
+E0686,R048052_s05,R048052,Wizz Air,Economy Class,2017-07-02,7.0,2.0,4.0,,,3.0,5.0,positive,seat
+E0687,R021480_s18,R021480,Austrian Airlines,Business Class,2018-01-05,9.0,4.0,5.0,5.0,5.0,4.0,4.0,positive,none
 E0688,R025817_s19,R025817,China Southern Airlines,Economy Class,2018-09-25,3.0,2.0,2.0,1.0,3.0,3.0,1.0,negative,food
 E0689,R004964_s02,R004964,Lufthansa,Economy Class,2018-01-08,9.0,4.0,5.0,,,5.0,5.0,positive,ground
 E0690,R053195_s01,R053195,Bangkok Airways,Economy Class,2018-11-16,8.0,4.0,4.0,4.0,,4.0,4.0,positive,value
-E0691,R049982_s16,R049982,Spirit Airlines,Economy Class,2016-07-08,1.0,1.0,1.0,1.0,,1.0,1.0,negative,ground
-E0692,R052178_s04,R052178,Vueling Airlines,Economy Class,2015-07-20,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0691,R000165_s00,R000165,Turkish Airlines,Economy Class,2018-10-08,1.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,ground
+E0692,R009293_s09,R009293,American Airlines,Economy Class,2016-01-11,1.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,staff
 E0693,R028403_s09,R028403,Finnair,Economy Class,2018-11-28,3.0,3.0,4.0,3.0,4.0,2.0,2.0,negative,food
-E0694,R036182_s06,R036182,Royal Jordanian Airlines,Economy Class,2018-04-23,4.0,4.0,1.0,1.0,1.0,3.0,4.0,negative,entertainment
-E0695,R055472_s06,R055472,Frontier Airlines,Economy Class,2017-08-08,1.0,3.0,1.0,1.0,,1.0,1.0,negative,none
+E0694,R041995_s02,R041995,SAS Scandinavian,Economy Class,2014-02-07,2.0,3.0,2.0,3.0,1.0,,2.0,negative,entertainment
+E0695,R060906_s03,R060906,Ukraine International,Economy Class,2018-12-10,1.0,2.0,2.0,,1.0,1.0,1.0,negative,none
 E0696,R049432_s04,R049432,Spirit Airlines,Economy Class,2017-11-06,9.0,3.0,5.0,,,4.0,5.0,positive,ground
 E0697,R046612_s05,R046612,Cathay Pacific Airways,Premium Economy,2019-03-01,3.0,3.0,1.0,3.0,,1.0,3.0,negative,staff
 E0698,R019503_s06,R019503,Alitalia,Economy Class,2017-10-17,9.0,5.0,4.0,4.0,,3.0,4.0,positive,ground
-E0699,R016866_s01,R016866,Aeroflot Russian Airlines,Economy Class,2015-02-18,8.0,4.0,4.0,5.0,4.0,,5.0,positive,none
-E0700,R025952_s06,R025952,China Southern Airlines,Premium Economy,2018-05-20,9.0,4.0,5.0,4.0,3.0,5.0,5.0,positive,food
-E0701,R024141_s18,R024141,British Airways,Economy Class,2015-01-28,1.0,3.0,3.0,1.0,3.0,,1.0,negative,ground
+E0699,R056051_s05,R056051,Frontier Airlines,Economy Class,2014-03-17,7.0,3.0,4.0,4.0,,,5.0,positive,none
+E0700,R025942_s05,R025942,China Southern Airlines,Business Class,2018-05-26,10.0,5.0,5.0,4.0,,4.0,5.0,positive,food
+E0701,R024699_s03,R024699,Brussels Airlines,Economy Class,2018-03-01,1.0,3.0,2.0,,,1.0,1.0,negative,ground
 E0702,R025213_s03,R025213,China Eastern Airlines,Economy Class,2017-04-30,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0703,R014068_s07,R014068,United Airlines,Economy Class,2016-09-19,2.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0704,R018022_s06,R018022,Air Canada,Economy Class,2016-12-31,3.0,3.0,3.0,,,2.0,3.0,negative,seat
-E0705,R060902_s01,R060902,Ukraine International,Economy Class,2018-12-22,1.0,,,,,1.0,1.0,negative,none
-E0706,R035421_s04,R035421,Etihad Airways,Business Class,2015-04-17,10.0,4.0,5.0,4.0,3.0,,5.0,positive,none
-E0707,R024376_s00,R024376,British Airways,Business Class,2014-09-22,7.0,4.0,5.0,4.0,4.0,,5.0,positive,food
+E0703,R005918_s03,R005918,Lufthansa,First Class,2014-04-29,4.0,2.0,2.0,2.0,2.0,,2.0,negative,none
+E0704,R057034_s04,R057034,Aer Lingus,Economy Class,2019-02-01,4.0,3.0,2.0,2.0,,3.0,3.0,negative,seat
+E0705,R001340_s05,R001340,Turkish Airlines,Economy Class,2014-01-22,3.0,2.0,4.0,5.0,3.0,,4.0,negative,none
+E0706,R038139_s08,R038139,South African Airways,Economy Class,2014-01-30,10.0,5.0,5.0,4.0,5.0,,3.0,positive,none
+E0707,R024369_s01,R024369,British Airways,Business Class,2014-09-28,10.0,5.0,5.0,3.0,4.0,,5.0,positive,food
 E0708,R016200_s04,R016200,Aegean Airlines,Economy Class,2017-06-21,7.0,2.0,4.0,3.0,,3.0,3.0,positive,food
-E0709,R014092_s11,R014092,United Airlines,Economy Class,2016-08-21,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0710,R056675_s03,R056675,Icelandair,Economy Class,2012-01-04,2.0,,,,,,1.0,negative,none
-E0711,R055310_s07,R055310,Frontier Airlines,Business Class,2018-02-09,1.0,1.0,3.0,1.0,1.0,1.0,1.0,negative,entertainment
+E0709,R040870_s05,R040870,Singapore Airlines,Premium Economy,2017-01-05,3.0,3.0,2.0,1.0,2.0,1.0,1.0,negative,entertainment
+E0710,R025606_s02,R025606,China Eastern Airlines,Economy Class,2012-07-13,2.0,3.0,3.0,2.0,2.0,,1.0,negative,none
+E0711,R024136_s09,R024136,British Airways,Business Class,2015-02-11,1.0,2.0,1.0,1.0,3.0,,1.0,negative,entertainment
 E0712,R007235_s03,R007235,Virgin America,Economy Class,2012-11-29,3.0,1.0,4.0,1.0,2.0,,2.0,negative,food
 E0713,R010914_s04,R010914,Delta Air Lines,Economy Class,2016-11-07,8.0,4.0,4.0,3.0,5.0,4.0,5.0,positive,value
-E0714,R051237_s00,R051237,Spirit Airlines,,2014-03-30,9.0,4.0,5.0,1.0,1.0,,4.0,positive,none
+E0714,R002682_s06,R002682,Qatar Airways,Business Class,2014-07-29,10.0,5.0,5.0,5.0,4.0,,5.0,positive,none
 E0715,R028606_s10,R028606,Finnair,Business Class,2016-01-21,7.0,2.0,4.0,4.0,,3.0,2.0,positive,value
-E0716,R042356_s02,R042356,Swiss Intl Air Lines,First Class,2017-06-09,10.0,5.0,5.0,5.0,4.0,5.0,5.0,positive,entertainment
-E0717,R043249_s20,R043249,Thai Airways,Economy Class,2015-12-01,8.0,4.0,4.0,4.0,4.0,3.0,4.0,positive,food
-E0718,R023646_s04,R023646,British Airways,Economy Class,2015-10-23,2.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,value
-E0719,R025010_s01,R025010,Brussels Airlines,Economy Class,2011-08-17,2.0,,,,,,1.0,negative,staff
-E0720,R027484_s11,R027484,Copa Airlines,Economy Class,2015-07-19,7.0,3.0,3.0,3.0,1.0,4.0,3.0,positive,food
-E0721,R042232_s03,R042232,Swiss Intl Air Lines,Economy Class,2018-09-05,1.0,4.0,1.0,1.0,2.0,4.0,1.0,negative,none
-E0722,R004767_s06,R004767,Lufthansa,Business Class,2018-11-03,9.0,4.0,5.0,5.0,3.0,5.0,5.0,positive,entertainment
-E0723,R054917_s02,R054917,Frontier Airlines,Economy Class,2018-09-14,1.0,1.0,3.0,,,1.0,1.0,negative,staff
+E0716,R002208_s04,R002208,Qatar Airways,Economy Class,2016-04-10,7.0,3.0,4.0,3.0,2.0,5.0,4.0,positive,entertainment
+E0717,R024962_s02,R024962,Brussels Airlines,Economy Class,2012-12-06,10.0,4.0,5.0,5.0,5.0,,5.0,positive,food
+E0718,R023649_s08,R023649,British Airways,Business Class,2015-10-22,2.0,1.0,4.0,3.0,4.0,4.0,2.0,negative,value
+E0719,R038327_s04,R038327,South African Airways,Economy Class,2011-04-04,2.0,,,,,,1.0,negative,staff
+E0720,R025326_s01,R025326,China Eastern Airlines,Business Class,2016-02-08,8.0,4.0,5.0,5.0,2.0,3.0,4.0,positive,food
+E0721,R040353_s01,R040353,Royal Air Maroc,Economy Class,2014-12-18,1.0,1.0,1.0,1.0,1.0,,3.0,negative,none
+E0722,R047388_s02,R047388,Cathay Pacific Airways,Premium Economy,2015-02-18,7.0,4.0,1.0,1.0,4.0,,3.0,positive,entertainment
+E0723,R017890_s02,R017890,Air Canada,Economy Class,2017-09-15,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,staff
 E0724,R025422_s05,R025422,China Eastern Airlines,Economy Class,2014-10-31,10.0,5.0,5.0,4.0,4.0,,5.0,positive,ground
 E0725,R005127_s01,R005127,Lufthansa,Economy Class,2017-04-03,8.0,3.0,4.0,4.0,4.0,4.0,4.0,positive,ground
-E0726,R047556_s06,R047556,Cathay Pacific Airways,Economy Class,2014-06-20,10.0,5.0,5.0,5.0,5.0,,5.0,positive,none
-E0727,R025716_s05,R025716,China Southern Airlines,Business Class,2019-02-06,8.0,5.0,5.0,5.0,5.0,4.0,4.0,positive,food
-E0728,R013558_s09,R013558,United Airlines,Economy Class,2017-12-30,7.0,3.0,3.0,3.0,3.0,3.0,3.0,positive,entertainment
-E0729,R001223_s10,R001223,Turkish Airlines,Business Class,2014-07-13,9.0,4.0,4.0,4.0,4.0,,4.0,positive,entertainment
-E0730,R047582_s07,R047582,Cathay Pacific Airways,Economy Class,2014-05-05,10.0,5.0,5.0,5.0,5.0,,5.0,positive,none
+E0726,R033545_s06,R033545,Qantas Airways,Business Class,2013-12-25,9.0,3.0,5.0,5.0,3.0,,3.0,positive,none
+E0727,R057734_s04,R057734,Adria Airways,Economy Class,2017-11-20,9.0,5.0,5.0,3.0,,5.0,3.0,positive,food
+E0728,R042877_s06,R042877,Thai Airways,Business Class,2019-04-02,7.0,4.0,4.0,3.0,3.0,4.0,4.0,positive,entertainment
+E0729,R018588_s07,R018588,Air Canada,Economy Class,2014-06-18,8.0,4.0,4.0,4.0,4.0,,4.0,positive,entertainment
+E0730,R056884_s00,R056884,IndiGo,Economy Class,2016-01-21,10.0,5.0,5.0,,,5.0,5.0,positive,none
 E0731,R035100_s05,R035100,Etihad Airways,Business Class,2016-08-08,8.0,4.0,5.0,5.0,4.0,4.0,5.0,positive,ground
-E0732,R027231_s06,R027231,China Southern Airlines,Economy Class,2013-12-25,9.0,5.0,5.0,4.0,4.0,,5.0,positive,none
-E0733,R035430_s05,R035430,Etihad Airways,Economy Class,2015-04-04,2.0,1.0,1.0,1.0,2.0,,1.0,negative,none
-E0734,R017500_s03,R017500,Aeromexico,Economy Class,2011-06-13,1.0,,,,,,1.0,negative,ground
-E0735,R008526_s04,R008526,American Airlines,Economy Class,2017-10-11,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0736,R032112_s02,R032112,LOT Polish Airlines,Economy Class,2016-08-10,4.0,3.0,1.0,1.0,,4.0,2.0,negative,value
-E0737,R028303_s01,R028303,Egyptair,Economy Class,2011-03-24,4.0,,,,,,4.0,negative,none
-E0738,R039402_s10,R039402,TAP Portugal,Economy Class,2012-07-02,7.0,4.0,3.0,2.0,4.0,,4.0,positive,food
+E0732,R040838_s08,R040838,Singapore Airlines,Premium Economy,2017-02-22,9.0,5.0,5.0,4.0,4.0,5.0,4.0,positive,none
+E0733,R023086_s07,R023086,British Airways,First Class,2016-10-06,2.0,4.0,4.0,2.0,2.0,1.0,1.0,negative,none
+E0734,R055819_s12,R055819,Frontier Airlines,Economy Class,2015-07-29,1.0,1.0,3.0,1.0,,1.0,1.0,negative,ground
+E0735,R028137_s02,R028137,Egyptair,Economy Class,2015-04-06,3.0,2.0,4.0,4.0,1.0,,1.0,negative,none
+E0736,R032116_s04,R032116,LOT Polish Airlines,Business Class,2016-07-21,1.0,1.0,2.0,2.0,3.0,1.0,2.0,negative,value
+E0737,R049533_s08,R049533,Spirit Airlines,Economy Class,2017-08-13,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0738,R028779_s03,R028779,Finnair,Economy Class,2013-10-20,7.0,4.0,5.0,2.0,1.0,,3.0,positive,food
 E0739,R009472_s09,R009472,American Airlines,Economy Class,2015-10-13,1.0,3.0,1.0,1.0,1.0,3.0,2.0,negative,food
-E0740,R043852_s00,R043852,Air India,Economy Class,2017-06-01,8.0,4.0,4.0,4.0,,3.0,5.0,positive,none
-E0741,R010927_s05,R010927,Delta Air Lines,Economy Class,2016-10-14,1.0,3.0,3.0,,,1.0,1.0,negative,ground
-E0742,R013951_s06,R013951,United Airlines,Economy Class,2017-01-04,1.0,3.0,4.0,2.0,3.0,1.0,1.0,negative,ground
-E0743,R009950_s08,R009950,American Airlines,Economy Class,2014-07-27,1.0,2.0,1.0,1.0,1.0,,1.0,negative,entertainment
-E0744,R022810_s04,R022810,British Airways,Business Class,2017-03-06,3.0,1.0,4.0,2.0,,1.0,1.0,negative,none
-E0745,R006369_s15,R006369,KLM Royal Dutch Airlines,Premium Economy,2017-06-18,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,entertainment
+E0740,R040636_s01,R040636,Singapore Airlines,Economy Class,2018-07-25,10.0,5.0,5.0,4.0,4.0,5.0,5.0,positive,none
+E0741,R039484_s01,R039484,Eurowings,Economy Class,2018-10-26,1.0,3.0,3.0,,,1.0,2.0,negative,ground
+E0742,R036996_s03,R036996,Ryanair,Economy Class,2016-11-16,2.0,2.0,3.0,,,2.0,1.0,negative,ground
+E0743,R043434_s02,R043434,Thai Airways,Business Class,2014-06-02,3.0,3.0,2.0,2.0,1.0,,3.0,negative,entertainment
+E0744,R028103_s07,R028103,Egyptair,Economy Class,2015-12-02,3.0,3.0,2.0,3.0,3.0,1.0,3.0,negative,none
+E0745,R005156_s09,R005156,Lufthansa,Economy Class,2017-02-08,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
 E0746,R022688_s03,R022688,British Airways,Premium Economy,2017-05-05,1.0,2.0,1.0,1.0,2.0,3.0,2.0,negative,food
-E0747,R049355_s08,R049355,Spirit Airlines,Economy Class,2018-01-14,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0748,R047830_s02,R047830,Wizz Air,Economy Class,2019-02-07,1.0,1.0,2.0,1.0,1.0,1.0,2.0,negative,ground
-E0749,R046038_s01,R046038,Air China,Economy Class,2018-01-19,1.0,3.0,5.0,4.0,4.0,1.0,4.0,negative,value
-E0750,R013292_s09,R013292,United Airlines,Economy Class,2018-06-19,2.0,1.0,1.0,1.0,1.0,3.0,2.0,negative,none
+E0747,R036212_s42,R036212,Royal Jordanian Airlines,Business Class,2016-12-02,3.0,4.0,2.0,3.0,2.0,2.0,2.0,negative,none
+E0748,R010580_s27,R010580,Delta Air Lines,Economy Class,2018-04-19,2.0,2.0,3.0,3.0,3.0,3.0,2.0,negative,ground
+E0749,R050051_s04,R050051,Spirit Airlines,Economy Class,2016-05-20,1.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,value
+E0750,R001061_s09,R001061,Turkish Airlines,Economy Class,2015-04-24,1.0,1.0,1.0,4.0,3.0,,1.0,negative,none
 E0751,R033700_s10,R033700,Air France,Business Class,2018-12-02,2.0,4.0,1.0,1.0,3.0,2.0,2.0,negative,food
-E0752,R014980_s03,R014980,United Airlines,Economy Class,2014-10-13,1.0,3.0,2.0,4.0,4.0,,1.0,negative,none
-E0753,R056174_s02,R056174,Frontier Airlines,Economy Class,2013-04-16,2.0,4.0,2.0,,,,2.0,negative,ground
-E0754,R005221_s11,R005221,Lufthansa,Business Class,2016-09-10,8.0,4.0,5.0,4.0,,5.0,4.0,positive,none
-E0755,R022553_s04,R022553,British Airways,Economy Class,2017-07-26,2.0,3.0,1.0,1.0,,2.0,2.0,negative,none
-E0756,R045092_s31,R045092,Air Canada rouge,Economy Class,2015-06-30,2.0,1.0,5.0,3.0,1.0,1.0,1.0,negative,seat
+E0752,R019556_s03,R019556,Alitalia,Business Class,2017-01-10,1.0,,,,,1.0,1.0,negative,none
+E0753,R044778_s06,R044778,Air Canada rouge,Economy Class,2017-11-16,1.0,2.0,2.0,1.0,1.0,1.0,1.0,negative,ground
+E0754,R031833_s00,R031833,LATAM Airlines,Economy Class,2017-08-17,7.0,3.0,5.0,2.0,1.0,4.0,3.0,positive,none
+E0755,R017541_s07,R017541,Air Canada,Economy Class,2019-03-25,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
+E0756,R050645_s04,R050645,Spirit Airlines,Economy Class,2015-06-13,1.0,1.0,1.0,1.0,1.0,,1.0,negative,seat
 E0757,R053826_s02,R053826,Garuda Indonesia,Business Class,2018-04-07,10.0,5.0,5.0,5.0,,5.0,5.0,positive,ground
-E0758,R053555_s08,R053555,flydubai,Economy Class,2018-08-08,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0759,R014122_s01,R014122,United Airlines,Premium Economy,2016-07-25,7.0,4.0,4.0,3.0,,4.0,4.0,positive,none
-E0760,R038648_s13,R038648,TAP Portugal,Economy Class,2018-12-13,10.0,4.0,4.0,4.0,,5.0,5.0,positive,none
-E0761,R033399_s06,R033399,Qantas Airways,Business Class,2014-05-28,10.0,3.0,5.0,4.0,4.0,,5.0,positive,staff
-E0762,R044945_s02,R044945,Air Canada rouge,Economy Class,2016-03-06,4.0,1.0,4.0,,1.0,5.0,3.0,negative,entertainment
-E0763,R028994_s04,R028994,Finnair,Economy Class,2011-07-13,8.0,,,,,,4.0,positive,entertainment
-E0764,R003747_s20,R003747,Emirates,Economy Class,2016-03-27,3.0,1.0,1.0,1.0,1.0,1.0,3.0,negative,none
-E0765,R047453_s00,R047453,Cathay Pacific Airways,Economy Class,2014-10-31,4.0,2.0,1.0,1.0,1.0,,2.0,negative,staff
+E0758,R053560_s01,R053560,flydubai,Economy Class,2018-06-25,3.0,1.0,1.0,1.0,1.0,4.0,4.0,negative,value
+E0759,R022063_s07,R022063,British Airways,Economy Class,2018-11-22,7.0,5.0,5.0,4.0,2.0,5.0,4.0,positive,none
+E0760,R024182_s10,R024182,British Airways,Business Class,2015-01-14,8.0,4.0,2.0,4.0,4.0,,5.0,positive,none
+E0761,R001377_s04,R001377,Turkish Airlines,Business Class,2013-12-25,10.0,5.0,5.0,5.0,,,5.0,positive,staff
+E0762,R009617_s08,R009617,American Airlines,Economy Class,2015-07-27,2.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
+E0763,R023343_s03,R023343,British Airways,Premium Economy,2016-04-12,9.0,5.0,5.0,4.0,5.0,4.0,4.0,positive,entertainment
+E0764,R014834_s14,R014834,United Airlines,Business Class,2015-03-04,1.0,5.0,1.0,4.0,4.0,,5.0,negative,none
+E0765,R049296_s03,R049296,Spirit Airlines,Economy Class,2018-03-14,1.0,1.0,1.0,1.0,,1.0,1.0,negative,staff
 E0766,R017591_s01,R017591,Air Canada,Economy Class,2019-01-04,2.0,2.0,1.0,,,3.0,1.0,negative,food
-E0767,R003372_s01,R003372,Emirates,Business Class,2017-09-01,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0768,R008999_s06,R008999,American Airlines,Economy Class,2016-08-24,1.0,4.0,4.0,4.0,,1.0,1.0,negative,none
-E0769,R032007_s03,R032007,LOT Polish Airlines,Economy Class,2018-07-01,3.0,2.0,3.0,1.0,,1.0,2.0,negative,value
-E0770,R027937_s05,R027937,Ethiopian Airlines,Business Class,2013-07-29,7.0,4.0,5.0,4.0,2.0,,3.0,positive,entertainment
-E0771,R013131_s05,R013131,United Airlines,Economy Class,2018-08-26,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0767,R004709_s00,R004709,Lufthansa,Economy Class,2019-02-17,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,none
+E0768,R009277_s00,R009277,American Airlines,Economy Class,2016-01-22,1.0,,,,,1.0,1.0,negative,none
+E0769,R032011_s07,R032011,LOT Polish Airlines,Economy Class,2018-06-22,1.0,1.0,1.0,1.0,4.0,1.0,1.0,negative,value
+E0770,R003270_s04,R003270,Emirates,Business Class,2018-01-03,10.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,entertainment
+E0771,R052124_s02,R052124,Vueling Airlines,Economy Class,2015-09-10,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
 E0772,R003954_s05,R003954,Emirates,Economy Class,2015-09-28,3.0,1.0,1.0,4.0,4.0,5.0,2.0,negative,food
 E0773,R001236_s06,R001236,Turkish Airlines,Economy Class,2014-06-23,10.0,5.0,5.0,5.0,5.0,,4.0,positive,value
 E0774,R013379_s02,R013379,United Airlines,Economy Class,2018-05-04,4.0,2.0,4.0,1.0,1.0,4.0,3.0,negative,food
-E0775,R050285_s10,R050285,Spirit Airlines,Economy Class,2015-11-06,8.0,4.0,5.0,,,5.0,5.0,positive,none
-E0776,R035886_s04,R035886,Pegasus Airlines,Economy Class,2018-05-10,1.0,2.0,2.0,,,1.0,1.0,negative,none
-E0777,R009979_s01,R009979,American Airlines,Economy Class,2014-06-23,1.0,1.0,3.0,2.0,1.0,,1.0,negative,entertainment
+E0775,R007866_s02,R007866,American Airlines,Economy Class,2018-09-18,7.0,4.0,4.0,3.0,5.0,5.0,3.0,positive,none
+E0776,R027828_s22,R027828,Ethiopian Airlines,Business Class,2015-07-02,2.0,2.0,3.0,1.0,2.0,1.0,2.0,negative,none
+E0777,R029160_s01,R029160,Iberia,Business Class,2017-11-13,3.0,4.0,3.0,1.0,1.0,1.0,2.0,negative,entertainment
 E0778,R000668_s14,R000668,Turkish Airlines,Business Class,2016-05-11,8.0,3.0,4.0,4.0,3.0,2.0,5.0,positive,value
 E0779,R053940_s02,R053940,Garuda Indonesia,First Class,2017-03-17,9.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,ground
-E0780,R000165_s00,R000165,Turkish Airlines,Economy Class,2018-10-08,1.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,ground
+E0780,R010927_s05,R010927,Delta Air Lines,Economy Class,2016-10-14,1.0,3.0,3.0,,,1.0,1.0,negative,ground
 E0781,R010174_s10,R010174,American Airlines,Economy Class,2013-12-23,1.0,1.0,1.0,1.0,1.0,,1.0,negative,food
 E0782,R043531_s03,R043531,Thai Airways,Economy Class,2013-10-02,3.0,3.0,3.0,1.0,3.0,,1.0,negative,food
 E0783,R028707_s02,R028707,Finnair,Business Class,2014-11-25,10.0,5.0,5.0,5.0,4.0,,5.0,positive,ground
-E0784,R049510_s12,R049510,Spirit Airlines,Economy Class,2017-09-02,9.0,4.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0785,R040093_s00,R040093,EVA Air,Business Class,2013-02-06,7.0,3.0,3.0,3.0,4.0,,4.0,positive,none
-E0786,R001642_s04,R001642,Qatar Airways,Economy Class,2018-08-13,8.0,4.0,3.0,5.0,4.0,5.0,5.0,positive,entertainment
-E0787,R017389_s04,R017389,Aeromexico,First Class,2015-06-27,1.0,4.0,3.0,4.0,1.0,4.0,3.0,negative,none
-E0788,R045689_s06,R045689,Air Canada rouge,Economy Class,2014-03-17,1.0,1.0,4.0,1.0,1.0,,2.0,negative,value
-E0789,R038489_s02,R038489,Saudi Arabian Airlines,Economy Class,2015-01-26,10.0,5.0,3.0,5.0,5.0,,5.0,positive,none
+E0784,R009446_s07,R009446,American Airlines,Economy Class,2015-10-27,7.0,3.0,5.0,4.0,5.0,3.0,2.0,positive,none
+E0785,R005623_s07,R005623,Lufthansa,Business Class,2015-01-30,8.0,3.0,4.0,3.0,3.0,,4.0,positive,none
+E0786,R020022_s03,R020022,Alitalia,Economy Class,2012-06-13,9.0,4.0,4.0,4.0,5.0,,5.0,positive,entertainment
+E0787,R035540_s05,R035540,Etihad Airways,Business Class,2014-10-22,1.0,2.0,1.0,2.0,3.0,,1.0,negative,none
+E0788,R043789_s06,R043789,Air India,Business Class,2018-02-15,1.0,2.0,2.0,3.0,,1.0,1.0,negative,value
+E0789,R026191_s07,R026191,China Southern Airlines,Economy Class,2017-10-09,7.0,4.0,2.0,4.0,3.0,4.0,5.0,positive,none
 E0790,R055338_s01,R055338,Frontier Airlines,Economy Class,2018-01-22,10.0,4.0,5.0,4.0,,5.0,5.0,positive,value
-E0791,R045299_s04,R045299,Air Canada rouge,Economy Class,2014-12-18,3.0,1.0,3.0,3.0,1.0,,3.0,negative,seat
+E0791,R042276_s06,R042276,Swiss Intl Air Lines,Economy Class,2018-03-21,2.0,1.0,1.0,,1.0,3.0,1.0,negative,seat
 E0792,R060519_s04,R060519,WOW air,Economy Class,2017-12-26,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0793,R025255_s08,R025255,China Eastern Airlines,Economy Class,2016-12-27,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0794,R049359_s01,R049359,Spirit Airlines,Economy Class,2018-01-10,1.0,2.0,3.0,,,2.0,1.0,negative,none
-E0795,R059868_s04,R059868,Gulf Air,Economy Class,2014-10-22,4.0,2.0,3.0,3.0,3.0,,4.0,negative,none
-E0796,R031937_s13,R031937,LOT Polish Airlines,Economy Class,2019-01-10,2.0,1.0,1.0,,,1.0,1.0,negative,staff
-E0797,R051620_s02,R051620,Vueling Airlines,Economy Class,2018-09-12,1.0,2.0,2.0,,,1.0,1.0,negative,value
-E0798,R054664_s02,R054664,Frontier Airlines,Economy Class,2019-05-06,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
+E0793,R028351_s09,R028351,Egyptair,Business Class,2010-05-10,4.0,,,,,,1.0,negative,none
+E0794,R003532_s00,R003532,Emirates,Economy Class,2017-01-05,1.0,3.0,3.0,,,1.0,1.0,negative,none
+E0795,R055131_s01,R055131,Frontier Airlines,Economy Class,2018-06-26,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0796,R008603_s01,R008603,American Airlines,Economy Class,2017-08-04,2.0,2.0,1.0,1.0,4.0,1.0,1.0,negative,staff
+E0797,R052424_s03,R052424,Vueling Airlines,,2011-10-10,3.0,,,,,,,negative,value
+E0798,R054789_s03,R054789,Frontier Airlines,Economy Class,2018-11-29,1.0,,,,,1.0,1.0,negative,value
 E0799,R043796_s07,R043796,Air India,Economy Class,2018-01-28,1.0,2.0,1.0,1.0,2.0,1.0,1.0,negative,food
 E0800,R031044_s00,R031044,easyJet,Economy Class,2013-09-25,1.0,2.0,2.0,,,,2.0,negative,value
-E0801,R008649_s08,R008649,American Airlines,Premium Economy,2017-07-04,1.0,3.0,1.0,,,3.0,2.0,negative,seat
-E0802,R032624_s10,R032624,Qantas Airways,Economy Class,2017-11-06,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
-E0803,R050793_s06,R050793,Spirit Airlines,,2015-01-28,1.0,1.0,1.0,1.0,1.0,,1.0,negative,staff
-E0804,R019708_s09,R019708,Alitalia,Economy Class,2015-07-23,2.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,ground
-E0805,R026520_s01,R026520,China Southern Airlines,Business Class,2016-11-04,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
+E0801,R054779_s06,R054779,Frontier Airlines,Economy Class,2018-12-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,seat
+E0802,R031687_s07,R031687,LATAM Airlines,Business Class,2019-03-17,2.0,3.0,1.0,3.0,3.0,1.0,1.0,negative,none
+E0803,R009984_s08,R009984,American Airlines,Economy Class,2014-06-13,1.0,1.0,1.0,1.0,1.0,,2.0,negative,staff
+E0804,R018169_s02,R018169,Air Canada,Economy Class,2016-03-12,1.0,2.0,1.0,2.0,4.0,1.0,1.0,negative,ground
+E0805,R042226_s04,R042226,Swiss Intl Air Lines,Business Class,2018-09-26,10.0,5.0,5.0,5.0,4.0,5.0,4.0,positive,staff
 E0806,R058192_s03,R058192,Alaska Airlines,Economy Class,2016-06-17,8.0,3.0,4.0,4.0,5.0,4.0,4.0,positive,ground
-E0807,R003748_s03,R003748,Emirates,Economy Class,2016-03-25,4.0,2.0,3.0,2.0,5.0,5.0,4.0,negative,entertainment
-E0808,R028616_s14,R028616,Finnair,Economy Class,2016-01-03,7.0,3.0,4.0,3.0,3.0,4.0,4.0,positive,food
-E0809,R013249_s06,R013249,United Airlines,Economy Class,2018-07-03,2.0,2.0,4.0,1.0,,1.0,2.0,negative,seat
-E0810,R040592_s12,R040592,Singapore Airlines,Economy Class,2018-10-11,9.0,4.0,5.0,5.0,4.0,4.0,5.0,positive,seat
-E0811,R016416_s11,R016416,Aegean Airlines,Economy Class,2014-07-06,4.0,1.0,3.0,3.0,2.0,,3.0,negative,seat
-E0812,R033249_s04,R033249,Qantas Airways,Economy Class,2014-12-18,9.0,3.0,4.0,2.0,1.0,,3.0,positive,food
+E0807,R044909_s05,R044909,Air Canada rouge,Economy Class,2016-08-01,1.0,1.0,1.0,1.0,1.0,1.0,2.0,negative,entertainment
+E0808,R039935_s07,R039935,EVA Air,Economy Class,2015-06-04,8.0,4.0,4.0,3.0,4.0,,5.0,positive,food
+E0809,R007169_s04,R007169,Virgin America,Economy Class,2014-04-22,3.0,1.0,3.0,,1.0,,2.0,negative,seat
+E0810,R026366_s01,R026366,China Southern Airlines,Economy Class,2017-03-29,9.0,4.0,5.0,5.0,5.0,5.0,4.0,positive,seat
+E0811,R044338_s09,R044338,Air India,Economy Class,2012-01-01,4.0,1.0,2.0,3.0,,,2.0,negative,seat
+E0812,R033249_s03,R033249,Qantas Airways,Economy Class,2014-12-18,9.0,3.0,4.0,2.0,1.0,,3.0,positive,food
 E0813,R056402_s07,R056402,Icelandair,Economy Class,2016-08-04,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0814,R041929_s18,R041929,SAS Scandinavian,Business Class,2014-08-28,1.0,1.0,1.0,1.0,1.0,,1.0,negative,none
-E0815,R049283_s04,R049283,Spirit Airlines,Economy Class,2018-03-26,1.0,1.0,1.0,,,1.0,1.0,negative,value
-E0816,R050062_s08,R050062,Spirit Airlines,Economy Class,2016-05-09,1.0,,,,,1.0,1.0,negative,value
-E0817,R001612_s03,R001612,Qatar Airways,Economy Class,2018-10-02,2.0,4.0,4.0,2.0,3.0,1.0,3.0,negative,none
-E0818,R023033_s10,R023033,British Airways,Business Class,2016-11-07,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0819,R059841_s08,R059841,Gulf Air,Economy Class,2016-01-14,7.0,4.0,2.0,3.0,3.0,4.0,4.0,positive,staff
-E0820,R054868_s02,R054868,Frontier Airlines,Economy Class,2018-10-09,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0814,R021470_s04,R021470,Austrian Airlines,Business Class,2018-03-30,1.0,2.0,2.0,,,2.0,1.0,negative,none
+E0815,R047945_s02,R047945,Wizz Air,Economy Class,2018-05-19,2.0,1.0,3.0,,1.0,1.0,1.0,negative,value
+E0816,R031835_s01,R031835,LATAM Airlines,Economy Class,2017-08-07,1.0,1.0,1.0,1.0,2.0,2.0,3.0,negative,value
+E0817,R031779_s15,R031779,LATAM Airlines,Economy Class,2018-04-05,1.0,3.0,2.0,1.0,1.0,1.0,1.0,negative,none
+E0818,R018021_s04,R018021,Air Canada,Business Class,2017-01-01,4.0,3.0,1.0,1.0,3.0,3.0,2.0,negative,entertainment
+E0819,R052854_s11,R052854,Sunwing Airlines,Economy Class,2014-02-22,8.0,2.0,5.0,4.0,4.0,,5.0,positive,staff
+E0820,R026449_s04,R026449,China Southern Airlines,Economy Class,2017-01-17,1.0,2.0,1.0,3.0,5.0,1.0,1.0,negative,staff
 E0821,R057168_s04,R057168,Aer Lingus,Economy Class,2016-12-23,7.0,5.0,3.0,,,5.0,5.0,positive,ground
-E0822,R038005_s06,R038005,South African Airways,Economy Class,2017-05-22,1.0,1.0,1.0,1.0,2.0,1.0,2.0,negative,ground
-E0823,R048827_s04,R048827,Spirit Airlines,Economy Class,2018-12-29,1.0,1.0,1.0,,,1.0,1.0,negative,staff
-E0824,R007252_s06,R007252,Virgin America,Economy Class,2012-07-19,4.0,5.0,1.0,,1.0,,2.0,negative,entertainment
-E0825,R053474_s02,R053474,Bangkok Airways,Economy Class,2011-07-13,10.0,,,,,,,positive,none
-E0826,R030574_s06,R030574,easyJet,Economy Class,2016-06-06,1.0,1.0,1.0,1.0,,2.0,3.0,negative,seat
-E0827,R034568_s08,R034568,Air France,Economy Class,2013-06-09,1.0,2.0,1.0,1.0,2.0,,1.0,negative,none
-E0828,R011048_s04,R011048,Delta Air Lines,First Class,2016-03-09,10.0,5.0,4.0,5.0,4.0,5.0,4.0,positive,entertainment
-E0829,R029482_s01,R029482,Iberia,Economy Class,2014-02-18,10.0,4.0,5.0,,,,5.0,positive,none
-E0830,R029137_s10,R029137,Iberia,Economy Class,2018-02-20,1.0,1.0,1.0,,,1.0,1.0,negative,ground
-E0831,R039922_s00,R039922,EVA Air,Economy Class,2015-08-27,7.0,4.0,3.0,3.0,2.0,2.0,3.0,positive,none
-E0832,R013132_s02,R013132,United Airlines,Economy Class,2018-08-26,1.0,3.0,1.0,2.0,,1.0,1.0,negative,ground
-E0833,R057087_s13,R057087,Aer Lingus,Economy Class,2018-05-31,2.0,4.0,4.0,4.0,4.0,2.0,2.0,negative,value
-E0834,R016563_s01,R016563,Aegean Airlines,Economy Class,2011-05-23,9.0,,,,,,4.0,positive,entertainment
+E0822,R048553_s24,R048553,Spirit Airlines,Economy Class,2019-06-04,1.0,1.0,4.0,1.0,1.0,1.0,1.0,negative,ground
+E0823,R031909_s01,R031909,LOT Polish Airlines,Economy Class,2019-04-17,1.0,3.0,1.0,,,1.0,1.0,negative,staff
+E0824,R014812_s04,R014812,United Airlines,First Class,2015-03-28,4.0,3.0,3.0,3.0,1.0,,2.0,negative,entertainment
+E0825,R053730_s06,R053730,Garuda Indonesia,Business Class,2019-05-07,10.0,5.0,5.0,5.0,,5.0,5.0,positive,none
+E0826,R034047_s03,R034047,Air France,Economy Class,2016-05-04,1.0,1.0,1.0,1.0,2.0,1.0,1.0,negative,seat
+E0827,R012838_s03,R012838,United Airlines,Economy Class,2019-02-02,1.0,3.0,5.0,4.0,4.0,3.0,1.0,negative,none
+E0828,R046797_s07,R046797,Cathay Pacific Airways,Economy Class,2018-01-22,10.0,5.0,5.0,4.0,5.0,5.0,4.0,positive,entertainment
+E0829,R013234_s05,R013234,United Airlines,Economy Class,2018-07-10,9.0,4.0,5.0,3.0,5.0,5.0,5.0,positive,none
+E0830,R048657_s02,R048657,Spirit Airlines,Economy Class,2019-04-15,1.0,3.0,1.0,,,1.0,1.0,negative,ground
+E0831,R023534_s04,R023534,British Airways,Economy Class,2015-12-11,10.0,5.0,5.0,5.0,,5.0,5.0,positive,none
+E0832,R010885_s05,R010885,Delta Air Lines,Economy Class,2016-12-30,1.0,2.0,1.0,2.0,2.0,1.0,1.0,negative,ground
+E0833,R040353_s08,R040353,Royal Air Maroc,Economy Class,2014-12-18,1.0,1.0,1.0,1.0,1.0,,3.0,negative,value
+E0834,R059469_s02,R059469,Norwegian,,2014-08-06,9.0,,,,,,,positive,entertainment
 E0835,R003385_s06,R003385,Emirates,Economy Class,2017-08-04,7.0,4.0,4.0,4.0,5.0,2.0,5.0,positive,seat
-E0836,R009226_s10,R009226,American Airlines,Premium Economy,2016-02-29,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0836,R055629_s05,R055629,Frontier Airlines,Economy Class,2016-11-11,1.0,3.0,4.0,,,4.0,3.0,negative,ground
 E0837,R009030_s16,R009030,American Airlines,,2016-08-04,1.0,,,,,,,negative,food
-E0838,R000946_s00,R000946,Turkish Airlines,Economy Class,2015-09-18,3.0,3.0,3.0,3.0,3.0,1.0,3.0,negative,none
-E0839,R009060_s06,R009060,American Airlines,Economy Class,2016-07-20,3.0,2.0,1.0,2.0,1.0,2.0,2.0,negative,staff
-E0840,R016760_s02,R016760,Aeroflot Russian Airlines,Economy Class,2017-01-07,1.0,2.0,2.0,3.0,1.0,1.0,1.0,negative,entertainment
-E0841,R013438_s13,R013438,United Airlines,Economy Class,2018-03-18,1.0,2.0,1.0,1.0,1.0,1.0,4.0,negative,seat
-E0842,R010278_s07,R010278,Delta Air Lines,Economy Class,2019-02-14,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0843,R015568_s02,R015568,Jetblue Airways,Economy Class,2018-04-08,2.0,2.0,1.0,1.0,3.0,2.0,2.0,negative,entertainment
-E0844,R012837_s01,R012837,United Airlines,Economy Class,2019-02-03,10.0,5.0,5.0,3.0,3.0,5.0,4.0,positive,staff
-E0845,R051136_s08,R051136,Spirit Airlines,,2014-05-20,1.0,1.0,1.0,1.0,1.0,,1.0,negative,value
-E0846,R008659_s04,R008659,American Airlines,Economy Class,2017-06-28,1.0,2.0,1.0,2.0,2.0,1.0,2.0,negative,entertainment
-E0847,R047926_s04,R047926,Wizz Air,Economy Class,2018-07-15,2.0,4.0,4.0,3.0,,1.0,3.0,negative,staff
-E0848,R020131_s04,R020131,AirAsia,Economy Class,2018-03-05,9.0,3.0,3.0,,,5.0,4.0,positive,none
-E0849,R010764_s05,R010764,Delta Air Lines,Economy Class,2017-07-25,1.0,1.0,1.0,,,1.0,1.0,negative,seat
+E0838,R048612_s15,R048612,Spirit Airlines,Economy Class,2019-04-27,2.0,2.0,4.0,2.0,1.0,2.0,2.0,negative,none
+E0839,R012884_s07,R012884,United Airlines,Economy Class,2019-01-06,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0840,R027108_s06,R027108,China Southern Airlines,Business Class,2014-10-01,4.0,5.0,3.0,1.0,1.0,,5.0,negative,entertainment
+E0841,R048994_s02,R048994,Spirit Airlines,Economy Class,2018-09-23,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,seat
+E0842,R052580_s01,R052580,Sunwing Airlines,Premium Economy,2017-03-29,1.0,1.0,3.0,1.0,3.0,1.0,1.0,negative,entertainment
+E0843,R023466_s04,R023466,British Airways,Economy Class,2016-01-15,4.0,2.0,2.0,1.0,1.0,3.0,2.0,negative,entertainment
+E0844,R038265_s01,R038265,South African Airways,Economy Class,2012-03-12,8.0,3.0,4.0,4.0,5.0,,4.0,positive,staff
+E0845,R051876_s04,R051876,Vueling Airlines,Economy Class,2017-01-03,1.0,,,,,1.0,1.0,negative,value
+E0846,R011798_s02,R011798,Southwest Airlines,Economy Class,2019-01-16,2.0,2.0,3.0,2.0,3.0,3.0,3.0,negative,entertainment
+E0847,R041612_s09,R041612,SAS Scandinavian,Economy Class,2018-06-22,2.0,3.0,4.0,,,1.0,1.0,negative,staff
+E0848,R030655_s04,R030655,easyJet,Economy Class,2016-01-01,8.0,3.0,3.0,3.0,,4.0,5.0,positive,none
+E0849,R059832_s08,R059832,Gulf Air,Business Class,2016-09-21,1.0,,,,,1.0,3.0,negative,seat
 E0850,R004106_s03,R004106,Emirates,Economy Class,2015-05-20,8.0,4.0,4.0,4.0,5.0,,5.0,positive,seat
-E0851,R047495_s06,R047495,Cathay Pacific Airways,Premium Economy,2014-08-28,9.0,4.0,5.0,3.0,4.0,,4.0,positive,seat
-E0852,R056307_s04,R056307,Icelandair,Economy Class,2018-04-05,1.0,3.0,3.0,1.0,3.0,2.0,2.0,negative,ground
-E0853,R014016_s06,R014016,United Airlines,Economy Class,2016-11-16,1.0,1.0,1.0,1.0,1.0,2.0,1.0,negative,value
-E0854,R034512_s04,R034512,Air France,Economy Class,2013-09-05,10.0,5.0,5.0,5.0,1.0,,5.0,positive,entertainment
-E0855,R019023_s03,R019023,Air New Zealand,Business Class,2016-07-05,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,food
+E0851,R036260_s03,R036260,Royal Jordanian Airlines,Business Class,2015-01-21,8.0,5.0,5.0,3.0,4.0,,4.0,positive,seat
+E0852,R007728_s07,R007728,American Airlines,Economy Class,2018-11-18,3.0,3.0,3.0,,,1.0,2.0,negative,ground
+E0853,R014042_s05,R014042,United Airlines,Economy Class,2016-10-17,3.0,2.0,3.0,2.0,2.0,3.0,1.0,negative,value
+E0854,R042335_s05,R042335,Swiss Intl Air Lines,Economy Class,2017-09-04,9.0,4.0,5.0,4.0,5.0,4.0,5.0,positive,entertainment
+E0855,R052764_s01,R052764,Sunwing Airlines,Economy Class,2015-01-19,7.0,3.0,5.0,4.0,3.0,,5.0,positive,food
 E0856,R029100_s03,R029100,Iberia,Economy Class,2018-09-05,7.0,3.0,3.0,4.0,5.0,3.0,4.0,positive,seat
-E0857,R007679_s02,R007679,American Airlines,Economy Class,2018-12-20,2.0,1.0,3.0,,,2.0,1.0,negative,none
-E0858,R009549_s08,R009549,American Airlines,Economy Class,2015-09-07,7.0,4.0,4.0,4.0,3.0,3.0,3.0,positive,entertainment
-E0859,R006179_s13,R006179,KLM Royal Dutch Airlines,Economy Class,2018-09-06,7.0,3.0,4.0,4.0,2.0,4.0,3.0,positive,none
-E0860,R049314_s03,R049314,Spirit Airlines,Economy Class,2018-03-02,1.0,1.0,3.0,1.0,1.0,1.0,1.0,negative,ground
-E0861,R050870_s04,R050870,Spirit Airlines,,2014-10-31,10.0,5.0,5.0,4.0,4.0,,5.0,positive,none
+E0857,R025363_s05,R025363,China Eastern Airlines,Economy Class,2015-09-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0858,R033217_s03,R033217,Qantas Airways,Economy Class,2015-01-21,7.0,3.0,5.0,4.0,3.0,,3.0,positive,entertainment
+E0859,R003590_s04,R003590,Emirates,First Class,2016-10-20,9.0,5.0,5.0,3.0,5.0,4.0,4.0,positive,none
+E0860,R024797_s04,R024797,Brussels Airlines,Economy Class,2016-06-12,1.0,1.0,5.0,5.0,4.0,5.0,5.0,negative,ground
+E0861,R030558_s04,R030558,easyJet,Economy Class,2016-07-06,10.0,5.0,5.0,4.0,,5.0,5.0,positive,none
 E0862,R016286_s02,R016286,Aegean Airlines,Business Class,2016-04-19,9.0,4.0,5.0,4.0,3.0,4.0,4.0,positive,ground
-E0863,R036874_s01,R036874,Ryanair,Economy Class,2017-09-02,7.0,2.0,4.0,4.0,,2.0,4.0,positive,none
+E0863,R030609_s07,R030609,easyJet,Economy Class,2016-03-18,9.0,4.0,4.0,4.0,,3.0,4.0,positive,none
 E0864,R031984_s11,R031984,LOT Polish Airlines,Economy Class,2018-09-14,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,food
-E0865,R054174_s09,R054174,Garuda Indonesia,Economy Class,2015-01-28,8.0,5.0,5.0,3.0,3.0,,4.0,positive,none
-E0866,R037329_s05,R037329,Ryanair,Economy Class,2015-07-20,2.0,4.0,1.0,,,5.0,5.0,negative,staff
-E0867,R024919_s04,R024919,Brussels Airlines,Business Class,2013-11-01,10.0,4.0,5.0,4.0,3.0,,5.0,positive,none
-E0868,R019104_s02,R019104,Air New Zealand,Business Class,2015-06-04,9.0,5.0,5.0,4.0,4.0,,4.0,positive,food
-E0869,R058155_s13,R058155,Alaska Airlines,Premium Economy,2016-12-27,9.0,5.0,5.0,5.0,5.0,4.0,4.0,positive,staff
-E0870,R033005_s06,R033005,Qantas Airways,Premium Economy,2015-11-27,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,none
+E0865,R028541_s15,R028541,Finnair,Business Class,2017-01-06,8.0,4.0,4.0,2.0,3.0,5.0,4.0,positive,none
+E0866,R009670_s02,R009670,American Airlines,Economy Class,2015-06-16,3.0,2.0,3.0,2.0,,4.0,3.0,negative,staff
+E0867,R004049_s01,R004049,Emirates,First Class,2015-07-08,10.0,5.0,5.0,5.0,5.0,5.0,4.0,positive,none
+E0868,R058692_s07,R058692,Norwegian,Economy Class,2018-09-27,9.0,4.0,5.0,4.0,4.0,4.0,5.0,positive,food
+E0869,R027668_s03,R027668,Ethiopian Airlines,Business Class,2018-05-28,7.0,4.0,5.0,3.0,4.0,4.0,5.0,positive,staff
+E0870,R038967_s02,R038967,TAP Portugal,Economy Class,2016-09-02,7.0,5.0,4.0,3.0,,3.0,4.0,positive,none
 E0871,R014189_s18,R014189,United Airlines,Premium Economy,2016-05-26,4.0,1.0,2.0,1.0,3.0,2.0,3.0,negative,food
-E0872,R026175_s09,R026175,China Southern Airlines,Business Class,2017-10-24,8.0,4.0,4.0,3.0,2.0,4.0,4.0,positive,food
-E0873,R053753_s01,R053753,Garuda Indonesia,Economy Class,2019-02-12,4.0,3.0,4.0,3.0,,3.0,2.0,negative,none
-E0874,R023400_s02,R023400,British Airways,Economy Class,2016-03-07,4.0,1.0,2.0,2.0,,3.0,3.0,negative,seat
-E0875,R042418_s01,R042418,Swiss Intl Air Lines,,2016-09-15,3.0,,,,,,,negative,value
-E0876,R018289_s17,R018289,Air Canada,Economy Class,2015-08-29,2.0,2.0,1.0,2.0,3.0,1.0,2.0,negative,none
-E0877,R026364_s03,R026364,China Southern Airlines,Economy Class,2017-03-30,9.0,4.0,5.0,4.0,4.0,4.0,4.0,positive,staff
-E0878,R024378_s04,R024378,British Airways,Economy Class,2014-09-22,1.0,3.0,4.0,3.0,4.0,,1.0,negative,value
-E0879,R019289_s01,R019289,Air New Zealand,Business Class,2013-12-16,10.0,5.0,5.0,5.0,,,5.0,positive,seat
-E0880,R029705_s03,R029705,ANA All Nippon Airways,First Class,2018-06-21,10.0,5.0,5.0,5.0,3.0,5.0,5.0,positive,food
-E0881,R059211_s03,R059211,Norwegian,Economy Class,2015-09-18,10.0,5.0,4.0,5.0,5.0,5.0,5.0,positive,seat
-E0882,R002593_s15,R002593,Qatar Airways,Economy Class,2015-01-05,8.0,4.0,5.0,2.0,4.0,,5.0,positive,none
-E0883,R012032_s01,R012032,Southwest Airlines,Economy Class,2017-10-14,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
-E0884,R033976_s07,R033976,Air France,Business Class,2016-12-10,10.0,5.0,5.0,5.0,3.0,5.0,4.0,positive,entertainment
-E0885,R008357_s02,R008357,American Airlines,Economy Class,2018-01-22,1.0,1.0,1.0,,,1.0,1.0,negative,ground
-E0886,R040771_s12,R040771,Singapore Airlines,Premium Economy,2017-08-03,9.0,4.0,5.0,4.0,4.0,4.0,5.0,positive,entertainment
-E0887,R000964_s10,R000964,Turkish Airlines,Economy Class,2015-09-03,1.0,2.0,4.0,4.0,3.0,1.0,1.0,negative,ground
-E0888,R022469_s11,R022469,British Airways,Premium Economy,2017-10-01,7.0,1.0,3.0,1.0,3.0,4.0,4.0,positive,seat
-E0889,R044955_s03,R044955,Air Canada rouge,Economy Class,2016-02-16,2.0,1.0,4.0,,,3.0,1.0,negative,none
+E0872,R058456_s02,R058456,Alaska Airlines,First Class,2011-02-11,10.0,,,,,,4.0,positive,food
+E0873,R036652_s01,R036652,Ryanair,Economy Class,2018-07-08,1.0,2.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0874,R034968_s02,R034968,Etihad Airways,Economy Class,2017-04-22,3.0,1.0,1.0,1.0,1.0,4.0,3.0,negative,seat
+E0875,R042429_s03,R042429,Swiss Intl Air Lines,Business Class,2016-08-17,3.0,1.0,1.0,3.0,2.0,1.0,2.0,negative,value
+E0876,R021873_s11,R021873,Austrian Airlines,Economy Class,2012-06-24,3.0,2.0,3.0,2.0,,,3.0,negative,none
+E0877,R049262_s06,R049262,Spirit Airlines,Economy Class,2018-04-11,10.0,5.0,5.0,,,5.0,5.0,positive,staff
+E0878,R024380_s12,R024380,British Airways,Business Class,2014-09-18,2.0,1.0,1.0,1.0,1.0,,1.0,negative,value
+E0879,R041988_s03,R041988,SAS Scandinavian,Business Class,2014-03-17,8.0,4.0,5.0,4.0,2.0,,3.0,positive,seat
+E0880,R024571_s03,R024571,British Airways,Business Class,2014-06-01,7.0,4.0,4.0,4.0,4.0,,3.0,positive,food
+E0881,R040177_s03,R040177,EVA Air,Business Class,2011-08-30,8.0,,,,,,4.0,positive,seat
+E0882,R002754_s02,R002754,Qatar Airways,Economy Class,2014-04-08,8.0,4.0,5.0,4.0,4.0,,5.0,positive,none
+E0883,R057588_s06,R057588,Aer Lingus,Economy Class,2012-07-25,9.0,4.0,5.0,4.0,4.0,,4.0,positive,none
+E0884,R044992_s06,R044992,Air Canada rouge,Economy Class,2015-12-09,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,entertainment
+E0885,R000870_s08,R000870,Turkish Airlines,Business Class,2015-11-30,2.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,ground
+E0886,R003364_s01,R003364,Emirates,Business Class,2017-09-25,10.0,5.0,5.0,4.0,4.0,3.0,4.0,positive,entertainment
+E0887,R010312_s12,R010312,Delta Air Lines,First Class,2019-01-04,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0888,R052741_s05,R052741,Sunwing Airlines,Economy Class,2015-02-24,10.0,5.0,5.0,4.0,4.0,,5.0,positive,seat
+E0889,R034774_s07,R034774,Etihad Airways,Business Class,2018-05-11,1.0,4.0,4.0,2.0,3.0,1.0,1.0,negative,none
 E0890,R041890_s03,R041890,SAS Scandinavian,Premium Economy,2015-03-23,10.0,4.0,5.0,4.0,,,5.0,positive,value
-E0891,R047788_s02,R047788,Wizz Air,Economy Class,2019-05-08,3.0,1.0,2.0,1.0,1.0,1.0,3.0,negative,ground
-E0892,R010130_s02,R010130,American Airlines,Economy Class,2014-01-31,2.0,2.0,2.0,1.0,1.0,,3.0,negative,entertainment
-E0893,R029973_s05,R029973,ANA All Nippon Airways,Economy Class,2014-03-05,1.0,1.0,1.0,2.0,1.0,,1.0,negative,entertainment
+E0891,R030207_s01,R030207,easyJet,Economy Class,2018-11-13,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0892,R029884_s06,R029884,ANA All Nippon Airways,Economy Class,2015-06-14,2.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,entertainment
+E0893,R038052_s02,R038052,South African Airways,Premium Economy,2016-01-15,4.0,1.0,5.0,1.0,1.0,3.0,1.0,negative,entertainment
 E0894,R042630_s08,R042630,Swiss Intl Air Lines,First Class,2014-07-17,10.0,5.0,5.0,5.0,3.0,,5.0,positive,ground
-E0895,R045629_s03,R045629,Air Canada rouge,Economy Class,2014-05-03,1.0,1.0,1.0,1.0,1.0,,1.0,negative,entertainment
+E0895,R034241_s08,R034241,Air France,Economy Class,2015-03-29,1.0,3.0,2.0,1.0,1.0,,1.0,negative,entertainment
 E0896,R054081_s07,R054081,Garuda Indonesia,Business Class,2016-01-10,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,ground
-E0897,R044210_s02,R044210,Air India,Business Class,2013-12-29,4.0,4.0,3.0,1.0,1.0,,5.0,negative,entertainment
-E0898,R039207_s02,R039207,TAP Portugal,Economy Class,2014-03-10,10.0,5.0,5.0,5.0,4.0,,5.0,positive,none
-E0899,R060713_s10,R060713,WOW air,Economy Class,2016-12-12,10.0,5.0,5.0,,,5.0,5.0,positive,none
-E0900,R015546_s05,R015546,Jetblue Airways,Economy Class,2018-06-02,1.0,2.0,1.0,1.0,,1.0,1.0,negative,none
-E0901,R023126_s09,R023126,British Airways,First Class,2016-09-18,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0902,R000207_s12,R000207,Turkish Airlines,Economy Class,2018-08-19,1.0,4.0,2.0,4.0,1.0,1.0,1.0,negative,none
+E0897,R004968_s05,R004968,Lufthansa,Business Class,2018-01-03,3.0,1.0,4.0,3.0,1.0,4.0,2.0,negative,entertainment
+E0898,R027424_s04,R027424,Copa Airlines,Economy Class,2018-01-05,8.0,4.0,3.0,3.0,3.0,3.0,4.0,positive,none
+E0899,R052426_s02,R052426,Vueling Airlines,Economy Class,2011-09-13,10.0,,,,,,4.0,positive,none
+E0900,R010894_s00,R010894,Delta Air Lines,Economy Class,2016-12-20,1.0,3.0,2.0,1.0,3.0,1.0,1.0,negative,none
+E0901,R023127_s20,R023127,British Airways,Business Class,2016-09-18,2.0,1.0,2.0,1.0,,1.0,1.0,negative,value
+E0902,R058518_s01,R058518,Tunisair,Economy Class,2012-07-26,2.0,,,,,,1.0,negative,none
 E0903,R049304_s04,R049304,Spirit Airlines,Economy Class,2018-03-07,7.0,3.0,4.0,3.0,,2.0,4.0,positive,ground
-E0904,R001197_s04,R001197,Turkish Airlines,,2014-09-01,9.0,,,,,,,positive,entertainment
-E0905,R023202_s02,R023202,British Airways,Business Class,2016-07-15,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,food
-E0906,R045265_s02,R045265,Air Canada rouge,Economy Class,2015-01-14,4.0,1.0,2.0,2.0,4.0,,1.0,negative,seat
-E0907,R022395_s05,R022395,British Airways,Economy Class,2017-11-24,3.0,1.0,5.0,1.0,1.0,3.0,3.0,negative,entertainment
-E0908,R045019_s01,R045019,Air Canada rouge,Business Class,2015-10-11,10.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,none
-E0909,R060157_s11,R060157,Kuwait Airways,Economy Class,2015-04-19,3.0,2.0,3.0,3.0,1.0,,2.0,negative,entertainment
-E0910,R061116_s00,R061116,Ukraine International,Economy Class,2013-07-24,10.0,4.0,5.0,5.0,1.0,,4.0,positive,none
-E0911,R048051_s08,R048051,Wizz Air,Economy Class,2017-07-04,2.0,2.0,3.0,2.0,1.0,1.0,3.0,negative,value
-E0912,R006100_s03,R006100,KLM Royal Dutch Airlines,Economy Class,2019-03-08,1.0,1.0,1.0,,,1.0,1.0,negative,ground
-E0913,R009545_s03,R009545,American Airlines,Business Class,2015-09-08,9.0,4.0,4.0,4.0,4.0,4.0,4.0,positive,staff
-E0914,R003711_s05,R003711,Emirates,Economy Class,2016-05-27,1.0,3.0,1.0,3.0,4.0,3.0,1.0,negative,staff
-E0915,R008997_s05,R008997,American Airlines,Economy Class,2016-08-25,7.0,4.0,5.0,,1.0,3.0,4.0,positive,none
-E0916,R018259_s05,R018259,Air Canada,Economy Class,2015-10-04,8.0,4.0,5.0,4.0,3.0,4.0,5.0,positive,seat
-E0917,R007168_s07,R007168,Virgin America,Economy Class,2014-04-23,1.0,1.0,3.0,2.0,1.0,,,negative,none
-E0918,R010824_s03,R010824,Delta Air Lines,Economy Class,2017-04-24,1.0,1.0,1.0,1.0,,1.0,1.0,negative,none
-E0919,R009415_s10,R009415,American Airlines,Economy Class,2015-11-10,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
-E0920,R056931_s07,R056931,IndiGo,Economy Class,2014-08-06,9.0,3.0,4.0,3.0,,,5.0,positive,staff
-E0921,R047385_s04,R047385,Cathay Pacific Airways,Business Class,2015-02-18,9.0,5.0,4.0,4.0,4.0,,4.0,positive,entertainment
+E0904,R026444_s04,R026444,China Southern Airlines,Economy Class,2017-01-20,7.0,4.0,4.0,2.0,3.0,4.0,5.0,positive,entertainment
+E0905,R029280_s04,R029280,Iberia,Business Class,2015-11-15,7.0,3.0,4.0,3.0,,3.0,3.0,positive,food
+E0906,R018604_s08,R018604,Air Canada,Economy Class,2014-06-02,2.0,3.0,2.0,1.0,2.0,,2.0,negative,seat
+E0907,R053598_s17,R053598,flydubai,Economy Class,2017-07-01,2.0,3.0,1.0,1.0,1.0,1.0,2.0,negative,entertainment
+E0908,R001850_s03,R001850,Qatar Airways,Economy Class,2017-10-02,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
+E0909,R025236_s01,R025236,China Eastern Airlines,Economy Class,2017-02-09,3.0,1.0,2.0,3.0,2.0,3.0,3.0,negative,entertainment
+E0910,R021946_s09,R021946,British Airways,Economy Class,2019-03-23,7.0,3.0,5.0,4.0,4.0,4.0,4.0,positive,none
+E0911,R035413_s03,R035413,Etihad Airways,Economy Class,2015-05-04,1.0,1.0,2.0,2.0,1.0,,1.0,negative,value
+E0912,R052327_s01,R052327,Vueling Airlines,Economy Class,2013-10-10,1.0,2.0,1.0,1.0,1.0,,3.0,negative,ground
+E0913,R042139_s03,R042139,SAS Scandinavian,Business Class,2012-07-26,7.0,3.0,5.0,5.0,2.0,,3.0,positive,staff
+E0914,R059986_s06,R059986,Gulf Air,Economy Class,2010-10-12,2.0,,,,,,1.0,negative,staff
+E0915,R055456_s18,R055456,Frontier Airlines,Economy Class,2017-08-29,8.0,1.0,5.0,3.0,,5.0,5.0,positive,none
+E0916,R028904_s02,R028904,Finnair,Economy Class,2012-08-01,8.0,4.0,4.0,4.0,3.0,,5.0,positive,seat
+E0917,R013601_s05,R013601,United Airlines,Economy Class,2017-12-05,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0918,R050344_s00,R050344,Spirit Airlines,Economy Class,2015-09-23,1.0,1.0,1.0,,,1.0,1.0,negative,none
+E0919,R015522_s07,R015522,Jetblue Airways,Economy Class,2018-07-16,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,staff
+E0920,R046827_s02,R046827,Cathay Pacific Airways,Economy Class,2017-12-05,9.0,4.0,5.0,4.0,4.0,5.0,4.0,positive,staff
+E0921,R044866_s14,R044866,Air Canada rouge,Premium Economy,2016-11-26,8.0,5.0,5.0,5.0,3.0,4.0,4.0,positive,entertainment
 E0922,R045411_s07,R045411,Air Canada rouge,Economy Class,2014-09-28,7.0,4.0,5.0,4.0,4.0,,4.0,positive,seat
-E0923,R052128_s13,R052128,Vueling Airlines,Economy Class,2015-09-08,1.0,1.0,3.0,,,1.0,1.0,negative,ground
-E0924,R044846_s07,R044846,Air Canada rouge,Economy Class,2017-03-14,2.0,1.0,4.0,,1.0,4.0,1.0,negative,seat
-E0925,R043906_s03,R043906,Air India,Economy Class,2016-09-01,8.0,5.0,4.0,4.0,2.0,3.0,5.0,positive,none
-E0926,R002595_s04,R002595,Qatar Airways,Economy Class,2015-01-05,8.0,3.0,4.0,4.0,4.0,,5.0,positive,none
-E0927,R002580_s06,R002580,Qatar Airways,Business Class,2015-01-19,10.0,5.0,5.0,4.0,5.0,,5.0,positive,none
-E0928,R057974_s03,R057974,Alaska Airlines,Economy Class,2018-12-15,10.0,4.0,4.0,4.0,,5.0,5.0,positive,staff
+E0923,R017144_s01,R017144,Aeromexico,Economy Class,2018-04-11,4.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,ground
+E0924,R042670_s04,R042670,Swiss Intl Air Lines,Economy Class,2014-02-10,2.0,1.0,1.0,2.0,2.0,,1.0,negative,seat
+E0925,R004408_s11,R004408,Emirates,Economy Class,2014-06-23,8.0,4.0,4.0,4.0,5.0,,5.0,positive,none
+E0926,R033621_s05,R033621,Qantas Airways,Economy Class,2013-10-02,8.0,4.0,4.0,3.0,4.0,,4.0,positive,none
+E0927,R052752_s01,R052752,Sunwing Airlines,Economy Class,2015-02-06,7.0,3.0,4.0,1.0,4.0,,3.0,positive,none
+E0928,R019592_s02,R019592,Alitalia,Business Class,2016-08-30,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,staff
 E0929,R000273_s07,R000273,Turkish Airlines,Economy Class,2018-05-23,9.0,4.0,5.0,5.0,4.0,5.0,5.0,positive,value
-E0930,R023832_s19,R023832,British Airways,Economy Class,2015-08-06,1.0,1.0,1.0,1.0,,1.0,2.0,negative,none
-E0931,R024812_s06,R024812,Brussels Airlines,Economy Class,2016-01-14,1.0,1.0,1.0,,1.0,1.0,1.0,negative,staff
+E0930,R027814_s12,R027814,Ethiopian Airlines,Economy Class,2015-11-04,2.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0931,R019085_s03,R019085,Air New Zealand,Economy Class,2015-09-05,1.0,3.0,1.0,1.0,4.0,5.0,1.0,negative,staff
 E0932,R028516_s01,R028516,Finnair,Economy Class,2017-05-15,9.0,4.0,4.0,3.0,,4.0,4.0,positive,value
-E0933,R008447_s03,R008447,American Airlines,Economy Class,2017-11-27,1.0,1.0,3.0,3.0,1.0,1.0,1.0,negative,ground
+E0933,R002015_s03,R002015,Qatar Airways,Economy Class,2017-02-11,4.0,4.0,3.0,3.0,5.0,3.0,5.0,negative,ground
 E0934,R036887_s13,R036887,Ryanair,Economy Class,2017-08-09,9.0,4.0,4.0,4.0,,4.0,5.0,positive,ground
-E0935,R026716_s03,R026716,China Southern Airlines,Business Class,2016-04-14,9.0,3.0,5.0,4.0,5.0,5.0,5.0,positive,seat
+E0935,R054126_s10,R054126,Garuda Indonesia,First Class,2015-08-24,8.0,5.0,5.0,3.0,4.0,5.0,5.0,positive,seat
 E0936,R047156_s03,R047156,Cathay Pacific Airways,Premium Economy,2016-01-31,9.0,5.0,5.0,4.0,5.0,5.0,5.0,positive,value
-E0937,R041566_s03,R041566,SAS Scandinavian,Economy Class,2019-01-21,2.0,3.0,1.0,1.0,,4.0,2.0,negative,staff
-E0938,R046675_s10,R046675,Cathay Pacific Airways,Economy Class,2018-10-09,10.0,5.0,5.0,5.0,5.0,5.0,5.0,positive,none
+E0937,R045965_s07,R045965,Air China,Economy Class,2018-11-20,3.0,4.0,5.0,5.0,3.0,1.0,4.0,negative,staff
+E0938,R047526_s07,R047526,Cathay Pacific Airways,Economy Class,2014-07-22,8.0,4.0,3.0,3.0,5.0,,5.0,positive,none
 E0939,R043180_s03,R043180,Thai Airways,Economy Class,2016-06-18,9.0,5.0,4.0,4.0,3.0,4.0,5.0,positive,ground
-E0940,R034076_s06,R034076,Air France,Economy Class,2016-02-25,9.0,5.0,5.0,3.0,5.0,4.0,5.0,positive,food
-E0941,R055793_s31,R055793,Frontier Airlines,Economy Class,2015-09-23,1.0,1.0,2.0,,,3.0,1.0,negative,value
-E0942,R017569_s09,R017569,Air Canada,Economy Class,2019-02-12,1.0,2.0,3.0,1.0,1.0,1.0,2.0,negative,none
+E0940,R033349_s05,R033349,Qantas Airways,Economy Class,2014-07-31,8.0,4.0,5.0,3.0,1.0,,1.0,positive,food
+E0941,R047787_s18,R047787,Wizz Air,Economy Class,2019-05-11,1.0,2.0,1.0,,1.0,1.0,1.0,negative,value
+E0942,R008441_s20,R008441,American Airlines,Economy Class,2017-12-02,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
 E0943,R019788_s12,R019788,Alitalia,Premium Economy,2014-08-15,1.0,3.0,1.0,1.0,1.0,,1.0,negative,food
-E0944,R030760_s08,R030760,easyJet,Economy Class,2015-07-08,1.0,1.0,1.0,,,1.0,1.0,negative,value
-E0945,R061005_s09,R061005,Ukraine International,Economy Class,2017-01-06,9.0,3.0,5.0,3.0,2.0,4.0,5.0,positive,none
-E0946,R009311_s00,R009311,American Airlines,,2016-01-04,1.0,,,,,,,negative,none
-E0947,R048582_s14,R048582,Spirit Airlines,Economy Class,2019-05-17,3.0,1.0,4.0,,,3.0,1.0,negative,seat
-E0948,R060421_s07,R060421,WOW air,Economy Class,2018-05-30,1.0,2.0,1.0,,,1.0,1.0,negative,value
+E0944,R054835_s10,R054835,Frontier Airlines,Economy Class,2018-10-30,1.0,1.0,1.0,,,1.0,1.0,negative,value
+E0945,R059902_s01,R059902,Gulf Air,Economy Class,2013-06-11,7.0,2.0,3.0,3.0,2.0,,4.0,positive,none
+E0946,R011902_s01,R011902,Southwest Airlines,Economy Class,2018-07-09,2.0,2.0,2.0,,,1.0,1.0,negative,none
+E0947,R012881_s04,R012881,United Airlines,Economy Class,2019-01-07,2.0,1.0,3.0,1.0,2.0,1.0,1.0,negative,seat
+E0948,R051729_s09,R051729,Vueling Airlines,Economy Class,2018-05-06,1.0,1.0,1.0,,,1.0,1.0,negative,value
 E0949,R030911_s03,R030911,easyJet,Economy Class,2014-06-01,9.0,4.0,4.0,3.0,,,3.0,positive,ground
-E0950,R027622_s32,R027622,Ethiopian Airlines,Economy Class,2019-01-03,1.0,1.0,1.0,1.0,,1.0,1.0,negative,staff
-E0951,R049926_s01,R049926,Spirit Airlines,Economy Class,2016-08-22,1.0,1.0,1.0,,,1.0,1.0,negative,none
-E0952,R057066_s08,R057066,Aer Lingus,Economy Class,2018-09-04,1.0,3.0,3.0,,,3.0,1.0,negative,staff
-E0953,R058117_s09,R058117,Alaska Airlines,Economy Class,2017-08-03,1.0,1.0,2.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0954,R030034_s05,R030034,ANA All Nippon Airways,Economy Class,2013-02-04,8.0,4.0,5.0,5.0,3.0,,5.0,positive,entertainment
-E0955,R058762_s11,R058762,Norwegian,Economy Class,2018-06-12,1.0,,,,,1.0,1.0,negative,ground
-E0956,R038906_s02,R038906,TAP Portugal,Business Class,2017-04-20,2.0,1.0,4.0,2.0,,2.0,1.0,negative,entertainment
-E0957,R059215_s05,R059215,Norwegian,Economy Class,2015-09-15,7.0,3.0,3.0,,3.0,3.0,5.0,positive,none
-E0958,R025218_s22,R025218,China Eastern Airlines,Economy Class,2017-04-13,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,entertainment
-E0959,R028223_s04,R028223,Egyptair,Economy Class,2013-02-25,4.0,2.0,3.0,3.0,1.0,,2.0,negative,seat
+E0950,R034306_s04,R034306,Air France,Economy Class,2014-09-17,1.0,2.0,1.0,1.0,1.0,,1.0,negative,staff
+E0951,R013955_s18,R013955,United Airlines,Premium Economy,2017-01-01,1.0,3.0,1.0,1.0,1.0,4.0,3.0,negative,none
+E0952,R045802_s10,R045802,airBaltic,Economy Class,2014-07-31,1.0,3.0,1.0,1.0,1.0,,1.0,negative,staff
+E0953,R034357_s04,R034357,Air France,Economy Class,2014-05-20,4.0,3.0,2.0,2.0,2.0,,4.0,negative,entertainment
+E0954,R022339_s09,R022339,British Airways,Business Class,2018-01-17,8.0,5.0,5.0,5.0,2.0,5.0,5.0,positive,entertainment
+E0955,R049025_s07,R049025,Spirit Airlines,Economy Class,2018-08-30,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,ground
+E0956,R045544_s06,R045544,Air Canada rouge,Economy Class,2014-05-25,3.0,2.0,3.0,2.0,1.0,,1.0,negative,entertainment
+E0957,R010127_s06,R010127,American Airlines,Business Class,2014-02-05,8.0,3.0,4.0,4.0,4.0,,4.0,positive,none
+E0958,R035065_s35,R035065,Etihad Airways,Economy Class,2016-10-30,2.0,1.0,1.0,1.0,2.0,1.0,2.0,negative,entertainment
+E0959,R050413_s08,R050413,Spirit Airlines,Economy Class,2015-08-21,1.0,1.0,1.0,,,1.0,1.0,negative,seat
 E0960,R028910_s03,R028910,Finnair,Economy Class,2012-07-08,7.0,4.0,4.0,3.0,3.0,,4.0,positive,seat
-E0961,R040032_s01,R040032,EVA Air,Business Class,2014-02-20,10.0,5.0,5.0,5.0,4.0,,5.0,positive,none
-E0962,R030153_s27,R030153,easyJet,Economy Class,2019-04-23,1.0,1.0,1.0,,,1.0,1.0,negative,staff
-E0963,R036977_s06,R036977,Ryanair,Economy Class,2016-12-12,1.0,1.0,1.0,,1.0,1.0,1.0,negative,value
-E0964,R039561_s04,R039561,Eurowings,Economy Class,2018-02-27,1.0,,,,,1.0,1.0,negative,ground
+E0961,R032720_s07,R032720,Qantas Airways,Economy Class,2017-04-12,8.0,4.0,5.0,5.0,5.0,5.0,4.0,positive,none
+E0962,R002080_s01,R002080,Qatar Airways,Economy Class,2016-10-15,3.0,3.0,4.0,3.0,3.0,3.0,2.0,negative,staff
+E0963,R054649_s03,R054649,Frontier Airlines,Economy Class,2019-05-19,1.0,1.0,1.0,1.0,,1.0,1.0,negative,value
+E0964,R027250_s01,R027250,China Southern Airlines,Economy Class,2013-11-18,4.0,3.0,4.0,3.0,2.0,,5.0,negative,ground
 E0965,R039760_s06,R039760,EVA Air,Business Class,2018-03-15,9.0,4.0,5.0,3.0,4.0,5.0,5.0,positive,ground
 E0966,R015223_s16,R015223,United Airlines,Business Class,2014-05-21,9.0,3.0,5.0,5.0,5.0,,5.0,positive,seat
 E0967,R005845_s04,R005845,Lufthansa,Business Class,2014-06-05,10.0,3.0,5.0,3.0,3.0,,3.0,positive,value
-E0968,R020794_s00,R020794,Asiana Airlines,Economy Class,2015-09-06,8.0,3.0,4.0,3.0,3.0,3.0,5.0,positive,none
-E0969,R035725_s12,R035725,Etihad Airways,Economy Class,2014-01-14,7.0,3.0,3.0,3.0,3.0,,4.0,positive,food
+E0968,R020594_s02,R020594,AirAsia,Economy Class,2012-05-15,8.0,4.0,5.0,5.0,,,5.0,positive,none
+E0969,R035725_s11,R035725,Etihad Airways,Economy Class,2014-01-14,7.0,3.0,3.0,3.0,3.0,,4.0,positive,food
 E0970,R040766_s05,R040766,Singapore Airlines,Economy Class,2017-08-15,10.0,4.0,4.0,5.0,,5.0,5.0,positive,ground
-E0971,R043953_s05,R043953,Air India,Economy Class,2016-01-19,1.0,2.0,2.0,2.0,3.0,1.0,1.0,negative,none
-E0972,R042553_s03,R042553,Swiss Intl Air Lines,Economy Class,2015-05-28,8.0,4.0,5.0,4.0,3.0,,4.0,positive,entertainment
-E0973,R035887_s04,R035887,Pegasus Airlines,Economy Class,2018-04-22,8.0,2.0,4.0,,,4.0,4.0,positive,none
-E0974,R049706_s08,R049706,Spirit Airlines,Economy Class,2017-04-23,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,value
-E0975,R027615_s04,R027615,Ethiopian Airlines,Business Class,2019-02-04,10.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,none
-E0976,R007251_s05,R007251,Virgin America,Economy Class,2012-07-26,7.0,4.0,2.0,,,,3.0,positive,none
+E0971,R055422_s15,R055422,Frontier Airlines,Economy Class,2017-10-25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,negative,none
+E0972,R034709_s15,R034709,Etihad Airways,Business Class,2018-09-12,10.0,1.0,1.0,1.0,1.0,3.0,1.0,positive,entertainment
+E0973,R016082_s15,R016082,Aegean Airlines,Economy Class,2018-10-08,8.0,4.0,2.0,4.0,,1.0,5.0,positive,none
+E0974,R049707_s01,R049707,Spirit Airlines,Economy Class,2017-04-23,1.0,1.0,1.0,1.0,,1.0,1.0,negative,value
+E0975,R046889_s00,R046889,Cathay Pacific Airways,Economy Class,2017-07-12,7.0,1.0,5.0,5.0,2.0,5.0,4.0,positive,none
+E0976,R042569_s02,R042569,Swiss Intl Air Lines,First Class,2015-03-09,10.0,5.0,5.0,3.0,4.0,,3.0,positive,none
 E0977,R053490_s00,R053490,Bangkok Airways,Economy Class,2011-02-04,7.0,,,,,,1.0,positive,value
-E0978,R007838_s05,R007838,American Airlines,Economy Class,2018-10-02,2.0,1.0,2.0,1.0,1.0,1.0,3.0,negative,ground
+E0978,R041147_s07,R041147,Singapore Airlines,Economy Class,2015-06-07,3.0,3.0,3.0,3.0,3.0,,3.0,negative,ground
 E0979,R054205_s05,R054205,Garuda Indonesia,First Class,2014-08-26,10.0,5.0,5.0,5.0,5.0,,5.0,positive,value
 E0980,R016855_s07,R016855,Aeroflot Russian Airlines,Economy Class,2015-04-24,1.0,2.0,1.0,2.0,2.0,,1.0,negative,food
-E0981,R032252_s03,R032252,LOT Polish Airlines,Economy Class,2012-06-10,8.0,5.0,4.0,3.0,,,5.0,positive,food
+E0981,R039834_s04,R039834,EVA Air,Business Class,2017-03-02,9.0,5.0,5.0,4.0,,3.0,4.0,positive,food
 E0982,R004300_s06,R004300,Emirates,Economy Class,2014-10-08,2.0,1.0,2.0,1.0,3.0,,2.0,negative,food
-E0983,R021796_s02,R021796,Austrian Airlines,Economy Class,2013-07-22,2.0,3.0,3.0,1.0,3.0,,2.0,negative,none
-E0984,R029648_s09,R029648,Iberia,Business Class,2012-08-07,10.0,5.0,5.0,5.0,5.0,,5.0,positive,staff
-E0985,R027204_s04,R027204,China Southern Airlines,Economy Class,2014-01-25,10.0,3.0,5.0,4.0,5.0,,3.0,positive,none
-E0986,R021154_s10,R021154,Avianca,Economy Class,2018-03-02,7.0,3.0,4.0,4.0,4.0,2.0,4.0,positive,staff
-E0987,R055429_s15,R055429,Frontier Airlines,Economy Class,2017-10-17,10.0,3.0,5.0,,,4.0,5.0,positive,none
+E0983,R007934_s19,R007934,American Airlines,Economy Class,2018-08-15,2.0,1.0,1.0,,,1.0,1.0,negative,none
+E0984,R016793_s01,R016793,Aeroflot Russian Airlines,Premium Economy,2016-04-21,7.0,3.0,5.0,5.0,5.0,3.0,3.0,positive,staff
+E0985,R043355_s04,R043355,Thai Airways,Economy Class,2015-02-18,8.0,4.0,5.0,3.0,2.0,,5.0,positive,none
+E0986,R026170_s03,R026170,China Southern Airlines,Business Class,2017-10-27,9.0,4.0,5.0,4.0,,4.0,5.0,positive,staff
+E0987,R028810_s00,R028810,Finnair,Economy Class,2013-08-04,8.0,4.0,4.0,4.0,4.0,,5.0,positive,none
 E0988,R059535_s01,R059535,Norwegian,Economy Class,2014-04-21,10.0,4.0,5.0,,5.0,,5.0,positive,value
-E0989,R029473_s02,R029473,Iberia,Economy Class,2014-03-22,8.0,3.0,5.0,4.0,2.0,,4.0,positive,entertainment
-E0990,R005667_s01,R005667,Lufthansa,Economy Class,2014-12-22,8.0,3.0,5.0,3.0,4.0,,3.0,positive,none
-E0991,R028963_s02,R028963,Finnair,Economy Class,2011-11-10,8.0,4.0,5.0,5.0,4.0,,5.0,positive,food
-E0992,R017653_s08,R017653,Air Canada,Economy Class,2018-10-10,1.0,1.0,1.0,,,1.0,1.0,negative,staff
+E0989,R004174_s04,R004174,Emirates,Economy Class,2015-02-18,9.0,4.0,4.0,5.0,5.0,,5.0,positive,entertainment
+E0990,R011223_s04,R011223,Delta Air Lines,Economy Class,2015-09-23,7.0,5.0,3.0,2.0,4.0,5.0,4.0,positive,none
+E0991,R028953_s18,R028953,Finnair,Business Class,2012-01-09,7.0,4.0,5.0,4.0,,,4.0,positive,food
+E0992,R038310_s05,R038310,South African Airways,Business Class,2011-05-29,4.0,,,,,,1.0,negative,staff
 E0993,R061145_s03,R061145,Ukraine International,Business Class,2011-06-03,8.0,,,,,,4.0,positive,seat
-E0994,R047560_s03,R047560,Cathay Pacific Airways,Economy Class,2014-06-10,3.0,3.0,3.0,2.0,4.0,,3.0,negative,entertainment
-E0995,R021850_s07,R021850,Austrian Airlines,Business Class,2012-10-03,9.0,3.0,5.0,4.0,3.0,,4.0,positive,staff
-E0996,R006832_s02,R006832,KLM Royal Dutch Airlines,Economy Class,2014-06-16,10.0,4.0,5.0,5.0,5.0,,5.0,positive,staff
+E0994,R023763_s02,R023763,British Airways,Economy Class,2015-09-05,2.0,1.0,2.0,1.0,1.0,3.0,1.0,negative,entertainment
+E0995,R028336_s09,R028336,Egyptair,Economy Class,2010-08-08,7.0,,,,,,4.0,positive,staff
+E0996,R036885_s11,R036885,Ryanair,,2017-08-10,7.0,,,,,,,positive,staff
 E0997,R039752_s02,R039752,EVA Air,Economy Class,2018-04-13,9.0,5.0,5.0,5.0,5.0,4.0,5.0,positive,ground
-E0998,R034669_s08,R034669,Etihad Airways,Business Class,2018-12-05,1.0,3.0,3.0,3.0,3.0,1.0,2.0,negative,none
-E0999,R026844_s00,R026844,China Southern Airlines,Economy Class,2016-01-12,8.0,4.0,4.0,4.0,4.0,4.0,5.0,positive,none
-E1000,R034391_s01,R034391,Air France,Economy Class,2014-03-19,7.0,3.0,4.0,4.0,4.0,,4.0,positive,staff
+E0998,R056239_s01,R056239,Icelandair,Economy Class,2019-05-28,1.0,1.0,3.0,2.0,2.0,2.0,1.0,negative,none
+E0999,R021222_s06,R021222,Avianca,Economy Class,2016-05-31,7.0,4.0,3.0,4.0,4.0,2.0,4.0,positive,none
+E1000,R028514_s12,R028514,Finnair,Business Class,2017-05-23,8.0,4.0,5.0,4.0,4.0,5.0,5.0,positive,staff
