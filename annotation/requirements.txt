@@ -1,0 +1,17 @@
+# 标注系统的依赖 —— 只装跑这个 app 需要的东西。
+#
+# 特意不包含 torch / transformers / faiss / spacy / sentence-transformers：
+# 那些是 scripts/ 里离线建库和训练用的，标注 app 一行都没 import。
+# 全装上会让 Streamlit Community Cloud 拉 2 GB 的 torch，然后撞上资源上限。
+# 依赖清单是用 AST 扫 app/ 的 import 得出来的，不是照着根目录那份抄的。
+
+streamlit>=1.40          # st.navigation / st.dataframe 的行选择都要较新版本
+pandas>=2.0              # 总览页的表
+bcrypt>=4.0              # 密码哈希
+filelock>=3.13           # 本地 CSV 模式下的写锁
+psycopg[binary]>=3.1     # Supabase（云端共享库）
+psycopg-pool>=3.2        # 连接池
+tomli>=2.0; python_version < "3.11"   # 3.11+ 用标准库 tomllib
+
+# 注：app/data_explorer.py 要 duckdb + altair，但那是独立的 parquet 浏览工具，
+# 不在标注系统的导航里，云端不会加载，所以这里不列。

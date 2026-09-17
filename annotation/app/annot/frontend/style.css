@@ -1,0 +1,64 @@
+:root{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#1e293b;background:#fff;font-size:16px;--green:#23685d;--line:#dfe5e9}*{box-sizing:border-box}body{margin:0;padding:3px}button,textarea{font:inherit}button{cursor:pointer;background:white;color:inherit;border:1px solid var(--line);border-radius:7px;padding:10px 16px}button:hover:not(:disabled){border-color:var(--green);background:#f0f7f5}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,textarea:focus-visible{outline:3px solid #8bc0b5;outline-offset:2px}.progress{display:flex;gap:16px;align-items:center;font-size:14px;margin-bottom:18px}.bar{background:#e5edeb;height:7px;border-radius:4px;flex:1;overflow:hidden}.bar i{background:var(--green);height:100%;display:block}.muted{color:#64748b;font-size:14px}.panel{border:1px solid var(--line);border-radius:12px;overflow:hidden}.sentence{padding:24px 28px}.meta{display:flex;justify-content:space-between;font-size:14px;color:#64748b;gap:12px}.id{font-family:Consolas,monospace;color:#245f56;font-weight:600}.risk{color:#966216}.english{font-size:20px;line-height:1.7;margin:22px 0;white-space:pre-wrap}.translation{border-top:1px dashed #cbd5e1;padding:16px 12px 0;margin:0;font-size:14px;line-height:1.8;color:#66758a;white-space:pre-wrap}.translate-toggle{border:0;padding:0 0 8px;font-size:13px;color:#64748b;background:transparent;float:right}.questions{border-top:1px solid var(--line);padding:20px 28px}.question{margin-bottom:18px}.qtitle{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:600;font-size:15px}.number{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef2f6;color:#748398;font-size:12px}.active .number{background:var(--green);color:white}.options{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.aspects{grid-template-columns:repeat(4,1fr)}.option{text-align:left;font-size:14px;padding:10px}.option kbd{font-size:12px;margin-right:10px;color:#758391}.selected{background:#e8f4ee;border-color:#488775;color:#205a4e}.qtitle small{margin-left:auto;font-weight:400;color:#64748b;font-size:12px}label{display:block;font-size:14px;margin:8px 0}textarea{resize:vertical;width:100%;min-height:52px;border:1px solid var(--line);padding:10px;border-radius:7px;font-size:14px;line-height:1.6}.controls{padding:16px 28px;background:#fafbfc;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}.status{font-size:13px;color:#246e5f}.status.warning{color:#946018}.hints{font-size:12px;color:#778494;margin-top:14px;line-height:1.8}.help{border:0;background:transparent;color:#64748b;padding:0 5px;font-size:13px}dialog{border:1px solid var(--line);border-radius:12px;max-width:95%;width:800px;padding:24px;max-height:85vh;overflow:auto}dialog::backdrop{background:#15283b66}.guide{white-space:pre-wrap;font-size:14px;line-height:1.8}h2{font-size:20px}.retry{color:#9a511d;border-color:#cfae8e}@media(max-width:600px){.sentence,.questions{padding:18px}.aspects{grid-template-columns:repeat(2,1fr)}.progress{flex-wrap:wrap}.progress .bar{min-width:100px}.controls{padding:12px;flex-wrap:wrap}.qtitle small{display:none}.english{font-size:20px}.controls button{font-size:14px;padding:8px}.status{font-size:12px}}
+button{background:var(--secondary-background-color,#f8fafc);color:var(--text-color,#1e293b)}.selected{background:#23685d!important;color:#fff!important;border-color:#499d8b}.selected kbd{color:#d8f0e9}.controls{background:var(--secondary-background-color,#fafbfc)}.translation{color:var(--text-color,#64748b);opacity:.7}.status{color:#389d83}textarea{background:var(--background-color,#fff);color:var(--text-color,#1e293b)}dialog{background:var(--background-color,#fff);color:var(--text-color,#1e293b)}.panel{background:var(--background-color,#fff)}
+
+/* 「标不了」的提示条：解释它的边界，防止被当成偷懒出口 */
+.unclear-hint{
+  margin:.6rem 0 0; padding:.55rem .8rem; font-size:.82rem; line-height:1.65;
+  background:#fdf3e7; border-left:3px solid #b4472e; border-radius:0 6px 6px 0;
+  color:#5c3a2c;
+}
+@media (prefers-color-scheme:dark){
+  .unclear-hint{background:#2e1f17; border-left-color:#e0764f; color:#e8cbb8;}
+}
+
+/* 清除本题：放在控制条里，样式要比「下一句」弱，避免误点 */
+.clear-btn{
+  background:none; border:1px solid var(--line,#d8d4cc); color:#8a6a5c;
+  font-size:.78rem; padding:.3rem .6rem; border-radius:6px; cursor:pointer;
+}
+.clear-btn:hover:not(:disabled){background:#fdf3e7; border-color:#b4472e; color:#b4472e;}
+.clear-btn:disabled{opacity:.4; cursor:default;}
+@media (prefers-color-scheme:dark){
+  .clear-btn{border-color:#3a383f; color:#b79a8c;}
+  .clear-btn:hover:not(:disabled){background:#2e1f17; border-color:#e0764f; color:#e0764f;}
+}
+
+/* 备注标签：统一 note 的写法，否则三个人写 sarcasm/讽刺/反讽，事后没法筛 */
+.note-tags{display:flex; flex-wrap:wrap; gap:6px; margin:.35rem 0 .45rem;}
+.note-tags .tag{
+  font-size:.76rem; padding:.22rem .6rem; border-radius:999px; cursor:pointer;
+  border:1px solid var(--line,#d8d4cc); background:transparent; color:#6b6862;
+}
+.note-tags .tag:hover:not(:disabled){border-color:#4a3aa7; color:#4a3aa7;}
+.note-tags .tag.on{background:#eeecfa; border-color:#4a3aa7; color:#4a3aa7; font-weight:600;}
+.note-tags .tag:disabled{opacity:.45; cursor:default;}
+@media (prefers-color-scheme:dark){
+  .note-tags .tag{border-color:#3a383f; color:#9b988f;}
+  .note-tags .tag:hover:not(:disabled){border-color:#9085e9; color:#9085e9;}
+  .note-tags .tag.on{background:#201e33; border-color:#9085e9; color:#9085e9;}
+}
+
+/* 客观陈述时第 2 问不适用。原来只是把选项禁用、小字改成
+   "polarity = NA"，视觉上几乎没变化 —— 标注员照旧会去按它，
+   而那一下会落到第 3 问选中 staff。这里让它明显退到背景。 */
+.question.skipped { opacity: .38; }
+.question.skipped .options { pointer-events: none; }
+.question.skipped .qtitle small { color: #888; font-style: italic; }
+
+/* 方面按钮的第二行小字。
+   真实数据里有人把 40% 的句子标成 staff —— 改签、退款、延误、值机全往里放。
+   不是理解力问题：按钮上原来只写「服务」两个字，任谁都会当成万能兜底项。
+   规范写在 ? 对话框里没用，必须出现在做决定的那一刻。 */
+.option .hint {
+  display: block; font-style: normal; font-size: 11px;
+  color: #7c8a99; margin-top: 3px; margin-left: 26px; line-height: 1.35;
+}
+.option.selected .hint { color: #3f7466; }
+.option:disabled .hint { color: #a8b3bd; }
+@media(max-width:600px){ .option .hint { margin-left: 0; } }
+
+/* 「暂存备注」：卡住时的出口。没有它，标注员只能硬猜或误用「标不了」——
+   后者更糟，≥2 人标 unclear 会把句子从金标准剔除。 */
+.pending-btn { color:#8a6d1f; border-color:#d8c48a; }
+.pending-btn:hover:not(:disabled) { background:#fdf8ec; border-color:#b89a45; }
+.pending-flag { color:#8a6d1f; font-size:13px; }

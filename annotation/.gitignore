@@ -1,0 +1,27 @@
+# 密钥。数据库连接串和仲裁口令在这里面，绝对不能提交。
+# 云端用 Streamlit Cloud 的 Secrets 面板配置，不走仓库。
+.streamlit/secrets.toml
+
+# 标注产出。本地 CSV 模式的落盘位置、导出结果、以及 scripts/backup.py 的快照。
+# 备份是给「云端库出事」兜底的，跟着仓库走就失去意义了 —— 存到
+# 本机或网盘，别提交。
+outputs/
+backups/
+
+# 标注答案。to_label_meta.csv 含 overall_rating / weak_polarity，
+# 标注员看到就等于泄题——这个仓库要部署给他们用，一律不收。
+data/eval/*meta*.csv
+
+# 前端组件的构建工具链。运行时只要 bundle.js（已提交），
+# node_modules 有 26 MB，需要时用 npx esbuild 重新生成。
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# macOS
+.DS_Store
