@@ -32,13 +32,17 @@
 抽样规则：
   1. 排除 is_route_only（纯航线元数据，没有情感极性，标了浪费人力）
   2. 排除 dup_count > 1（同一句标两遍没有意义，作业也要求评测集无重复）
-  3. 排除太短的句子（< 5 词，多是 "Never again." 这类，标注价值低）
+  3. 排除 is_non_english（让人标法语句子的英文情感，纯属浪费人工；
+     而且分类器跑在英文上，非英语进金标准会把评测搅浑）
+  4. 排除 is_fragment（以标点开头的残片，没有完整语义可判）
+  5. 排除太短的句子（< 5 词，多是 "Never again." 这类，标注价值低）
   4. 按总体评分分层：>=7 偏正面、<=4 偏负面，各占一半；5-6 分丢弃
   5. 每层内部**按六个维度尽量均衡**，避免全是 value（它覆盖率 98% 最高，
      不控制的话会挤掉 entertainment 和 ground）
   6. 打乱顺序，避免标注员形成心理惯性
 """
 import argparse
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -79,6 +83,25 @@ def tag_aspect(text: str, matchers) -> str:
     return best
 
 
+def stable_pick(pool: pd.DataFrame, k: int, seed: int) -> pd.DataFrame:
+    """从 pool 里稳定地取 k 条。
+
+    **不要用 df.sample(random_state=...)** —— 它按行位置抽，
+    池子里少掉任何一行，后面所有行的抽中结果都会错位。
+    实测：过滤规则多排掉 355 句，1,000 句标注集就被换掉 752 句（75%），
+    已经标过的部分全部作废。
+
+    改成按 chunk_id 的哈希排序取前 k 条：每条句子中不中只取决于它自己的 id，
+    和池子里有没有别的句子无关。以后再加过滤规则，只有被排掉的那几句会被替换。
+    """
+    if k <= 0 or pool.empty:
+        return pool.iloc[:0]
+    h = pool["chunk_id"].map(
+        lambda c: hashlib.md5(f"{c}|{seed}".encode()).hexdigest())
+    # 用 sort_values 而不是 nsmallest —— 后者不支持字符串 dtype
+    return pool.loc[h.sort_values().index[:min(k, len(pool))]]
+
+
 def take_balanced(pool: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
     """从一层里取 n 条，六个维度尽量均分，不够的用 none 补。"""
     names = list(ASPECTS)
@@ -88,7 +111,7 @@ def take_balanced(pool: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
         sub = pool[pool["_aspect"] == a]
         k = min(per, len(sub))
         if k:
-            picked.append(sub.sample(k, random_state=seed))
+            picked.append(stable_pick(sub, k, seed))
     got = pd.concat(picked) if picked else pool.iloc[:0]
 
     # 剩下的名额从还没被选中的里面补（优先 none，让语料更像真实分布）
@@ -98,11 +121,11 @@ def take_balanced(pool: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
         none_pool = rest[rest["_aspect"] == "none"]
         k = min(need, len(none_pool))
         if k:
-            got = pd.concat([got, none_pool.sample(k, random_state=seed)])
+            got = pd.concat([got, stable_pick(none_pool, k, seed)])
             rest = rest.drop(index=got.index.intersection(rest.index))
         need = n - len(got)
         if need > 0 and len(rest):
-            got = pd.concat([got, rest.sample(min(need, len(rest)), random_state=seed)])
+            got = pd.concat([got, stable_pick(rest, need, seed)])
     return got
 
 
@@ -138,7 +161,8 @@ def main() -> None:
 
     print(f"读取 {CHUNKS.name} ...")
     cols = ["chunk_id", "review_id", "text", "airline", "cabin", "date",
-            "overall_rating", "n_words", "is_route_only", "dup_count"] + \
+            "overall_rating", "n_words", "is_route_only", "dup_count",
+            "is_non_english", "is_fragment"] + \
            [f"r_{a}" for a in ASPECTS]
     df = pd.read_parquet(CHUNKS, columns=cols)
     print(f"   全量 {len(df):,} 句")
@@ -150,6 +174,13 @@ def main() -> None:
     before = len(df)
     df = df[df["dup_count"] == 1]
     print(f"   排除重复句        -{before - len(df):,}")
+    # 这两列是 2026-09-13 加的质量标记。非英语句尤其要排 ——
+    # 让标注员去判断一句法语的英文情感，既浪费人工又会把金标准搅浑。
+    for col, label in [("is_non_english", "排除非英语句"), ("is_fragment", "排除残片句")]:
+        if col in df.columns:
+            before = len(df)
+            df = df[~df[col].fillna(False)]
+            print(f"   {label}      -{before - len(df):,}")
     before = len(df)
     df = df[df["n_words"] >= MIN_WORDS]
     print(f"   排除 <{MIN_WORDS} 词的短句   -{before - len(df):,}")
@@ -183,7 +214,10 @@ def main() -> None:
         print(f"   ⚠️ 去掉 {before - len(sample)} 条重复文本")
 
     # ---- 打乱 ----
-    sample = sample.sample(frac=1, random_state=args.seed).reset_index(drop=True)
+    # 打乱顺序（避免标注员形成心理惯性）。同样用哈希，保证顺序也稳定。
+    order = sample["chunk_id"].map(
+        lambda c: hashlib.md5(f"shuffle|{c}|{args.seed}".encode()).hexdigest())
+    sample = sample.loc[order.sort_values().index].reset_index(drop=True)
     sample.insert(0, "id", [f"E{i:04d}" for i in range(1, len(sample) + 1)])
 
     DATA_EVAL.mkdir(parents=True, exist_ok=True)
