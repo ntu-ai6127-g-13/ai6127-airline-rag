@@ -24,6 +24,7 @@ from src.clean_text import (clean_field, clean_review, extract_route_from_text,
                             is_clearly_non_english, is_obvious_fragment, is_route_only,
                             parse_date_flown, parse_review_date, parse_route)
 from src.config import (ASPECTS, CHUNKS, COL_AIRCRAFT, COL_AIRLINE, COL_CABIN,
+                        DATA_EVAL,
                         COL_DATE, COL_DATE_FLOWN, COL_OVERALL, COL_RECOMMENDED,
                         COL_ROUTE, COL_TEXT, COL_TRAVELLER, DATA_PROC, DATA_RAW,
                         REVIEWS)
@@ -235,6 +236,9 @@ def add_derived(chunks: pd.DataFrame) -> pd.DataFrame:
     chunks["is_fragment"] = chunks["text"].map(is_obvious_fragment)
     chunks["is_non_english"] = chunks["text"].map(is_clearly_non_english)
 
+    # 人工金标准。训练时必须排掉，否则就是拿测试集训练。
+    chunks["is_eval"] = mark_eval(chunks["chunk_id"])
+
     # 数值列瘦身：1–10 / 1–5 用不着 8 字节浮点。省空间是次要的（才 0.5 MB），
     # 主要是语义正确 —— 评分是整数，不该显示成 7.0。Int8 是 pandas 的可空整数。
     for col in ["overall_rating"] + [f"r_{a}" for a in ASPECTS]:
@@ -243,6 +247,38 @@ def add_derived(chunks: pd.DataFrame) -> pd.DataFrame:
 
     print(f"      派生列完成  ({time.perf_counter()-t0:.0f}s)")
     return chunks
+
+
+def mark_eval(chunk_ids: pd.Series) -> pd.Series:
+    """标出人工金标准的句子，下游训练时一律排掉。
+
+    为什么必须是 parquet 里的一列，而不是「记得手动排除」
+      训练信号全部来自远程监督（乘客自己打的维度评分），金标准是唯一一份
+      信息源独立于评分的标签。它一旦混进训练集，P/R/F1 会系统性虚高，
+      而且这个偏差在报告里没法辩护 —— 也查不出来，因为不会报任何错。
+
+      B/C 组只要写 `df[~df.is_eval]` 就安全了，不依赖任何人记得这回事。
+
+    为什么按 chunk_id 而不是按 review_id
+      同 992 条评论里还有约 1 万句非金标准的句子。它们和金标准共享同一套
+      评分，属于更弱的关联泄漏。严格做法是连 review_id 一起排 ——
+      这里只排句子级，要不要再收紧留给下游按实验设计决定
+      （`df[~df.review_id.isin(eval_reviews)]`）。
+
+    金标准还没生成时（首次建库）整列为 False，重建时会自动重新打上。
+    """
+    meta = DATA_EVAL / "to_label_meta.csv"
+    if not meta.exists():
+        print("      is_eval：评测集尚未生成，整列置 False")
+        return pd.Series(False, index=chunk_ids.index)
+    ids = set(pd.read_csv(meta, usecols=["chunk_id"])["chunk_id"])
+    flag = chunk_ids.isin(ids)
+    hit = int(flag.sum())
+    print(f"      is_eval：标出 {hit:,} 句金标准（评测集 {len(ids):,} 句）")
+    if hit != len(ids):
+        print(f"      ⚠️ 对不上 —— 评测集里有 {len(ids) - hit:,} 句在本次语料中找不到。"
+              "多半是语料重建后 chunk_id 变了，评测集和语料已经不是一套。")
+    return flag
 
 
 def report(chunks: pd.DataFrame) -> None:
