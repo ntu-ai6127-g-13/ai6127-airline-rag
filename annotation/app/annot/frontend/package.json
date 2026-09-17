@@ -1,0 +1,1 @@
+{"name":"airline-annotation-component","private":true,"scripts":{"build":"esbuild src.js --bundle --minify --outfile=bundle.js"},"dependencies":{"streamlit-component-lib":"^2.0.0"},"devDependencies":{"esbuild":"^0.25.0"}}

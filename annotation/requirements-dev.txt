@@ -1,0 +1,5 @@
+# 开发/测试用。部署不需要，所以不放进 requirements.txt ——
+# Streamlit Cloud 会照着那份装，多一个包就多一分构建失败的可能。
+-r requirements.txt
+pytest>=8.0
+playwright>=1.40      # 端到端截图验收，可选
