@@ -133,10 +133,31 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=1000, help="总共抽多少句（默认 1000）")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--force", action="store_true",
+                    help="覆盖已存在的评测集。⚠️ 评测集一旦开标就等于冻结了，"
+                         "重抽会让已有的人工标注全部对不上号")
     args = ap.parse_args()
 
     if not CHUNKS.exists():
         sys.exit(f"❌ 找不到 {CHUNKS}\n   先跑：python -m src.build_kb")
+
+    # ---- 覆盖防护 ----
+    # 评测集一旦发给标注员就是冻结的：句子的 id 已经和数据库里的人工标注绑死，
+    # 重抽一次，E0001 就指向另一句话，而按 id 做的 join 不会报错，只会静默出错。
+    # 实测过一次：过滤规则一变，1,000 句里 765 句被换掉，三个人标的东西全部作废。
+    # 所以这里 fail closed —— 要重抽，先自己确认标注可以作废，再加 --force。
+    existing = [p for p in (DATA_EVAL / "to_label.csv", DATA_EVAL / "to_label_meta.csv")
+                if p.exists()]
+    if existing and not args.force:
+        listing = "\n".join(f"     {p}  （{sum(1 for _ in p.open(encoding='utf-8-sig')) - 1:,} 行）"
+                            for p in existing)
+        sys.exit(
+            "❌ 评测集已存在，拒绝覆盖：\n"
+            f"{listing}\n\n"
+            "   这些文件和标注数据库里的句子是按 id 绑定的。重新抽样会把 id 指向\n"
+            "   别的句子，已有的人工标注会静默错位 —— 不报错，但全错。\n\n"
+            "   · 只是想加预留句 → python scripts/make_reserve.py（不碰现有文件）\n"
+            "   · 确实要重抽且接受已有标注作废 → 加 --force")
 
     print(f"读取 {CHUNKS.name} ...")
     cols = ["chunk_id", "review_id", "text", "airline", "cabin", "date",
