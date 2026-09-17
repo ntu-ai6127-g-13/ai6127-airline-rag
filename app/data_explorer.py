@@ -178,6 +178,10 @@ def build_where(f: dict) -> tuple[str, list]:
         params.append(f"%{f['aircraft'].strip()}%")
     if f["drop_route_only"] and "is_route_only" in f["cols"]:
         clauses.append("NOT is_route_only")
+    if f["drop_non_en"] and "is_non_english" in f["cols"]:
+        clauses.append("NOT is_non_english")
+    if f["drop_frag"] and "is_fragment" in f["cols"]:
+        clauses.append("NOT is_fragment")
 
     # 日期：21.6% 的记录 date 是空的。只有用户真的把区间收窄了才加这个条件，
     # 否则默认视图会悄悄少掉 11 万句 —— 很容易让人把总量报错。
@@ -353,7 +357,13 @@ with st.sidebar:
         drop_route_only = st.checkbox(
             "排除纯航线句", value=False,
             help="像 'Guangzhou to New York.' 这种整句就是航线的元数据句，"
-                 "占 3.03%。和 route 列完全重复，没有情感极性 —— 建索引时建议排除。")
+                 "占 3.07%。和 route 列完全重复，没有情感极性 —— 建索引时建议排除。")
+        drop_non_en = st.checkbox(
+            "排除非英语句", value=False,
+            help="336 句法语/西语/意语等。分类器跑在英文上，这些进索引是纯噪声。")
+        drop_frag = st.checkbox(
+            "排除残片句", value=False,
+            help="19 句以标点开头的切句残片，没有完整语义。")
         drop_dups = st.checkbox(
             "只保留每句的第一条（去重）", value=False,
             help="'All flights on time.' 这句话在语料里出现 83 次，来自 37 家航司。"
@@ -377,7 +387,8 @@ if not isinstance(date_range, (tuple, list)) or len(date_range) != 2:
 F = dict(
     airlines=airlines, cabins=cabins, travellers=travellers, recommended=recommended,
     route=route, route_from=route_from, route_to=route_to, aircraft=aircraft,
-    drop_route_only=drop_route_only, drop_dups=drop_dups, cols=SRC_COLS,
+    drop_route_only=drop_route_only, drop_dups=drop_dups,
+    drop_non_en=drop_non_en, drop_frag=drop_frag, cols=SRC_COLS,
     date_range=date_range, date_full=(lo.date(), hi.date()),
     keep_null_date=keep_null_date, overall=overall, aspect_col=aspect_col,
     aspect_range=aspect_range, search=search, search_mode=search_mode, whole_word=whole_word,
@@ -427,7 +438,7 @@ with st.expander("各列的空值情况（先看这个，再下结论）"):
     # 以前这里硬写列名，切到旧样本就整页崩掉。
     want = ["cabin", "traveller_type", "route", "route_from", "route_to",
             "route_via", "aircraft", "date", "date_flown", "overall_rating",
-            "recommended"] + list(ASPECTS)
+            "recommended", "is_non_english", "is_fragment"] + list(ASPECTS)
     null_cols = [c_ for c_ in want if c_ in SRC_COLS]
     nulls = q(
         "SELECT " + ", ".join(f"count({c_}) AS {c_}" for c_ in null_cols)
@@ -489,6 +500,8 @@ with tab_table:
                 "date": st.column_config.DateColumn("评论日期", format="YYYY-MM-DD"),
                 "date_flown": st.column_config.DateColumn("乘机月份", format="YYYY-MM"),
                 "is_route_only": st.column_config.CheckboxColumn("纯航线句"),
+                "is_non_english": st.column_config.CheckboxColumn("非英语"),
+                "is_fragment": st.column_config.CheckboxColumn("残片"),
                 "is_last": st.column_config.CheckboxColumn("末句"),
                 "dup_count": st.column_config.NumberColumn("重复次数", format="%d"),
                 "overall_rating": st.column_config.NumberColumn("总分", format="%d"),
@@ -755,7 +768,7 @@ with tab_sql:
             "FROM (\n"
             "  SELECT * FROM t\n"
             "  WHERE cabin = 'Economy Class' AND r_seat IS NOT NULL\n"
-            "    AND NOT is_route_only\n"
+            "    AND NOT is_route_only AND NOT is_non_english\n"
             "  QUALIFY row_number() OVER (PARTITION BY text ORDER BY chunk_id) = 1\n"
             ")\n"
             "GROUP BY 1 HAVING count(*) >= 200\nORDER BY 2 DESC LIMIT 15"
