@@ -49,7 +49,13 @@ def _tokenize(text: str) -> list[str]:
 
 
 def _load_index_pool(chunks_path: str | Path) -> pd.DataFrame:
-    """Load the minimal index data and remove documented noise rows."""
+    """Load the minimal index data and remove documented noise rows.
+
+    ``is_eval`` rows deliberately remain searchable: BM25/FAISS index building
+    is not supervised model training and never reads the human labels. Any
+    downstream classifier training must instead use ``df[~df.is_eval]`` as
+    required by ``docs/数据使用指南.md``.
+    """
 
     path = Path(chunks_path)
     if not path.exists():

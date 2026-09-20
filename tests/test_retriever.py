@@ -46,15 +46,21 @@ class RetrieverTest(unittest.TestCase):
         self.chunks = self.root / "chunks.parquet"
         pd.DataFrame(
             [
-                ("c0", "Plenty of legroom in this seat.", False, False),
-                ("c1", "The seat pitch gave me knee space.", False, False),
-                ("c2", "The food and dinner were excellent.", False, False),
-                ("c3", "The cabin crew offered friendly service.", False, False),
-                ("c4", "Plenty of legroom in this seat.", False, False),
-                ("c5", "Singapore to London.", True, False),
-                ("c6", "Le service etait mauvais.", False, True),
+                ("c0", "Plenty of legroom in this seat.", False, False, True),
+                ("c1", "The seat pitch gave me knee space.", False, False, False),
+                ("c2", "The food and dinner were excellent.", False, False, False),
+                ("c3", "The cabin crew offered friendly service.", False, False, False),
+                ("c4", "Plenty of legroom in this seat.", False, False, False),
+                ("c5", "Singapore to London.", True, False, False),
+                ("c6", "Le service etait mauvais.", False, True, False),
             ],
-            columns=["chunk_id", "text", "is_route_only", "is_non_english"],
+            columns=[
+                "chunk_id",
+                "text",
+                "is_route_only",
+                "is_non_english",
+                "is_eval",
+            ],
         ).to_parquet(self.chunks, index=False)
         self.bm25_path = self.root / "bm25.pkl"
         self.faiss_path = self.root / "faiss.index"
@@ -70,6 +76,7 @@ class RetrieverTest(unittest.TestCase):
         self.assertEqual(stats, {"indexed": 5, "excluded": 2})
 
         results = search_bm25("legroom seat", 5, index_path=self.bm25_path)
+        # Gold-standard rows remain in the retrieval corpus; no labels are used.
         self.assertEqual(results[0][0], "c0")
         self.assertEqual([chunk_id for chunk_id, _ in results].count("c4"), 0)
         self.assertTrue(all(score > 0 for _, score in results))
