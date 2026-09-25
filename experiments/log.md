@@ -12,8 +12,8 @@
 |---|---|---|---|---|---|---|---|
 | 2026-09-20 | 郭泰来 | BM25 基线（529,031 句，过滤路线/非英语，结果按文本去重） | 待标注 | 待标注 | 待标注 | 待标注 | 全量建索引 3.5s；top-20 查询中位 101.2ms |
 | 2026-09-20 | 郭泰来 | MiniLM + FAISS IndexFlatIP（384 维、L2 归一化） | 待标注 | 待标注 | 待标注 | 待标注 | 全量编码+建索引 78.5s；top-20 查询中位 11.5ms；自匹配 1.0000 |
-| 2026-09-25 | sunsirmiemie | RRF 合并（`k=60`，各路先取 top-100 已去重候选，按 rank 融合而非分数——BM25/cosine 量纲不同） | 待标注 | 待标注 | 待标注 | 待标注 | 5 个定性 query，top-100 融合查询中位 117.8ms；修了一个 bug：FAISS 对同分候选的 tie-break 和 BM25 不一致，重复句会被两路选成不同 chunk_id，融合时证据被拆分，已改成两路统一按 (分数, 原始行位置) 排序去重 |
-| 2026-09-25 | sunsirmiemie | + 重排序（cross-encoder/ms-marco-MiniLM-L-6-v2，对融合后 top-100 重排取 top-20） | 待标注 | 待标注 | 待标注 | 待标注 | 5 个定性 query，100→20 重排查询中位 66.5ms；结果定性合理（如 "rude cabin crew" 命中 "The cabin crew were rude unapproachable..."） |
+| 2026-09-25 | 孙宇鑫 | RRF 合并（`k=60`，各路先取 top-100 已去重候选，按 rank 融合而非分数——BM25/cosine 量纲不同） | 待标注 | 待标注 | 待标注 | 待标注 | 5 个定性 query，top-100 融合查询中位 117.8ms；修了一个 bug：FAISS 对同分候选的 tie-break 和 BM25 不一致，重复句会被两路选成不同 chunk_id，融合时证据被拆分，已改成两路统一按 (分数, 原始行位置) 排序去重 |
+| 2026-09-25 | 孙宇鑫 | + 重排序（cross-encoder/ms-marco-MiniLM-L-6-v2，对融合后 top-100 重排取 top-20） | 待标注 | 待标注 | 待标注 | 待标注 | 5 个定性 query，100→20 重排查询中位 66.5ms；结果定性合理（如 "rude cabin crew" 命中 "The cabin crew were rude unapproachable..."） |
 | | | + 查询扩展 | | | | | |
 
 ## 分类实验
