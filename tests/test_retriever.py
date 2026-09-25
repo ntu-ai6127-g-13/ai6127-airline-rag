@@ -135,6 +135,36 @@ class RetrieverTest(unittest.TestCase):
         self.assertIn("c0", ids)
         self.assertIn("c4", ids)
 
+    def test_duplicate_text_resolves_to_the_same_chunk_id_in_both_indices(self):
+        """BM25 and dense dedup must agree on which duplicate row 'wins'.
+
+        c0 and c4 are the same sentence. If BM25 and dense pick different
+        representative chunk_ids for it, RRF fusion (src.retriever.rrf_fuse)
+        would split one sentence's evidence across two different keys and
+        silently lose the ranking boost duplicated evidence should get.
+        """
+        build_bm25(self.chunks, self.bm25_path)
+        build_faiss(
+            self.chunks,
+            self.faiss_path,
+            self.ids_path,
+            self.texts_path,
+            model=self.model,
+            show_progress_bar=False,
+        )
+        bm25_results = search_bm25("legroom seat", 5, index_path=self.bm25_path)
+        dense_results = search_dense(
+            "legroom seat",
+            5,
+            index_path=self.faiss_path,
+            chunk_ids_path=self.ids_path,
+            chunk_texts_path=self.texts_path,
+            model=self.model,
+        )
+        bm25_winner = next(cid for cid, _ in bm25_results if cid in {"c0", "c4"})
+        dense_winner = next(cid for cid, _ in dense_results if cid in {"c0", "c4"})
+        self.assertEqual(bm25_winner, dense_winner)
+
     def test_invalid_query_and_missing_index_have_clear_errors(self):
         with self.assertRaisesRegex(ValueError, "non-empty"):
             search_bm25(" ", index_path=self.bm25_path)

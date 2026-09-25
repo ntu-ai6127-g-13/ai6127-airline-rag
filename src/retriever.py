@@ -34,6 +34,9 @@ from src.config import (
     CHUNK_TEXTS,
     EMBED_MODEL,
     FAISS_INDEX,
+    RRF_K,
+    TOP_K_CANDIDATES,
+    TOP_K_FINAL,
 )
 
 _INDEX_VERSION = 1
@@ -163,6 +166,21 @@ def _deduplicate_ranked(
         if len(results) == top_k:
             break
     return results
+
+
+def _stable_rank(positions: np.ndarray, scores: np.ndarray) -> np.ndarray:
+    """Order candidates by score desc, then by position asc.
+
+    FAISS's own tie-break for identical scores is not guaranteed to match
+    this convention (verified: ``IndexFlatIP`` can return a higher row index
+    before a lower one for tied cosine scores). BM25's ``_top_positions``
+    already sorts this way, so dense results are re-sorted here too — the
+    two indices must agree on which duplicate-text row "wins" a tie, or
+    ``rrf_fuse`` ends up splitting one sentence's evidence across two
+    different chunk_ids.
+    """
+
+    return np.lexsort((positions, -scores))
 
 
 def _source_row_count(path: Path) -> int:
@@ -424,21 +442,123 @@ def search_dense(
         return []
     if not deduplicate:
         scores, positions = index.search(query_vector, requested)
+        order = _stable_rank(positions[0], scores[0])
         return [
-            (str(chunk_ids[position]), float(score))
-            for position, score in zip(positions[0], scores[0])
-            if position >= 0
+            (str(chunk_ids[positions[0][i]]), float(scores[0][i]))
+            for i in order
+            if positions[0][i] >= 0
         ]
 
     candidate_count = min(index.ntotal, max(100, top_k * 5))
     while True:
         scores, positions = index.search(query_vector, candidate_count)
+        order = _stable_rank(positions[0], scores[0])
         results = _deduplicate_ranked(
-            positions[0], scores[0], chunk_ids, texts, top_k
+            positions[0][order], scores[0][order], chunk_ids, texts, top_k
         )
         if len(results) >= requested or candidate_count == index.ntotal:
             return results
         candidate_count = min(index.ntotal, candidate_count * 2)
+
+
+def rrf_fuse(
+    list_a: Sequence[tuple[str, float]],
+    list_b: Sequence[tuple[str, float]],
+    *,
+    k: int = RRF_K,
+    top_k: int = TOP_K_FINAL,
+) -> list[tuple[str, float]]:
+    """Combine two ranked result lists by reciprocal rank, not raw score.
+
+    BM25 scores are unbounded and FAISS cosine scores are bounded to
+    [-1, 1] — the two are not on a comparable scale, so summing them
+    directly would need per-query normalization that is unstable across
+    queries with very different score spreads. RRF sidesteps that by only
+    using each candidate's *rank* within its own list, per
+    ``docs/项目执行手册.md`` §20.
+    """
+
+    if isinstance(k, bool) or not isinstance(k, int) or k <= 0:
+        raise ValueError("k must be a positive integer")
+    if isinstance(top_k, bool) or not isinstance(top_k, int) or top_k <= 0:
+        raise ValueError("top_k must be a positive integer")
+
+    scores: dict[str, float] = {}
+    for ranked_list in (list_a, list_b):
+        for rank, (chunk_id, _) in enumerate(ranked_list, start=1):
+            chunk_id = str(chunk_id)
+            scores[chunk_id] = scores.get(chunk_id, 0.0) + 1.0 / (k + rank)
+
+    # Tie-break on chunk_id so output order is deterministic even when two
+    # candidates land on the exact same RRF score.
+    ranked = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
+    return ranked[:top_k]
+
+
+def search_hybrid(
+    query: str,
+    top_k: int = TOP_K_FINAL,
+    *,
+    candidate_k: int = TOP_K_CANDIDATES,
+    rrf_k: int = RRF_K,
+    bm25_index_path: str | Path = BM25_INDEX,
+    faiss_index_path: str | Path = FAISS_INDEX,
+    chunk_ids_path: str | Path = CHUNK_IDS,
+    chunk_texts_path: str | Path = CHUNK_TEXTS,
+    model_name: str = EMBED_MODEL,
+    model: Any | None = None,
+) -> list[tuple[str, float]]:
+    """Fuse BM25 and dense candidates with RRF (``docs/项目执行手册.md`` §20).
+
+    Each retriever is queried for ``candidate_k`` results (both already
+    deduplicated by sentence text) before fusion, then the fused list is cut
+    to ``top_k``. Widen ``candidate_k`` for aggressive metadata filtering
+    applied after this call, since filtering only shrinks the pool.
+    """
+
+    bm25_hits = search_bm25(query, candidate_k, index_path=bm25_index_path)
+    dense_hits = search_dense(
+        query,
+        candidate_k,
+        index_path=faiss_index_path,
+        chunk_ids_path=chunk_ids_path,
+        chunk_texts_path=chunk_texts_path,
+        model_name=model_name,
+        model=model,
+    )
+    return rrf_fuse(bm25_hits, dense_hits, k=rrf_k, top_k=top_k)
+
+
+@lru_cache(maxsize=2)
+def _load_chunk_lookup_cached(
+    path_text: str, modified_ns: int, size: int
+) -> dict[str, tuple[str, int]]:
+    del modified_ns, size
+    frame = pd.read_parquet(path_text, columns=["chunk_id", "text", "dup_count"])
+    lookup: dict[str, tuple[str, int]] = {}
+    for chunk_id, text, dup_count in frame.itertuples(index=False, name=None):
+        dup_count = int(dup_count) if pd.notna(dup_count) else 1
+        lookup[str(chunk_id)] = (str(text), dup_count)
+    return lookup
+
+
+def load_chunk_lookup(chunks_path: str | Path = CHUNKS) -> dict[str, tuple[str, int]]:
+    """Map ``chunk_id`` to ``(text, dup_count)`` for display/reranking.
+
+    ``dup_count`` is how many times this exact sentence recurs in the
+    corpus — per ``docs/数据使用指南.md`` §6.2, that count is aggregate
+    evidence ("34 reviews said this") and should travel with search results
+    even though the retrievers themselves dedup down to one representative
+    row.
+    """
+
+    path = Path(chunks_path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Chunk data not found: {path}. Run `python -m src.build_kb` first."
+        )
+    stat = path.stat()
+    return _load_chunk_lookup_cached(str(path.resolve()), stat.st_mtime_ns, stat.st_size)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -452,7 +572,7 @@ def _build_parser() -> argparse.ArgumentParser:
             build.add_argument("--batch-size", type=int, default=64)
 
     search = subparsers.add_parser("search")
-    search.add_argument("method", choices=("bm25", "dense"))
+    search.add_argument("method", choices=("bm25", "dense", "hybrid"))
     search.add_argument("query")
     search.add_argument("--top-k", type=int, default=5)
     return parser
@@ -465,7 +585,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     elif args.command == "build-dense":
         print(build_faiss(args.chunks, batch_size=args.batch_size))
     else:
-        search = search_bm25 if args.method == "bm25" else search_dense
+        search = {
+            "bm25": search_bm25,
+            "dense": search_dense,
+            "hybrid": search_hybrid,
+        }[args.method]
         for chunk_id, score in search(args.query, top_k=args.top_k):
             print(f"{score:.6f}\t{chunk_id}")
 
