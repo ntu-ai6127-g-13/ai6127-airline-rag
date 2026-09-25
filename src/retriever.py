@@ -43,6 +43,7 @@ _INDEX_VERSION = 1
 _TOKEN_RE = re.compile(r"[\w']+", flags=re.UNICODE)
 _REQUIRED_COLUMNS = ("chunk_id", "text")
 _NOISE_COLUMNS = ("is_route_only", "is_non_english")
+_FILTER_COLUMNS = ("airline", "cabin", "traveller_type", "route_from", "route_to", "date")
 
 
 def _tokenize(text: str) -> list[str]:
@@ -559,6 +560,151 @@ def load_chunk_lookup(chunks_path: str | Path = CHUNKS) -> dict[str, tuple[str, 
         )
     stat = path.stat()
     return _load_chunk_lookup_cached(str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+
+
+@lru_cache(maxsize=2)
+def _load_metadata_cached(
+    path_text: str, modified_ns: int, size: int
+) -> pd.DataFrame:
+    del modified_ns, size
+    columns = ["chunk_id", *_FILTER_COLUMNS]
+    frame = pd.read_parquet(path_text, columns=columns)
+    return frame.set_index("chunk_id")
+
+
+def _load_metadata(chunks_path: str | Path) -> pd.DataFrame:
+    path = Path(chunks_path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Chunk data not found: {path}. Run `python -m src.build_kb` first."
+        )
+    stat = path.stat()
+    return _load_metadata_cached(str(path.resolve()), stat.st_mtime_ns, stat.st_size)
+
+
+def _validate_filters(filters: dict[str, Any]) -> None:
+    unknown = set(filters) - set(_FILTER_COLUMNS)
+    if unknown:
+        raise ValueError(
+            f"Unsupported filter columns: {sorted(unknown)}; "
+            f"supported: {list(_FILTER_COLUMNS)}"
+        )
+    if "date" in filters:
+        value = filters["date"]
+        if (
+            not isinstance(value, (tuple, list))
+            or len(value) != 2
+        ):
+            raise ValueError(
+                "filters['date'] must be a (start, end) pair; either side "
+                "may be None for an open-ended range"
+            )
+
+
+def _filter_mask(metadata: pd.DataFrame, filters: dict[str, Any]) -> pd.Series:
+    mask = pd.Series(True, index=metadata.index)
+    for column, value in filters.items():
+        series = metadata[column]
+        if column == "date":
+            start, end = value
+            if start is not None:
+                mask &= series >= pd.Timestamp(start)
+            if end is not None:
+                mask &= series <= pd.Timestamp(end)
+        elif isinstance(value, (list, tuple, set)):
+            mask &= series.isin(value)
+        else:
+            mask &= series == value
+    return mask
+
+
+def filter_coverage(
+    filters: dict[str, Any], chunks_path: str | Path = CHUNKS
+) -> dict[str, float]:
+    """Fraction of the corpus with a non-null value for each filtered column.
+
+    Per ``docs/数据使用指南.md`` §3, ``date``/``cabin`` are ~100%/97% covered
+    but ``route_from``/``route_to`` are 67% and ``traveller_type`` is 65% —
+    filtering on those silently drops about a third of the corpus. Call this
+    before ``search_with_filters`` and report the number alongside results
+    so a small result count reads as "filtered out", not "not in the data".
+    """
+
+    if not filters:
+        return {}
+    _validate_filters(filters)
+    metadata = _load_metadata(chunks_path)
+    return {
+        column: float(metadata[column].notna().mean())
+        for column in filters
+        if column != "date"
+    }
+
+
+def search_with_filters(
+    query: str,
+    filters: dict[str, Any] | None = None,
+    top_k: int = TOP_K_FINAL,
+    *,
+    candidate_multiplier: int = 5,
+    rrf_k: int = RRF_K,
+    bm25_index_path: str | Path = BM25_INDEX,
+    faiss_index_path: str | Path = FAISS_INDEX,
+    chunk_ids_path: str | Path = CHUNK_IDS,
+    chunk_texts_path: str | Path = CHUNK_TEXTS,
+    chunks_path: str | Path = CHUNKS,
+    model_name: str = EMBED_MODEL,
+    model: Any | None = None,
+) -> list[tuple[str, float]]:
+    """Hybrid search, then keep only candidates matching ``filters``.
+
+    ``filters`` keys are columns in ``_FILTER_COLUMNS``; a value is either
+    an exact match, a list/tuple/set for "is one of", or — for ``date`` — a
+    ``(start, end)`` pair (either side may be ``None``).
+
+    This is retrieve-then-filter (``docs/项目执行手册.md`` §21): simple, but
+    a narrow filter can starve the candidate pool before it ever reaches the
+    filter step. ``candidate_multiplier`` widens that pool relative to
+    ``top_k`` — raise it for aggressive filters (e.g. a single airline) at
+    the cost of an extra BM25/dense pass over a larger candidate window.
+    """
+
+    if isinstance(top_k, bool) or not isinstance(top_k, int) or top_k <= 0:
+        raise ValueError("top_k must be a positive integer")
+    if (
+        isinstance(candidate_multiplier, bool)
+        or not isinstance(candidate_multiplier, int)
+        or candidate_multiplier <= 0
+    ):
+        raise ValueError("candidate_multiplier must be a positive integer")
+
+    hybrid_common = dict(
+        rrf_k=rrf_k,
+        bm25_index_path=bm25_index_path,
+        faiss_index_path=faiss_index_path,
+        chunk_ids_path=chunk_ids_path,
+        chunk_texts_path=chunk_texts_path,
+        model_name=model_name,
+        model=model,
+    )
+
+    if not filters:
+        return search_hybrid(query, top_k, **hybrid_common)
+
+    _validate_filters(filters)
+    metadata = _load_metadata(chunks_path)
+    allowed = set(metadata.index[_filter_mask(metadata, filters)])
+
+    pool_size = top_k * candidate_multiplier
+    candidates = search_hybrid(
+        query,
+        pool_size,
+        candidate_k=max(TOP_K_CANDIDATES, pool_size),
+        **hybrid_common,
+    )
+    return [
+        (chunk_id, score) for chunk_id, score in candidates if chunk_id in allowed
+    ][:top_k]
 
 
 def _build_parser() -> argparse.ArgumentParser:
