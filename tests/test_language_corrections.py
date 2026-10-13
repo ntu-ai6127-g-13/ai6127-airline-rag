@@ -4,7 +4,7 @@ from src.language_rules import choose_focus,polarity_evidence
 from src.subjectivity import weak_decision
 from src.subjectivity_legacy import weak_decision as old_decision
 from src.classification_pipeline import build_labels,split_labels
-from test_classification_pipeline import row,fixture
+from tests.test_classification_pipeline import row,fixture
 
 
 class LanguageCorrectionsTests(unittest.TestCase):

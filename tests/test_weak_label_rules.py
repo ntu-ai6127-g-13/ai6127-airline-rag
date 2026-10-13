@@ -2,7 +2,7 @@ import unittest
 import pandas as pd
 from src.weak_label_rules import match_series
 from src.weak_labels import build_weak_labels
-from test_weak_labels import row
+from tests.test_weak_labels import row
 
 
 def detected(text):
