@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -120,6 +121,15 @@ class FilterTest(unittest.TestCase):
     def test_filter_matching_nothing_returns_empty_list(self):
         results = self._search("seat legroom", filters={"airline": "Qantas"})
         self.assertEqual(results, [])
+
+    def test_narrow_filter_falls_back_when_global_pool_is_empty(self):
+        # A retrieve-then-filter pool can miss a valid row entirely. The
+        # filtered BM25 fallback must still search inside the allowed IDs.
+        with patch("src.retriever.search_hybrid", return_value=[]):
+            results = self._search(
+                "food dinner", filters={"airline": "Cathay Pacific"}, top_k=1
+            )
+        self.assertEqual([chunk_id for chunk_id, _ in results], ["c2"])
 
     def test_unsupported_column_raises(self):
         with self.assertRaisesRegex(ValueError, "Unsupported filter columns"):

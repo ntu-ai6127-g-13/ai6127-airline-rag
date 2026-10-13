@@ -702,9 +702,46 @@ def search_with_filters(
         candidate_k=max(TOP_K_CANDIDATES, pool_size),
         **hybrid_common,
     )
-    return [
+    filtered = [
         (chunk_id, score) for chunk_id, score in candidates if chunk_id in allowed
     ][:top_k]
+    if len(filtered) >= top_k or not allowed:
+        return filtered
+
+    # retrieve-then-filter can starve a narrow route/date filter: the matching
+    # rows may be far below the global top-N even though they are relevant
+    # inside the filtered subset. Fill the shortfall with an exact BM25 pass
+    # restricted to ``allowed`` IDs. Hybrid/RRF results keep their scores; the
+    # fallback exposes BM25 scores only for rows the first pass could not see.
+    bm25, chunk_ids, texts = _load_bm25(bm25_index_path)
+    query_tokens = _tokenize(query)
+    if query_tokens:
+        scores = np.asarray(bm25.get_scores(query_tokens), dtype=np.float64)
+        positions = [
+            position for position in _top_positions(scores, len(scores))
+            if str(chunk_ids[position]) in allowed and scores[position] > 0
+        ]
+        text_by_id = {
+            str(chunk_id): str(text)
+            for chunk_id, text in zip(chunk_ids, texts)
+        }
+        seen_texts = {
+            text_by_id[chunk_id].strip().casefold()
+            for chunk_id, _ in filtered
+            if chunk_id in text_by_id
+        }
+        existing = {chunk_id for chunk_id, _ in filtered}
+        for position in positions:
+            chunk_id = str(chunk_ids[position])
+            text_key = str(texts[position]).strip().casefold()
+            if chunk_id in existing or text_key in seen_texts:
+                continue
+            filtered.append((chunk_id, float(scores[position])))
+            existing.add(chunk_id)
+            seen_texts.add(text_key)
+            if len(filtered) == top_k:
+                break
+    return filtered
 
 
 def _build_parser() -> argparse.ArgumentParser:

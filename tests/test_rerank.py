@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.rerank import rerank
+from src.rerank import polarity_adjustment, rerank
 
 
 class FakeCrossEncoder:
@@ -22,6 +22,11 @@ class FakeCrossEncoder:
 
 
 class RerankTest(unittest.TestCase):
+    def test_polarity_adjustment_rejects_opposite_polarity(self):
+        self.assertLess(polarity_adjustment("bad food", "Food was not bad."), 0)
+        self.assertEqual(polarity_adjustment("bad food", "Food was bad."), 0)
+        self.assertLess(polarity_adjustment("good food", "Food was terrible."), 0)
+
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
         self.chunks = Path(self.tempdir.name) / "chunks.parquet"

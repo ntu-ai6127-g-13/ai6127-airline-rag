@@ -11,6 +11,7 @@ corpus is not viable.
 from __future__ import annotations
 
 import argparse
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Sequence
@@ -19,6 +20,61 @@ import numpy as np
 
 from src.config import CHUNKS, RERANK_MODEL, TOP_K_CANDIDATES, TOP_K_FINAL
 from src.retriever import load_chunk_lookup, search_hybrid
+
+
+_NEGATIVE_QUERY = re.compile(
+    r"\b(?:bad|poor|terrible|awful|horrible|rude|unfriendly|unhelpful|"
+    r"uncomfortable|cramped|dirty|filthy|broken|delay(?:ed)?|cancel(?:led|ed))\b",
+    re.I,
+)
+_POSITIVE_QUERY = re.compile(
+    r"\b(?:good|great|excellent|wonderful|amazing|pleasant|comfortable|"
+    r"friendly|helpful|delicious|tasty|spacious|recommend(?:ed)?)\b",
+    re.I,
+)
+_POSITIVE_TEXT = re.compile(
+    r"\b(?:good|great|excellent|wonderful|amazing|pleasant|comfortable|"
+    r"friendly|helpful|delicious|tasty|spacious|recommend(?:ed)?)\b",
+    re.I,
+)
+_NEGATED_POSITIVE = re.compile(
+    r"\b(?:not|n't|never|no)\s+(?:very\s+|particularly\s+|especially\s+)?"
+    r"(?:good|great|excellent|wonderful|comfortable|friendly|helpful|"
+    r"delicious|tasty|spacious|recommend(?:ed)?)\b",
+    re.I,
+)
+_NEGATED_NEGATIVE = re.compile(
+    r"\b(?:not|n't|never|no)\s+(?:very\s+|particularly\s+|especially\s+)?"
+    r"(?:bad|poor|terrible|awful|horrible|rude|unfriendly|unhelpful|"
+    r"uncomfortable|cramped|dirty|filthy|broken|problems?|issues?)\b",
+    re.I,
+)
+_NEGATIVE_CUE = re.compile(
+    r"\b(?:bad|poor|terrible|awful|horrible|rude|unfriendly|unhelpful|"
+    r"uncomfortable|cramped|dirty|filthy|broken|delay(?:ed)?|cancel(?:led|ed))\b",
+    re.I,
+)
+
+
+def polarity_adjustment(query: str, text: str) -> float:
+    """Penalize an opposite-polarity candidate for an explicitly polar query.
+
+    The cross-encoder is relevance-only and can rank ``not bad`` above a
+    genuinely negative sentence for a query such as ``bad food``.  Keep the
+    raw model score in the output, but use this small deterministic tie-break
+    for ordering.  Neutral queries are unchanged.
+    """
+    if _NEGATIVE_QUERY.search(query) and (
+        _NEGATED_NEGATIVE.search(text)
+        or (_POSITIVE_TEXT.search(text) and not _NEGATED_POSITIVE.search(text))
+    ):
+        return -1.0
+    if _POSITIVE_QUERY.search(query) and (
+        _NEGATED_POSITIVE.search(text)
+        or (_NEGATIVE_CUE.search(text) and not _NEGATED_NEGATIVE.search(text))
+    ):
+        return -1.0
+    return 0.0
 
 
 @lru_cache(maxsize=2)
@@ -76,7 +132,11 @@ def rerank(
         )
 
     order = sorted(
-        range(len(pairs)), key=lambda i: (-float(scores[i]), resolved[i][0])
+        range(len(pairs)),
+        key=lambda i: (
+            -(float(scores[i]) + polarity_adjustment(query, resolved[i][1])),
+            resolved[i][0],
+        ),
     )[:top_k]
 
     return [
