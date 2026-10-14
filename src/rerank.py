@@ -56,6 +56,25 @@ _NEGATIVE_CUE = re.compile(
 )
 
 
+def _query_polarity(query: str) -> tuple[bool, bool]:
+    """Return (negative, positive) polarity after simple local negation.
+
+    Negation is intentionally conservative: ``not bad`` is treated as
+    positive and ``not good`` as negative, while an unqualified cue keeps its
+    usual polarity.  This prevents the old rule from treating ``not bad`` as
+    an unambiguously negative query.
+    """
+    negative = bool(_NEGATIVE_QUERY.search(query))
+    positive = bool(_POSITIVE_QUERY.search(query))
+    if _NEGATED_NEGATIVE.search(query):
+        negative = False
+        positive = True
+    if _NEGATED_POSITIVE.search(query):
+        positive = False
+        negative = True
+    return negative, positive
+
+
 def polarity_adjustment(query: str, text: str) -> float:
     """Penalize an opposite-polarity candidate for an explicitly polar query.
 
@@ -64,12 +83,13 @@ def polarity_adjustment(query: str, text: str) -> float:
     raw model score in the output, but use this small deterministic tie-break
     for ordering.  Neutral queries are unchanged.
     """
-    if _NEGATIVE_QUERY.search(query) and (
+    query_negative, query_positive = _query_polarity(query)
+    if query_negative and (
         _NEGATED_NEGATIVE.search(text)
         or (_POSITIVE_TEXT.search(text) and not _NEGATED_POSITIVE.search(text))
     ):
         return -1.0
-    if _POSITIVE_QUERY.search(query) and (
+    if query_positive and (
         _NEGATED_POSITIVE.search(text)
         or (_NEGATIVE_CUE.search(text) and not _NEGATED_NEGATIVE.search(text))
     ):
@@ -131,10 +151,14 @@ def rerank(
             f"{scores.shape[0]} scores for {len(pairs)} pairs"
         )
 
+    adjusted_scores = [
+        float(scores[i]) + polarity_adjustment(query, resolved[i][1])
+        for i in range(len(pairs))
+    ]
     order = sorted(
         range(len(pairs)),
         key=lambda i: (
-            -(float(scores[i]) + polarity_adjustment(query, resolved[i][1])),
+            -adjusted_scores[i],
             resolved[i][0],
         ),
     )[:top_k]
@@ -143,6 +167,7 @@ def rerank(
         {
             "chunk_id": resolved[i][0],
             "score": float(scores[i]),
+            "ranking_score": adjusted_scores[i],
             "text": resolved[i][1],
             "dup_count": resolved[i][2],
         }

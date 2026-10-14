@@ -708,40 +708,46 @@ def search_with_filters(
     if len(filtered) >= top_k or not allowed:
         return filtered
 
-    # retrieve-then-filter can starve a narrow route/date filter: the matching
-    # rows may be far below the global top-N even though they are relevant
-    # inside the filtered subset. Fill the shortfall with an exact BM25 pass
-    # restricted to ``allowed`` IDs. Hybrid/RRF results keep their scores; the
-    # fallback exposes BM25 scores only for rows the first pass could not see.
-    bm25, chunk_ids, texts = _load_bm25(bm25_index_path)
-    query_tokens = _tokenize(query)
-    if query_tokens:
-        scores = np.asarray(bm25.get_scores(query_tokens), dtype=np.float64)
-        positions = [
-            position for position in _top_positions(scores, len(scores))
-            if str(chunk_ids[position]) in allowed and scores[position] > 0
-        ]
-        text_by_id = {
-            str(chunk_id): str(text)
-            for chunk_id, text in zip(chunk_ids, texts)
-        }
-        seen_texts = {
-            text_by_id[chunk_id].strip().casefold()
-            for chunk_id, _ in filtered
-            if chunk_id in text_by_id
-        }
-        existing = {chunk_id for chunk_id, _ in filtered}
-        for position in positions:
-            chunk_id = str(chunk_ids[position])
-            text_key = str(texts[position]).strip().casefold()
-            if chunk_id in existing or text_key in seen_texts:
-                continue
-            filtered.append((chunk_id, float(scores[position])))
-            existing.add(chunk_id)
-            seen_texts.add(text_key)
-            if len(filtered) == top_k:
-                break
-    return filtered
+    # Retrieve-then-filter can starve a narrow route/date filter: matching
+    # rows may be far below the global top-N.  Re-run *both* retrievers over
+    # their complete ranked lists and fuse the allowed candidates with RRF.
+    # This is deliberately slower only on the starvation path, but keeps the
+    # returned score contract consistent: every score is an RRF score rather
+    # than a mixture of RRF and raw BM25 values.
+    fallback_k = max(len(allowed), top_k)
+    bm25_meta, bm25_ids, _ = _load_bm25(bm25_index_path)
+    fallback_bm25_k = len(bm25_ids)
+    dense_meta, dense_ids, _ = _load_dense(
+        faiss_index_path, chunk_ids_path, chunk_texts_path
+    )
+    fallback_dense_k = dense_meta.ntotal
+    fallback_bm25 = [
+        (chunk_id, score)
+        for chunk_id, score in search_bm25(
+            query, max(fallback_k, fallback_bm25_k), index_path=bm25_index_path
+        )
+        if chunk_id in allowed
+    ]
+    fallback_dense = [
+        (chunk_id, score)
+        for chunk_id, score in search_dense(
+            query,
+            max(fallback_k, fallback_dense_k),
+            index_path=faiss_index_path,
+            chunk_ids_path=chunk_ids_path,
+            chunk_texts_path=chunk_texts_path,
+            model_name=model_name,
+            model=model,
+        )
+        if chunk_id in allowed
+    ]
+    fallback = rrf_fuse(
+        fallback_bm25, fallback_dense, k=rrf_k, top_k=top_k
+    )
+    if not filtered:
+        return fallback
+    existing = {chunk_id for chunk_id, _ in filtered}
+    return filtered + [item for item in fallback if item[0] not in existing][: top_k - len(filtered)]
 
 
 def _build_parser() -> argparse.ArgumentParser:
