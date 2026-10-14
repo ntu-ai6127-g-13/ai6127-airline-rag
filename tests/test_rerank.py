@@ -26,6 +26,8 @@ class RerankTest(unittest.TestCase):
         self.assertLess(polarity_adjustment("bad food", "Food was not bad."), 0)
         self.assertEqual(polarity_adjustment("bad food", "Food was bad."), 0)
         self.assertLess(polarity_adjustment("good food", "Food was terrible."), 0)
+        self.assertLess(polarity_adjustment("not bad food", "Food was bad."), 0)
+        self.assertEqual(polarity_adjustment("not bad food", "Food was not bad."), 0)
 
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
@@ -54,6 +56,7 @@ class RerankTest(unittest.TestCase):
         self.assertEqual(results[0]["chunk_id"], "c0")
         self.assertEqual(results[0]["dup_count"], 1)
         self.assertEqual(results[0]["text"], "Plenty of legroom in this seat.")
+        self.assertEqual(results[0]["ranking_score"], results[0]["score"])
 
     def test_top_k_truncates(self):
         candidates = [("c1", 0.9), ("c0", 0.1), ("c2", 0.5)]
