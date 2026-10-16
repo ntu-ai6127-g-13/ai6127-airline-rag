@@ -231,10 +231,20 @@ def main() -> None:
     candidate["candidate_label"] = candidate["candidate_subjectivity"]
     subjective = candidate["candidate_subjectivity"] == "subjective"
     candidate.loc[subjective, "candidate_label"] = candidate.loc[subjective, "candidate_polarity"]
-    candidate["gold_eligible"] = ~candidate["drop_from_gold_by_guideline"]
+    # A draft `unclear` aspect cannot be used as a normal aspect label.  Keep
+    # those rows outside the candidate gold set until a human decides whether
+    # the sentence is genuinely unresolvable or should be assigned overall/
+    # other under the guideline.
+    candidate["gold_eligible"] = (
+        ~candidate["drop_from_gold_by_guideline"]
+        & candidate["candidate_aspect"].ne("unclear")
+    )
     candidate["candidate_status"] = "majority_or_guideline_draft"
     candidate.loc[candidate["drop_from_gold_by_guideline"], "candidate_status"] = "drop_pending_group_confirmation"
     candidate.loc[candidate["aspect_three_way"], "candidate_status"] = "three_way_draft_pending_human_confirmation"
+    candidate.loc[
+        candidate["candidate_aspect"].eq("unclear"), "candidate_status"
+    ] = "unclear_aspect_pending_human_confirmation"
     candidate.to_csv(out / "gold_candidate_1100.csv", index=False, encoding="utf-8-sig")
 
     summary = {
