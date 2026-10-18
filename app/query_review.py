@@ -21,6 +21,12 @@ seed = directory / "judgments_to_review.jsonl"
 saved = directory / "judgments_reviewed.jsonl"
 if not seed.exists():
     st.info("尚无配对查询结果，请先运行查询评测。"); st.stop()
+feedback_path = directory / "user_feedback.json"
+if feedback_path.exists():
+    feedback = json.loads(feedback_path.read_text())
+    if feedback.get("small_batch_verdict") == "pass":
+        st.success("小批查询整体体验：用户已确认通过。")
+        st.caption("本次反馈未提供逐题评分；下方进度仅统计已保存的逐题评分，定量指标仍待统计。")
 rows = [json.loads(line) for line in (saved if saved.exists() else seed).read_text().splitlines() if line.strip()]
 mapping = {row["query_id"]: row for row in rows}
 query_ids = sorted({row["base_query_id"] for row in rows})
