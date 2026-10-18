@@ -265,11 +265,48 @@ class GroundedAnswerTests(unittest.TestCase):
                "pred_aspect": "food", "matched_subtopics": ["portion"],
                "direct_subtopic_matches": ["portion"]}
         result = {"aspect": "food", "subtopics": {"portion": "meal portion size"},
-                  "rating_summary": {"available": False}, "evidence": [row]}
+                  "rating_summary": {"available": False}, "evidence": [row],
+                  "subtopic_analysis": {"portion": {"direct_review_count": 12, "polarity_summary": {
+                      "labeled_review_count": 12, "positive_review_count": 0,
+                      "negative_review_count": 12, "positive_share": 0.0,
+                      "positive_share_ci95_low": 0.0, "positive_share_ci95_high": .24}}}}
         answer = answer_question("新航餐食分量怎么样", result, use_model=False)
         self.assertIn("关于新加坡航空的餐食分量", answer["text"])
-        self.assertIn("直接评论偏负面", answer["text"])
+        self.assertIn("完整直接匹配评论的自动标签总体偏负面", answer["text"])
         self.assertNotIn("这些细分问题需要分别看原文", answer["text"])
+
+    def test_single_subtopic_direction_uses_full_aggregate_not_top_examples(self):
+        negative_one = {**evidence("1", "Singapore Airlines", "negative"),
+                        "text": "The seats were cramped and legroom was awful.",
+                        "matched_subtopics": ["legroom"], "direct_subtopic_matches": ["legroom"]}
+        negative_two = {**evidence("2", "Singapore Airlines", "negative"),
+                        "text": "Leg and knee room were limited.",
+                        "matched_subtopics": ["legroom"], "direct_subtopic_matches": ["legroom"]}
+        positive = {**evidence("3", "Singapore Airlines", "positive"),
+                    "text": "Legroom was generous and comfortable.",
+                    "matched_subtopics": ["legroom"], "direct_subtopic_matches": ["legroom"]}
+        result = {"aspect": "seat", "subtopics": {"legroom": "seat legroom"},
+                  "rating_summary": {"available": False},
+                  "evidence": [negative_one, negative_two, positive],
+                  "subtopic_analysis": {"legroom": {"direct_review_count": 98, "polarity_summary": {
+                      "labeled_review_count": 98, "positive_review_count": 78,
+                      "negative_review_count": 20, "positive_share": .7959,
+                      "positive_share_ci95_low": .706, "positive_share_ci95_high": .862}}}}
+        text = answer_question("新航腿部空间怎么样", result, use_model=False)["text"]
+        self.assertIn("完整直接匹配评论的自动标签总体偏正面", text)
+        self.assertIn("正向 78 条（79.6%）、负向 20 条（20.4%）", text)
+        self.assertIn("一条正向代表性评论", text)
+        self.assertIn("一条负向反例", text)
+        self.assertNotIn("偏负面", text)
+
+    def test_validation_rejects_direction_that_contradicts_full_aggregate(self):
+        text = "关于座位腿部空间，完整评论偏负面，但自动标签中正向78条、负向20条。[1]"
+        ok, reasons = validate_answer(
+            text, {"1"}, required_subtopics=("legroom",),
+            evidence_numbers={"78", "20"}, allow_aggregate_counts=True,
+            expected_subtopic_directions={"legroom": "positive"})
+        self.assertFalse(ok)
+        self.assertIn("contradicts_full_subtopic_aggregate:legroom", reasons)
 
     def test_style_validation_failure_is_repaired_once(self):
         row = {**evidence("1", "A Air", "negative"),
