@@ -26,6 +26,7 @@ airlines,cabins,origins,destinations=filter_options()
 aspect_names={"seat":"座椅舒适度","staff":"空乘服务","food":"餐饮","entertainment":"娱乐与 Wi-Fi",
               "ground":"值机、行李与准点","value":"价格、退款与客服","overall":"总体体验","other":"清洁及其他"}
 manifest=ROOT/"outputs/query_r36_experiment_20261019/manifest.json"
+label_index=ROOT/"outputs/label_index_20261019/labels.parquet"
 with st.sidebar:
     st.subheader("查询条件")
     airline=st.selectbox("航司",["全部"]+airlines)
@@ -33,8 +34,13 @@ with st.sidebar:
     cabin=st.selectbox("舱位",["全部"]+cabins)
     aspect=st.selectbox("评价方面",list(aspect_names),format_func=aspect_names.get)
     sentiment=st.radio("查看哪些评价",["好评和差评","好评","差评"])
-    use_labels=st.checkbox("分类标签辅助排序",value=manifest.exists(),disabled=not manifest.exists(),
+    labels_available=label_index.exists() or manifest.exists()
+    use_labels=st.checkbox("分类标签辅助排序",value=labels_available,disabled=not labels_available,
                            help="自动标签用于辅助排序和展示，可能有误；可关闭以查看原检索顺序，原文证据始终保留。")
+    if use_labels and label_index.exists():
+        st.caption("当前使用全量离线基础标签；标签只做软排序，不删除评论。")
+    elif use_labels:
+        st.caption("离线标签不可用，当前回退到本地实时分类。")
     with st.expander("航线与日期条件"):
         origin=st.selectbox("出发地",["不限"]+origins)
         destination=st.selectbox("目的地",["不限"]+destinations)
@@ -61,17 +67,22 @@ if submitted:
         with st.spinner("正在检索并整理原文证据；启用分类时首次运行可能需要约一分钟……"):
             if len(comparison)>=2:
                 st.session_state["result"]=compare_airlines(comparison,query=query,aspect=aspect,polarity=polarity,
-                    filters=filters,classifier_manifest=manifest if use_labels else None)
+                    filters=filters,classifier_manifest=manifest if use_labels and not label_index.exists() else None,
+                    label_index_path=label_index if use_labels and label_index.exists() else None)
             else:
                 st.session_state["result"]=query_reviews(query,aspect=aspect,polarity=polarity,filters=filters,
-                    classifier_manifest=manifest if use_labels else None)
+                    classifier_manifest=manifest if use_labels and not label_index.exists() else None,
+                    label_index_path=label_index if use_labels and label_index.exists() else None)
     except Exception as error:
         st.error(str(error))
         st.session_state.pop("result",None)
 def display_result(result):
     answer=result["answer"]
     st.write(answer["text"])
-    st.caption(f"耗时 {result['total_seconds']:.1f} 秒 · {len(result['evidence'])} 条证据 · {answer['review_count']} 条不同评论")
+    label_mode={"offline_index":"离线标签","realtime_classifier":"实时分类","none":"未使用标签"}.get(
+        result.get("label_lookup_mode"),"未使用标签")
+    st.caption(f"耗时 {result['total_seconds']:.1f} 秒 · {len(result['evidence'])} 条证据 · "
+               f"{answer['review_count']} 条不同评论 · {label_mode}")
     for i,item in enumerate(result["evidence"],1):
         st.markdown(f"**[{i}] {item['airline']} · {item.get('cabin') or '舱位未知'}**")
         st.write(item["text"])

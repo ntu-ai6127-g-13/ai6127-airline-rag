@@ -13,6 +13,7 @@ from src.retriever import search_with_filters
 from src.rerank import rerank
 from src.classify import classify_texts
 from src.generate import evidence_answer
+from src.label_index import labels_for_chunks
 
 ASPECT_QUERIES = {
     "seat": "passenger seat comfort legroom recline",
@@ -58,6 +59,7 @@ def rank_evidence(candidates: list[dict], predictions: list[dict] | None = None,
 def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str | None = None,
                   filters: dict | None = None, top_k: int = 10, candidate_k: int = 60,
                   classifier_manifest: str | Path | None = None, chunks_path: str | Path = CHUNKS,
+                  label_index_path: str | Path | None = None,
                   include_candidates: bool = False) -> dict:
     if aspect is not None and aspect not in ASPECT_QUERIES: raise ValueError("Unknown aspect")
     if polarity not in {None,"positive","negative"}: raise ValueError("Unknown polarity")
@@ -78,28 +80,38 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
                 row[key] = None if pd.isna(value) else (value.isoformat() if hasattr(value,"isoformat") else str(value))
     baseline = rank_evidence(scored, aspect=aspect, polarity=polarity, top_k=top_k)
     # Classify the final diverse pool once. It is the same pool used by paired query evaluation.
-    predictions = classify_texts([row["text"] for row in baseline], classifier_manifest) if classifier_manifest and baseline else None
+    predictions = None
+    label_lookup_mode = "none"
+    if label_index_path and baseline:
+        predictions = labels_for_chunks([row["chunk_id"] for row in baseline], label_index_path)
+        label_lookup_mode = "offline_index"
+    elif classifier_manifest and baseline:
+        predictions = classify_texts([row["text"] for row in baseline], classifier_manifest)
+        label_lookup_mode = "realtime_classifier"
     selected = rank_evidence(baseline, predictions, aspect=aspect, polarity=polarity, top_k=top_k)
     answer = evidence_answer(selected, aspect=aspect)
     result = {"query": query, "retrieval_query": phrase, "aspect": aspect, "polarity": polarity,
             "filters": filters or {}, "evidence": selected, "baseline_evidence": baseline,
             "answer": answer, "baseline_answer": evidence_answer(baseline, aspect=aspect),
             "retrieval_seconds": retrieval_seconds,
-            "total_seconds": time.monotonic()-started, "classifier_used": bool(classifier_manifest),
-            "classifier_is_experimental": bool(classifier_manifest), "hard_label_filter": False,
+            "total_seconds": time.monotonic()-started, "classifier_used": predictions is not None,
+            "classifier_is_experimental": predictions is not None, "hard_label_filter": False,
+            "label_lookup_mode": label_lookup_mode,
             "acceptance_evaluated": False}
     if include_candidates: result["candidate_evidence"] = baseline
     return result
 
 
 def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polarity: str | None = None,
-                     filters: dict | None = None, classifier_manifest: str | Path | None = None) -> dict:
+                     filters: dict | None = None, classifier_manifest: str | Path | None = None,
+                     label_index_path: str | Path | None = None) -> dict:
     """Compare evidence under identical constraints without claiming corpus-wide rankings."""
     if not 2 <= len(set(airlines)) <= 3 or len(set(airlines)) != len(airlines):
         raise ValueError("Choose two or three distinct airlines")
     common = dict(filters or {}); common.pop("airline", None)
     results = {airline: query_reviews(query, aspect=aspect, polarity=polarity,
-               filters={**common,"airline":airline}, classifier_manifest=classifier_manifest) for airline in airlines}
+               filters={**common,"airline":airline}, classifier_manifest=classifier_manifest,
+               label_index_path=label_index_path) for airline in airlines}
     missing = [name for name,result in results.items() if result["answer"]["status"]=="insufficient_evidence"]
     return {"type":"comparison", "aspect":aspect, "results":results,
             "status":"insufficient_evidence" if missing else "evidence_available",
@@ -111,10 +123,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(); parser.add_argument("query", nargs="?", default="")
     parser.add_argument("--aspect", choices=list(ASPECT_QUERIES)); parser.add_argument("--airline")
     parser.add_argument("--polarity", choices=["positive","negative"])
-    parser.add_argument("--classifier-manifest", type=Path); parser.add_argument("--output", type=Path)
+    parser.add_argument("--classifier-manifest", type=Path); parser.add_argument("--label-index", type=Path)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     result = query_reviews(args.query, aspect=args.aspect, polarity=args.polarity,
-        filters={"airline":args.airline} if args.airline else None, classifier_manifest=args.classifier_manifest)
+        filters={"airline":args.airline} if args.airline else None, classifier_manifest=args.classifier_manifest,
+        label_index_path=args.label_index)
     value = json.dumps(result,ensure_ascii=False,indent=2)
     if args.output: args.output.parent.mkdir(parents=True,exist_ok=True); args.output.write_text(value)
     else: print(value)
