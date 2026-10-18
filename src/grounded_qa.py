@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 import re
 import socket
 import textwrap
@@ -37,6 +38,24 @@ _SUBTOPIC_SUBJECTS = {
     "gate_service": "登机口与登机服务", "lounge": "机场休息室", "price": "票价",
     "refund": "退款与改签", "support": "客服", "booking": "预订系统",
     "cleanliness": "客舱清洁", "toilet": "机上洗手间", "cabin_temperature": "客舱温度",
+}
+_ASPECT_NAMES_EN = {"seat": "seat comfort", "staff": "cabin crew service", "food": "food and beverages",
+                    "entertainment": "inflight entertainment and Wi-Fi", "ground": "ground service",
+                    "value": "value for money", "overall": "overall experience", "other": "other services"}
+_SUBTOPIC_NAMES_EN = {
+    "quality": "food quality and taste", "portion": "meal portion size", "variety": "meal variety and choice",
+    "drinks": "onboard drinks", "special_meals": "special meals", "temperature": "meal temperature",
+    "content": "entertainment content", "screen": "entertainment screen", "wifi": "onboard Wi-Fi",
+    "audio": "headphones and audio quality", "usability": "entertainment system usability",
+    "legroom": "seat legroom", "width": "seat width", "recline": "seat recline and lie-flat capability",
+    "comfort": "seat comfort", "condition": "seat condition", "seat_cleanliness": "seat cleanliness",
+    "power": "seat power and charging", "attitude": "crew attitude", "efficiency": "crew efficiency",
+    "professionalism": "crew professionalism", "availability": "crew availability and responsiveness",
+    "punctuality": "punctuality", "delay_handling": "delay and cancellation handling",
+    "baggage": "baggage service", "checkin": "check-in service", "gate_service": "gate and boarding service",
+    "lounge": "airport lounge", "price": "ticket price", "refund": "refunds and changes",
+    "support": "customer support", "booking": "booking system", "cleanliness": "cabin cleanliness",
+    "toilet": "onboard lavatory", "cabin_temperature": "cabin temperature",
 }
 
 
@@ -106,20 +125,24 @@ def _allowed_numbers(summary: dict | None) -> set[str]:
 
 
 def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
+    language = result.get("language", "zh")
+    aspect_names = _ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES
+    subtopic_names = _SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES
     aspect = result.get("aspect")
-    aspect_name = _ASPECT_NAMES.get(aspect, "该方面")
+    aspect_name = aspect_names.get(aspect, "this aspect" if language == "en" else "该方面")
     evidence = [{
         "id": row["citation_id"], "airline": row.get("airline"), "cabin": row.get("cabin"),
-        "date": row.get("date"), "route": row.get("route"), "text": row.get("text"),
-        "matched_subtopics": [SUBTOPIC_NAMES.get(topic, topic)
+        "date": row.get("date"), "route": row.get("route"),
+        "text": (row.get("text") if language == "en" else row.get("text_zh") or row.get("display_text")),
+        "matched_subtopics": [subtopic_names.get(topic, topic)
                               for topic in row.get("matched_subtopics", [])],
-        "direct_subtopic_matches": [SUBTOPIC_NAMES.get(topic, topic)
+        "direct_subtopic_matches": [subtopic_names.get(topic, topic)
                                     for topic in row.get("direct_subtopic_matches", [])],
-        "query_aspect": _ASPECT_NAMES.get(row.get("query_aspect"), row.get("query_aspect")),
+        "query_aspect": aspect_names.get(row.get("query_aspect"), row.get("query_aspect")),
         "predicted_aspect": row.get("pred_aspect"), "predicted_polarity": row.get("pred_polarity"),
     } for row in rows]
-    subtopics = {topic: SUBTOPIC_NAMES.get(topic, topic) for topic in result.get("subtopics", {})}
-    requested_aspects = {aspect: _ASPECT_NAMES.get(aspect, aspect)
+    subtopics = {topic: subtopic_names.get(topic, topic) for topic in result.get("subtopics", {})}
+    requested_aspects = {aspect: aspect_names.get(aspect, aspect)
                          for aspect in result.get("aspects", [])}
     full_label_distributions = dict(result.get("label_distributions", {}))
     if not full_label_distributions and result.get("corpus_label_matches"):
@@ -156,6 +179,16 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
     if requested_aspects:
         system += """
 7. requested_aspects 非空时，必须严格按照 requested_aspects 的顺序回答；每个评价方面单独成段，段与段之间空一行。每段必须明确写出方面名称、该方面的原始平均分、满分和评分份数，例如“原始餐饮评分为 3.80/5（900 份）”，再用属于该 query_aspect 的原文解释。不得用一个方面的评分回答另一个方面。回答控制在 220–550 个中文字符。"""
+    if language == "en":
+        system = """You are an airline review analysis assistant. Answer entirely in English and use only the supplied rating summaries, aggregate label statistics, and review evidence.
+Rules:
+1. Answer the question directly. If a parent rating comparison is marked clear_difference, name its winner. If it is no_clear_difference, report the gap and explain that it is not decisive.
+2. Copy rating means, sample sizes, differences, and aggregate sentiment counts exactly from the payload. Never calculate sentiment from the few displayed quotations.
+3. Use citations exactly as supplied, such as [1], [A1], or [B2]. Every substantive evidence claim needs a valid citation.
+4. Automatic labels are supporting statistics rather than human gold labels. Describe the data as historical reviews from 2002–2019.
+5. When requested_subtopics is nonempty, give each requested subtopic its own paragraph in the requested order. Parent-aspect ratings are context and cannot decide a subtopic winner. Follow comparison_subtopic_decisions: declare a subtopic winner only for clear_difference; describe direction without a winner for no_clear_difference; abstain only for insufficient_evidence.
+6. When aggregate statistics are available, include each airline's total matched reviews and the positive and negative counts and percentages in one compact sentence. Then support the interpretation with representative evidence.
+7. Translate nothing into Chinese and do not output Chinese characters. Write natural, specific English and avoid boilerplate. Keep the answer concise."""
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
                "rating_summary": None if subtopics else _rating_payload(result.get("rating_summary")),
@@ -185,7 +218,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
                     required_aspects: tuple[str, ...] = (),
                     evidence_numbers: set[str] | None = None,
                     require_all_rating_values: bool = False,
-                    allow_aggregate_counts: bool = False) -> tuple[bool, list[str]]:
+                    allow_aggregate_counts: bool = False,
+                    language: str = "zh") -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
     clean = text.strip()
@@ -196,6 +230,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if len(clean) > 1600: reasons.append("answer_too_long")
     if any(token in clean.casefold() for token in ("<|im_start|>", "program_computed_retrieved_sample", '"evidence"')):
         reasons.append("protocol_leak")
+    if language == "en" and re.search(r"[\u3400-\u9fff]", clean):
+        reasons.append("wrong_output_language")
     without_citations = _CITATION_RE.sub("", clean)
     numeric_tokens = [token.replace(",", "") for token in
                       re.findall(r"\d[\d,]*(?:\.\d+)?", without_citations)]
@@ -218,7 +254,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     paragraphs = [paragraph.strip() for paragraph in _PARAGRAPH_RE.split(clean) if paragraph.strip()]
     topic_paragraphs = {}
     for topic in required_subtopics:
-        name = SUBTOPIC_NAMES.get(topic, topic)
+        name = (_SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES).get(topic, topic)
         containing = [index for index, paragraph in enumerate(paragraphs) if name in paragraph]
         topic_paragraphs[topic] = containing
         if not containing:
@@ -226,7 +262,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if len(required_subtopics) > 1:
         used = set()
         assigned = []
-        names = [SUBTOPIC_NAMES.get(topic, topic) for topic in required_subtopics]
+        names = [(_SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES).get(topic, topic)
+                 for topic in required_subtopics]
         for indices in topic_paragraphs.values():
             choices = [index for index in indices if index not in used]
             choices.sort(key=lambda index: (sum(name in paragraphs[index] for name in names), index))
@@ -241,7 +278,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     aspect_paragraphs = {}
     summaries = (rating_summary or {}).get("rating_summaries", {})
     for aspect in required_aspects:
-        name = _ASPECT_NAMES.get(aspect, aspect)
+        name = (_ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES).get(aspect, aspect)
         containing = [index for index, paragraph in enumerate(paragraphs) if name in paragraph]
         aspect_paragraphs[aspect] = containing
         if not containing:
@@ -259,7 +296,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if len(required_aspects) > 1:
         used = set()
         assigned = []
-        names = [_ASPECT_NAMES.get(aspect, aspect) for aspect in required_aspects]
+        names = [(_ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES).get(aspect, aspect)
+                 for aspect in required_aspects]
         for indices in aspect_paragraphs.values():
             choices = [index for index in indices if index not in used]
             choices.sort(key=lambda index: (sum(name in paragraphs[index] for name in names), index))
@@ -279,12 +317,15 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     # sentences, which is the normal answer form produced by the local model.
     # Generic caveats are allowed without citations because they describe system
     # limits, not the review evidence.
-    exemptions = ("数据", "样本", "检索", "不能代表", "证据不足", "自动标签", "截至", "评分")
+    exemptions = (("data", "sample", "retriev", "does not represent", "insufficient", "automatic-label", "rating")
+                  if language == "en" else
+                  ("数据", "样本", "检索", "不能代表", "证据不足", "自动标签", "截至", "评分"))
     for paragraph in paragraphs:
         aspect_mentions = sum(_ASPECT_NAMES.get(aspect, aspect) in paragraph for aspect in required_aspects)
         if aspect_mentions >= 2 and any(term in paragraph for term in ("如下", "分别")):
             continue
-        if len(paragraph) < 8 or _CITATION_RE.search(paragraph) or any(term in paragraph for term in exemptions):
+        searchable = paragraph.casefold() if language == "en" else paragraph
+        if len(paragraph) < 8 or _CITATION_RE.search(paragraph) or any(term in searchable for term in exemptions):
             continue
         reasons.append("uncited_claim")
         break
@@ -343,9 +384,142 @@ def _polarity_distribution_sentence(summaries: dict[str, dict], *, direct: bool 
     return f"{scope}的自动标签汇总：" + "；".join(parts) + "。"
 
 
+def _polarity_distribution_sentence_en(summaries: dict[str, dict], *, direct: bool = False) -> str:
+    parts = []
+    for airline, data in summaries.items():
+        labeled = int(data.get("labeled_review_count") or 0)
+        positive = int(data.get("positive_review_count") or 0)
+        negative = int(data.get("negative_review_count") or 0)
+        if not labeled:
+            continue
+        matched = int(data.get("direct_review_count") or data.get("review_count") or labeled)
+        parts.append(
+            f"{airline}: {matched:,} matched reviews; among the {labeled:,} with a clear direction, "
+            f"{positive:,} were positive ({positive / labeled * 100:.1f}%) and "
+            f"{negative:,} were negative ({negative / labeled * 100:.1f}%)"
+        )
+    if not parts:
+        return ""
+    scope = "Directly relevant review-level automatic-label summary" if direct else "Aspect-level automatic-label summary"
+    return scope + ": " + "; ".join(parts) + "."
+
+
+def _fallback_answer_en(result: dict, rows: list[dict]) -> str:
+    if not rows:
+        return ("The current filters do not provide enough review evidence to answer reliably. "
+                "Try relaxing the airline, cabin, route, or date constraints.")
+    aspect = result.get("aspect")
+    aspect_name = _ASPECT_NAMES_EN.get(aspect, "this aspect")
+    rating = result.get("rating_summary") or {}
+    by_airline: dict[str, list[dict]] = {}
+    for row in rows:
+        by_airline.setdefault(str(row.get("airline") or "Selected airline"), []).append(row)
+
+    def quote(row: dict) -> str:
+        return textwrap.shorten(str(row.get("text", "")).strip(), width=155, placeholder="…")
+
+    if result.get("type") == "multi_aspect":
+        sections = []
+        for key in result.get("aspects", []):
+            name = _ASPECT_NAMES_EN.get(key, key)
+            summary = result.get("rating_summaries", {}).get(key) or {}
+            aspect_rows = [row for row in rows if row.get("query_aspect") == key]
+            airline = str((aspect_rows[0].get("airline") if aspect_rows else "") or "Selected airline")
+            data = next(iter(summary.get("airlines", {}).values()), {})
+            rating_text = (f"the original {name} rating was {data['mean']:.2f}/{summary['scale']} "
+                           f"from {data['n']:,} ratings" if summary.get("available") and data.get("mean") is not None
+                           else f"the source table has no independent {name} rating")
+            examples = "; ".join(f'“{quote(row)}”[{row["citation_id"]}]' for row in aspect_rows[:2])
+            sections.append(f"For {airline}'s {name}, {rating_text}. Representative evidence: {examples}.")
+        return "\n\n".join(sections) + "\n\nThe ratings and reviews cover 2002–2019 and do not describe current service."
+
+    subtopics = result.get("subtopics") or {}
+    if subtopics:
+        sections = []
+        comparison_query = result.get("type") == "comparison"
+        if comparison_query and rating.get("available"):
+            rating_parts = [f"{airline} {data['mean']:.2f}/{rating['scale']} ({data['n']:,} ratings)"
+                            for airline, data in rating.get("airlines", {}).items() if data.get("mean") is not None]
+            comparison = rating.get("comparison", {})
+            if comparison.get("status") == "clear_difference":
+                lead = (f"At the broader {aspect_name} level, {comparison['winner']} had the stronger historical rating, "
+                        f"leading by {comparison['difference']:.2f} points.")
+            elif comparison.get("status") == "no_clear_difference":
+                lead = (f"At the broader {aspect_name} level, the {comparison['difference']:.2f}-point gap was not decisive.")
+            else:
+                lead = f"The broader {aspect_name} ratings were insufficient for a reliable ranking."
+            sections.append(lead + " Original ratings: " + "; ".join(rating_parts)
+                            + ". These are parent-aspect ratings, not independent subtopic scores.")
+        for topic in subtopics:
+            topic_name = _SUBTOPIC_NAMES_EN.get(topic, topic)
+            matches = [row for row in rows if topic in row.get(
+                "direct_subtopic_matches" if comparison_query else "matched_subtopics", [])]
+            if comparison_query:
+                decision = _comparison_subtopic_decision(result, topic)
+                summaries = decision.get("summaries", {})
+                chosen = []
+                for airline in by_airline:
+                    candidates = [row for row in matches if row.get("airline") == airline]
+                    if candidates:
+                        share = summaries.get(airline, {}).get("positive_share")
+                        preferred = "positive" if share is not None and share >= .5 else "negative"
+                        chosen.append(next((row for row in candidates if row.get("pred_polarity") == preferred), candidates[0]))
+                aggregate = _polarity_distribution_sentence_en(summaries, direct=True)
+                if decision.get("status") == "clear_difference":
+                    finding = f"the full direct-evidence aggregate clearly supports {decision['winner']}"
+                elif decision.get("status") == "no_clear_difference":
+                    finding = f"the aggregate leans toward {decision['leader']}, but the gap is not decisive"
+                else:
+                    finding = "the direct evidence is insufficient to name a reliable winner"
+            else:
+                chosen = matches[:2]
+                aggregate_data = result.get("subtopic_analysis", {}).get(topic, {}).get("polarity_summary")
+                airline = next(iter(by_airline), "Selected airline")
+                aggregate = _polarity_distribution_sentence_en({airline: aggregate_data}, direct=True) if aggregate_data else ""
+                polarities = {row.get("pred_polarity") for row in chosen}
+                finding = ("the directly relevant reviews lean positive" if polarities == {"positive"} else
+                           "the directly relevant reviews lean negative" if polarities == {"negative"} else
+                           "the directly relevant reviews include both positive and negative experiences")
+            examples = "; ".join(
+                f'A {row.get("airline", "selected-airline")} passenger wrote, “{quote(row)}”[{row["citation_id"]}]'
+                for row in chosen)
+            sections.append(f"For {topic_name}, {finding}. {aggregate} {examples}.".strip())
+        return "\n\n".join(sections) + "\n\nThese are individual historical experiences and do not represent every flight."
+
+    comparison = rating.get("comparison", {})
+    distribution = _polarity_distribution_sentence_en(result.get("label_distributions", {}))
+    if rating.get("available") and comparison.get("status") == "clear_difference":
+        winner, runner = comparison["winner"], comparison["runner_up"]
+        first, second = rating["airlines"][winner], rating["airlines"][runner]
+        examples = "; ".join(f'{row.get("airline")} wrote, “{quote(row)}”[{row["citation_id"]}]' for row in rows[:2])
+        return (f"{winner} was clearly stronger in these historical {aspect_name} ratings: "
+                f"{first['mean']:.2f}/{rating['scale']} from {first['n']:,} ratings versus "
+                f"{second['mean']:.2f}/{rating['scale']} from {second['n']:,} for {runner}, a "
+                f"{comparison['difference']:.2f}-point gap. {distribution} {examples}. "
+                "The data cover 2002–2019 and do not represent current service.")
+    if rating.get("available") and comparison.get("status") == "no_clear_difference":
+        leader, runner = comparison["leader"], comparison["runner_up"]
+        first, second = rating["airlines"][leader], rating["airlines"][runner]
+        return (f"These historical ratings do not reliably distinguish the airlines. {leader} scored "
+                f"{first['mean']:.2f}/{rating['scale']} from {first['n']:,} ratings and {runner} scored "
+                f"{second['mean']:.2f}/{rating['scale']} from {second['n']:,}, a "
+                f"{comparison['difference']:.2f}-point gap. {distribution}")
+    if rating.get("available") and len(rating.get("airlines", {})) == 1:
+        airline, data = next(iter(rating["airlines"].items()))
+        distribution = _polarity_distribution_sentence_en(
+            {airline: result.get("corpus_label_matches")}) if result.get("corpus_label_matches") else ""
+        examples = "; ".join(f'“{quote(row)}”[{row["citation_id"]}]' for row in rows[:2])
+        return (f"{airline}'s historical {aspect_name} rating was {data['mean']:.2f}/{rating['scale']} from "
+                f"{data['n']:,} ratings. {distribution} Representative evidence: {examples}. Data end in 2019.")
+    examples = "; ".join(f'“{quote(row)}”[{row["citation_id"]}]' for row in rows[:2])
+    return f"The source table does not provide enough comparable ratings for a firm conclusion. Available evidence: {examples}."
+
+
 def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
     """Produce a useful answer without an LLM, grounded in visible evidence."""
     del question
+    if result.get("language") == "en":
+        return _fallback_answer_en(result, rows)
     if result.get("type") == "multi_aspect":
         sections = []
         for aspect in result.get("aspects", []):
@@ -374,7 +548,7 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
             details = []
             for index, row in enumerate(selected):
                 prefix = "一条评论写道" if index == 0 else "另一条评论写道"
-                quote = textwrap.shorten(str(row["text"]).strip(), width=125, placeholder="…")
+                quote = textwrap.shorten(str(row.get("text_zh") or row["text"]).strip(), width=125, placeholder="…")
                 details.append(f"{prefix}：“{quote}”[{row['citation_id']}]")
             evidence_text = "；".join(details) if details else "当前筛选条件下没有检索到可核对的原文"
             distribution = (result.get("results", {}).get(aspect, {})
@@ -397,7 +571,7 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                       and row.get("pred_polarity") == polarity]
         return candidates[0] if candidates else (by_airline.get(airline) or [None])[0]
     def quote(row: dict) -> str:
-        return textwrap.shorten(str(row["text"]).strip(), width=145, placeholder="…")
+        return textwrap.shorten(str(row.get("text_zh") or row["text"]).strip(), width=145, placeholder="…")
     subtopics = result.get("subtopics") or {}
     if subtopics:
         sections = []
@@ -504,7 +678,7 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                     direction += "。" + _polarity_distribution_sentence(
                         {airline_label or "所选航司": polarity_summary}, direct=True)
             sections.append(f"关于{subject}，{direction.rstrip('。')}。" + "；".join(details) + "。")
-        return "\n\n".join(sections) + "\n\n这些原文记录的是具体旅客经历，不能代表所有航班。"
+        return "\n\n".join(sections) + "\n\n这些评论记录的是具体旅客经历，不能代表所有航班。"
     if rating.get("available") and rating.get("comparison", {}).get("status") == "clear_difference":
         comparison = rating["comparison"]
         winner, runner = comparison["winner"], comparison["runner_up"]
@@ -559,8 +733,8 @@ StreamCallback = Callable[[str, str], None]
 
 
 def _generate(messages: list[dict], *, endpoint: str, timeout: float,
-              on_stream: StreamCallback | None = None) -> dict:
-    body = json.dumps({"messages": messages, "max_tokens": 480,
+              on_stream: StreamCallback | None = None, max_tokens: int = 480) -> dict:
+    body = json.dumps({"messages": messages, "max_tokens": max_tokens,
                        "temperature": 0.0}, ensure_ascii=False).encode("utf-8")
     path = "/generate_stream" if on_stream else "/generate"
     request = urllib.request.Request(endpoint.rstrip("/") + path, data=body,
@@ -588,10 +762,78 @@ def _generate(messages: list[dict], *, endpoint: str, timeout: float,
         return {"text": "".join(chunks).strip(), "seconds": seconds}
 
 
+def _evidence_items(result: dict) -> list[dict]:
+    if result.get("results"):
+        return [item for part in result["results"].values() for item in part.get("evidence", [])]
+    return list(result.get("evidence", []))
+
+
+@lru_cache(maxsize=512)
+def _translate_batch_cached(texts: tuple[str, ...], endpoint: str) -> tuple[str, ...]:
+    numbered = [{"id": index, "text": text} for index, text in enumerate(texts)]
+    messages = [
+        {"role": "system", "content":
+         "Translate airline passenger review excerpts from English into concise, natural Simplified Chinese. "
+         "Preserve concrete details, tone, negation, cabin products, numbers, and airline names. "
+         "Return only valid JSON in the exact form {\"translations\":[{\"id\":0,\"text\":\"...\"}]}. "
+         "Do not add explanations and do not omit any item."},
+        {"role": "user", "content": json.dumps({"items": numbered}, ensure_ascii=False)},
+    ]
+    payload = _generate(messages, endpoint=endpoint, timeout=90.0, max_tokens=1200)
+    raw = str(payload.get("text", "")).strip()
+    start, end = raw.find("{"), raw.rfind("}")
+    if start < 0 or end <= start:
+        raise ValueError("translation_json_missing")
+    parsed = json.loads(raw[start:end + 1])
+    translated = {int(item["id"]): str(item["text"]).strip()
+                  for item in parsed.get("translations", [])}
+    if set(translated) != set(range(len(texts))) or any(not value for value in translated.values()):
+        raise ValueError("translation_items_incomplete")
+    return tuple(translated[index] for index in range(len(texts)))
+
+
+def localize_evidence(result: dict, *, language: str, endpoint: str = DEFAULT_ENDPOINT) -> dict:
+    """Attach display-language evidence without replacing the source text."""
+    result["language"] = language
+    items = _evidence_items(result)
+    if language == "en":
+        for item in items:
+            item["display_text"] = str(item.get("text", ""))
+        result["evidence_translation"] = {"status": "not_needed", "language": "en"}
+        return result
+    unique = list(dict.fromkeys(str(item.get("text", "")).strip() for item in items if item.get("text")))
+    translated_by_source: dict[str, str] = {}
+    try:
+        for offset in range(0, len(unique), 8):
+            batch = tuple(unique[offset:offset + 8])
+            translations = _translate_batch_cached(batch, endpoint)
+            translated_by_source.update(zip(batch, translations))
+        status = "translated"
+    except (OSError, ValueError, KeyError, json.JSONDecodeError, urllib.error.URLError, socket.timeout):
+        status = "fallback_summary"
+    for item in items:
+        source = str(item.get("text", "")).strip()
+        translated = translated_by_source.get(source)
+        if not translated:
+            aspect = _ASPECT_NAMES.get(item.get("pred_aspect"), "所问方面")
+            polarity = {"positive": "正面", "negative": "负面"}.get(item.get("pred_polarity"), "相关")
+            translated = f"这条评论被自动识别为关于{aspect}的{polarity}评价；翻译服务暂时未返回逐句译文。"
+        item["text_zh"] = translated
+        item["display_text"] = translated
+    result["evidence_translation"] = {"status": status, "language": "zh", "translated_count": len(items)}
+    return result
+
+
 def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDPOINT,
                     timeout: float = 45.0, use_model: bool = True,
                     on_stream: StreamCallback | None = None) -> dict:
     """Generate, validate, and fall back without ever losing the evidence."""
+    language = result.get("language", "zh")
+    # Legacy/library callers that do not declare a language keep the historical
+    # behavior.  The UI always sets this field and therefore gets strict
+    # single-language evidence and answers.
+    if "language" in result:
+        localize_evidence(result, language=language, endpoint=endpoint)
     rows = collect_evidence(result)
     valid_ids = {row["citation_id"] for row in rows}
     fallback = fallback_answer(question, result, rows)
@@ -661,20 +903,27 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
                                         required_aspects=required_aspects,
                                         evidence_numbers=evidence_numbers,
                                         require_all_rating_values=require_all_rating_values,
-                                        allow_aggregate_counts=allow_aggregate_counts)
+                                        allow_aggregate_counts=allow_aggregate_counts,
+                                        language=language)
         if valid:
             if on_stream:
                 on_stream(text, "complete")
             return {"text": text, "mode": "local_qwen", "valid": True,
                     "validation_errors": [], "citations": sorted(_CITATION_RE.findall(text)),
                     "model_seconds": model_seconds}
+        repair_instruction = (
+            "The previous answer failed validation (" + "; ".join(errors) + "). Rewrite it in English only. "
+            "Keep valid citations, remove unsupported numbers and scope claims, and put every requested subtopic "
+            "or aspect in its own paragraph. Output only the corrected answer."
+            if language == "en" else
+            "上一版未通过校验（" + "；".join(errors) + "）。请按原要求重写，只输出修正后的中文回答。"
+            "保留有效引用，删除未经证实的数字和范围判断。每个 requested_subtopics 中文名称必须单独成段，"
+            "段与段之间空一行，不要把多个细分项写在同一段。requested_aspects 也必须每方面单独成段，"
+            "显式写出该方面的原始平均分、满分和评分份数。"
+        )
         repair_messages = messages + [
             {"role": "assistant", "content": text},
-            {"role": "user", "content":
-             "上一版未通过校验（" + "；".join(errors) + "）。请按原要求重写，只输出修正后的中文回答。"
-             "保留有效引用，删除未经证实的数字和范围判断。每个 requested_subtopics 中文名称必须单独成段，"
-             "段与段之间空一行，不要把多个细分项写在同一段。requested_aspects 也必须每方面单独成段，"
-             "显式写出该方面的原始平均分、满分和评分份数。"},
+            {"role": "user", "content": repair_instruction},
         ]
         if on_stream:
             on_stream("", "reset")
@@ -688,7 +937,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             required_subtopics=tuple(result.get("subtopics", {})), required_aspects=required_aspects,
             evidence_numbers=evidence_numbers,
             require_all_rating_values=require_all_rating_values,
-            allow_aggregate_counts=allow_aggregate_counts)
+            allow_aggregate_counts=allow_aggregate_counts,
+            language=language)
         if repaired_valid:
             if on_stream:
                 on_stream(repaired, "complete")
