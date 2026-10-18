@@ -146,7 +146,7 @@ def model_health(endpoint: str = DEFAULT_ENDPOINT, timeout: float = 0.5) -> dict
 
 
 def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDPOINT,
-                    timeout: float = 90.0, use_model: bool = True) -> dict:
+                    timeout: float = 45.0, use_model: bool = True) -> dict:
     """Generate, validate, and fall back without ever losing the evidence."""
     rows = collect_evidence(result)
     valid_ids = {row["citation_id"] for row in rows}
@@ -154,7 +154,7 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     if not use_model or not rows:
         return {"text": fallback, "mode": "program_fallback", "valid": True,
                 "validation_errors": [], "citations": sorted(_CITATION_RE.findall(fallback)), "model_seconds": 0.0}
-    body = json.dumps({"messages": _prompt(question, result, rows), "max_tokens": 420,
+    body = json.dumps({"messages": _prompt(question, result, rows), "max_tokens": 320,
                        "temperature": 0.0}, ensure_ascii=False).encode("utf-8")
     request = urllib.request.Request(endpoint.rstrip("/") + "/generate", data=body,
                                      headers={"Content-Type": "application/json"}, method="POST")
