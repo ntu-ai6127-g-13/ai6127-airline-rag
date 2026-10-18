@@ -61,6 +61,12 @@ class QuestionParserTests(unittest.TestCase):
         self.assertEqual(parsed.aspect, "seat")
         self.assertEqual(set(parsed.subtopics), {"seat_cleanliness"})
 
+    def test_multiple_top_level_aspects_are_preserved_in_question_order(self):
+        parsed = parse_question("新加坡航空餐食、性价比和地勤怎么样？",
+                                known_airlines=self.airlines)
+        self.assertEqual(parsed.aspect, "food")
+        self.assertEqual(parsed.aspects, ["food", "value", "ground"])
+
 
 class GroundedAnswerTests(unittest.TestCase):
     rating_summary = {"available": True, "scale": 5, "airlines": {
@@ -87,6 +93,15 @@ class GroundedAnswerTests(unittest.TestCase):
             "B Air": {"evidence": [evidence("2", "B Air", "negative")]},
         }}
         self.assertEqual([row["citation_id"] for row in collect_evidence(result)], ["A1", "B1"])
+
+    def test_multi_aspect_citation_ids_are_unique(self):
+        result = {"type": "multi_aspect", "results": {
+            "food": {"evidence": [evidence("1", "A Air", "positive")]},
+            "value": {"evidence": [evidence("2", "A Air", "negative")]},
+        }}
+        rows = collect_evidence(result)
+        self.assertEqual([row["citation_id"] for row in rows], ["A1", "B1"])
+        self.assertEqual([row["query_aspect"] for row in rows], ["food", "value"])
 
     def test_validation_rejects_unknown_citation_and_uncited_paragraph(self):
         self.assertFalse(validate_answer("结论。[9]", {"1"})[0])
@@ -191,6 +206,55 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertIn("腿部空间", text)
         self.assertIn("靠背调节与躺平", text)
         self.assertGreaterEqual(text.count("\n\n"), 2)
+
+    def test_multi_aspect_fallback_names_each_rating(self):
+        def summary(aspect, field, mean, n):
+            return {"available": True, "aspect": aspect, "rating_field": field, "scale": 5,
+                    "airlines": {"Singapore Airlines": {"mean": mean, "n": n, "median": 4.0,
+                        "std": 1.0, "high_share": .6, "low_share": .2}},
+                    "comparison": {"status": "not_applicable"}}
+        rows = {}
+        for index, aspect in enumerate(("food", "value", "ground"), 1):
+            rows[aspect] = {"evidence": [{**evidence(str(index), "Singapore Airlines", "positive"),
+                                           "pred_aspect": aspect}]}
+        ratings = {"food": summary("food", "food_bev", 3.8, 100),
+                   "value": summary("value", "value_for_money", 3.6, 120),
+                   "ground": summary("ground", "ground_service", 3.7, 80)}
+        result = {"type": "multi_aspect", "aspects": ["food", "value", "ground"],
+                  "results": rows, "rating_summaries": ratings}
+        answer = answer_question("餐食、性价比和地勤怎么样", result, use_model=False)
+        self.assertIn("原始餐饮评分为 3.80/5", answer["text"])
+        self.assertIn("原始性价比评分为 3.60/5", answer["text"])
+        self.assertIn("原始地面服务评分为 3.70/5", answer["text"])
+        self.assertGreaterEqual(answer["text"].count("\n\n"), 3)
+
+    def test_multi_aspect_validation_allows_intro_and_evidence_numbers(self):
+        def summary(mean):
+            return {"available": True, "scale": 5, "airlines": {
+                "Singapore Airlines": {"mean": mean, "n": 100, "median": 4.0,
+                                       "high_share": .6, "low_share": .2}},
+                "comparison": {"status": "not_applicable"}}
+        ratings = {"rating_summaries": {"food": summary(3.8), "ground": summary(4.0)}}
+        text = ("餐饮和地面服务分别如下。\n\n"
+                "餐饮：原始餐饮评分为 3.80/5，共 100 份；餐食不错。[A1]\n\n"
+                "地面服务：原始地面服务评分为 4.00/5，共 100 份；有航班延误 15 分钟。[B1]")
+        ok, reasons = validate_answer(text, {"A1", "B1"}, rating_summary=ratings,
+                                      required_aspects=("food", "ground"), evidence_numbers={"15"})
+        self.assertTrue(ok, reasons)
+
+    def test_multi_aspect_validation_rejects_wrong_paragraph_order(self):
+        def summary(mean):
+            return {"available": True, "scale": 5, "airlines": {
+                "Singapore Airlines": {"mean": mean, "n": 100, "median": 4.0,
+                                       "high_share": .6, "low_share": .2}},
+                "comparison": {"status": "not_applicable"}}
+        ratings = {"rating_summaries": {"food": summary(3.8), "ground": summary(4.0)}}
+        text = ("地面服务：原始地面服务评分为 4.00/5，共 100 份。[B1]\n\n"
+                "餐饮：原始餐饮评分为 3.80/5，共 100 份。[A1]")
+        ok, reasons = validate_answer(text, {"A1", "B1"}, rating_summary=ratings,
+                                      required_aspects=("food", "ground"))
+        self.assertFalse(ok)
+        self.assertIn("aspects_out_of_order", reasons)
 
 
 if __name__ == "__main__":

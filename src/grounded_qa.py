@@ -46,7 +46,13 @@ def _citation_id(prefix: str, number: int) -> str:
 def collect_evidence(result: dict) -> list[dict]:
     """Flatten a single/comparison query into uniquely cited evidence."""
     rows = []
-    if result.get("type") == "comparison":
+    if result.get("type") == "multi_aspect":
+        for position, (aspect, part) in enumerate(result["results"].items()):
+            prefix = chr(ord("A") + position)
+            for number, item in enumerate(part.get("evidence", []), 1):
+                rows.append({**item, "citation_id": _citation_id(prefix, number),
+                             "citation_prefix": prefix, "query_aspect": aspect})
+    elif result.get("type") == "comparison":
         for position, (airline, part) in enumerate(result["results"].items()):
             prefix = chr(ord("A") + position)
             for number, item in enumerate(part.get("evidence", []), 1):
@@ -78,6 +84,10 @@ def _rating_payload(summary: dict | None) -> dict | None:
 
 def _allowed_numbers(summary: dict | None) -> set[str]:
     allowed = {"2002", "2019"}
+    if summary and "rating_summaries" in summary:
+        for child in summary["rating_summaries"].values():
+            allowed.update(_allowed_numbers(child))
+        return allowed
     if not summary or not summary.get("available"):
         return allowed
     scale = summary["scale"]
@@ -104,9 +114,12 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
                               for topic in row.get("matched_subtopics", [])],
         "direct_subtopic_matches": [SUBTOPIC_NAMES.get(topic, topic)
                                     for topic in row.get("direct_subtopic_matches", [])],
+        "query_aspect": _ASPECT_NAMES.get(row.get("query_aspect"), row.get("query_aspect")),
         "predicted_aspect": row.get("pred_aspect"), "predicted_polarity": row.get("pred_polarity"),
     } for row in rows]
     subtopics = {topic: SUBTOPIC_NAMES.get(topic, topic) for topic in result.get("subtopics", {})}
+    requested_aspects = {aspect: _ASPECT_NAMES.get(aspect, aspect)
+                         for aspect in result.get("aspects", [])}
     system = """你是航空评论分析助手。只能依据输入的原始评分汇总和评论证据作答，不能使用外部知识。
 要求：
 1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。
@@ -119,9 +132,15 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
         system = system.replace(
             "1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。",
             "1. 第一行直接回答用户，并按 requested_subtopics 给出具体发现。comparison 只是上位方面的评分比较，不能强制成为细分问题的结论。")
+    if requested_aspects:
+        system += """
+7. requested_aspects 非空时，必须严格按照 requested_aspects 的顺序回答；每个评价方面单独成段，段与段之间空一行。每段必须明确写出方面名称、该方面的原始平均分、满分和评分份数，例如“原始餐饮评分为 3.80/5（900 份）”，再用属于该 query_aspect 的原文解释。不得用一个方面的评分回答另一个方面。回答控制在 220–550 个中文字符。"""
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
                "rating_summary": None if subtopics else _rating_payload(result.get("rating_summary")),
+               "requested_aspects": requested_aspects,
+               "rating_summaries": {requested_aspects.get(key, key): _rating_payload(value)
+                                    for key, value in result.get("rating_summaries", {}).items()},
                "evidence": evidence}
     return [{"role": "system", "content": system},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
@@ -129,7 +148,9 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
 
 def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | None = None,
                     require_rating_winner: bool = True,
-                    required_subtopics: tuple[str, ...] = ()) -> tuple[bool, list[str]]:
+                    required_subtopics: tuple[str, ...] = (),
+                    required_aspects: tuple[str, ...] = (),
+                    evidence_numbers: set[str] | None = None) -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
     clean = text.strip()
@@ -141,8 +162,9 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if any(token in clean.casefold() for token in ("<|im_start|>", "program_computed_retrieved_sample", '"evidence"')):
         reasons.append("protocol_leak")
     without_citations = _CITATION_RE.sub("", clean)
-    numeric_tokens = re.findall(r"\d+(?:\.\d+)?", without_citations)
-    unexpected = set(numeric_tokens) - _allowed_numbers(rating_summary)
+    numeric_tokens = [token.replace(",", "") for token in
+                      re.findall(r"\d[\d,]*(?:\.\d+)?", without_citations)]
+    unexpected = set(numeric_tokens) - (_allowed_numbers(rating_summary) | set(evidence_numbers or ()))
     if unexpected: reasons.append("unverified_numeric_claim:" + ",".join(sorted(unexpected)))
     if re.search(r"[零一二三四五六七八九十百]+\s*条", without_citations):
         reasons.append("retrieved_label_count_claim")
@@ -159,9 +181,53 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
         if not containing:
             reasons.append("missing_subtopic:" + topic)
     if len(required_subtopics) > 1:
-        used = [indices[0] for indices in topic_paragraphs.values() if indices]
-        if len(set(used)) != len(used):
+        used = set()
+        assigned = []
+        names = [SUBTOPIC_NAMES.get(topic, topic) for topic in required_subtopics]
+        for indices in topic_paragraphs.values():
+            choices = [index for index in indices if index not in used]
+            choices.sort(key=lambda index: (sum(name in paragraphs[index] for name in names), index))
+            available = choices[0] if choices else None
+            if available is not None:
+                used.add(available)
+                assigned.append(available)
+        if len(used) != len([indices for indices in topic_paragraphs.values() if indices]):
             reasons.append("subtopics_not_separated")
+        elif assigned != sorted(assigned):
+            reasons.append("subtopics_out_of_order")
+    aspect_paragraphs = {}
+    summaries = (rating_summary or {}).get("rating_summaries", {})
+    for aspect in required_aspects:
+        name = _ASPECT_NAMES.get(aspect, aspect)
+        containing = [index for index, paragraph in enumerate(paragraphs) if name in paragraph]
+        aspect_paragraphs[aspect] = containing
+        if not containing:
+            reasons.append("missing_aspect:" + aspect)
+            continue
+        summary = summaries.get(aspect) or {}
+        if summary.get("available"):
+            data = next(iter(summary.get("airlines", {}).values()), {})
+            expected = f"{data['mean']:.2f}" if data.get("mean") is not None else None
+            has_rating = any(expected in paragraphs[index]
+                             and f"/{summary['scale']}" in paragraphs[index].replace(" ", "")
+                             for index in containing) if expected else True
+            if not has_rating:
+                reasons.append("missing_aspect_rating:" + aspect)
+    if len(required_aspects) > 1:
+        used = set()
+        assigned = []
+        names = [_ASPECT_NAMES.get(aspect, aspect) for aspect in required_aspects]
+        for indices in aspect_paragraphs.values():
+            choices = [index for index in indices if index not in used]
+            choices.sort(key=lambda index: (sum(name in paragraphs[index] for name in names), index))
+            available = choices[0] if choices else None
+            if available is not None:
+                used.add(available)
+                assigned.append(available)
+        if len(used) != len([indices for indices in aspect_paragraphs.values() if indices]):
+            reasons.append("aspects_not_separated")
+        elif assigned != sorted(assigned):
+            reasons.append("aspects_out_of_order")
     if required_subtopics and re.search(
             r"多数|普遍|大部分|更多(?:人|旅客|评论)|较多(?:人|旅客|评论)|整体|总体", clean):
         reasons.append("unsupported_prevalence_claim")
@@ -172,6 +238,9 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     # limits, not the review evidence.
     exemptions = ("数据", "样本", "检索", "不能代表", "证据不足", "自动标签", "截至", "评分")
     for paragraph in paragraphs:
+        aspect_mentions = sum(_ASPECT_NAMES.get(aspect, aspect) in paragraph for aspect in required_aspects)
+        if aspect_mentions >= 2 and any(term in paragraph for term in ("如下", "分别")):
+            continue
         if len(paragraph) < 8 or _CITATION_RE.search(paragraph) or any(term in paragraph for term in exemptions):
             continue
         reasons.append("uncited_claim")
@@ -182,6 +251,39 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
 def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
     """Produce a useful answer without an LLM, grounded in visible evidence."""
     del question
+    if result.get("type") == "multi_aspect":
+        sections = []
+        for aspect in result.get("aspects", []):
+            aspect_name = _ASPECT_NAMES.get(aspect, aspect)
+            summary = result.get("rating_summaries", {}).get(aspect) or {}
+            aspect_rows = [row for row in rows if row.get("query_aspect") == aspect]
+            airline = str((aspect_rows[0].get("airline") if aspect_rows else "") or "")
+            airline_label = _AIRLINE_NAMES_ZH.get(airline, airline or "所选航司")
+            if summary.get("available"):
+                data = next(iter(summary.get("airlines", {}).values()), {})
+                if data.get("mean") is None:
+                    rating_text = f"当前条件下没有可用的原始{aspect_name}评分"
+                else:
+                    rating_text = (f"原始{aspect_name}评分为 {data['mean']:.2f}/{summary['scale']}"
+                                   f"（{data['n']:,} 份）")
+            else:
+                rating_text = f"原始表没有独立的{aspect_name}评分"
+            positive = next((row for row in aspect_rows if row.get("pred_polarity") == "positive"), None)
+            negative = next((row for row in aspect_rows if row.get("pred_polarity") == "negative"), None)
+            selected = []
+            for row in (positive, negative, *aspect_rows):
+                if row is not None and row not in selected:
+                    selected.append(row)
+                if len(selected) == 2:
+                    break
+            details = []
+            for index, row in enumerate(selected):
+                prefix = "一条评论写道" if index == 0 else "另一条评论写道"
+                quote = textwrap.shorten(str(row["text"]).strip(), width=125, placeholder="…")
+                details.append(f"{prefix}：“{quote}”[{row['citation_id']}]")
+            evidence_text = "；".join(details) if details else "当前筛选条件下没有检索到可核对的原文"
+            sections.append(f"关于{airline_label}的{aspect_name}，{rating_text}。{evidence_text}。")
+        return "\n\n".join(sections) + "\n\n评分和原文来自 2002–2019 年的历史评论，不能代表当前服务。"
     if not rows:
         return "当前筛选条件下没有检索到足够的评论证据，因此暂时无法回答。可以放宽航司、舱位、航线或日期条件后重试。"
     aspect = result.get("aspect")
@@ -295,7 +397,7 @@ def model_health(endpoint: str = DEFAULT_ENDPOINT, timeout: float = 0.5) -> dict
 
 
 def _generate(messages: list[dict], *, endpoint: str, timeout: float) -> dict:
-    body = json.dumps({"messages": messages, "max_tokens": 320,
+    body = json.dumps({"messages": messages, "max_tokens": 480,
                        "temperature": 0.0}, ensure_ascii=False).encode("utf-8")
     request = urllib.request.Request(endpoint.rstrip("/") + "/generate", data=body,
                                      headers={"Content-Type": "application/json"}, method="POST")
@@ -319,14 +421,22 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         return {"text": fallback, "mode": "program_fallback", "valid": True,
                 "validation_errors": [], "citations": sorted(_CITATION_RE.findall(fallback)), "model_seconds": 0.0}
     messages = _prompt(question, result, rows)
-    validation_rating = None if result.get("subtopics") else result.get("rating_summary")
+    if result.get("type") == "multi_aspect":
+        validation_rating = {"rating_summaries": result.get("rating_summaries", {})}
+    else:
+        validation_rating = None if result.get("subtopics") else result.get("rating_summary")
+    required_aspects = tuple(result.get("aspects", ())) if result.get("type") == "multi_aspect" else ()
+    evidence_numbers = {token.replace(",", "") for row in rows for token in
+                        re.findall(r"\d[\d,]*(?:\.\d+)?", str(row.get("text", "")))}
     try:
         payload = _generate(messages, endpoint=endpoint, timeout=timeout)
         text = str(payload.get("text", "")).strip()
         model_seconds = float(payload.get("seconds", 0.0))
         valid, errors = validate_answer(text, valid_ids, rating_summary=validation_rating,
                                         require_rating_winner=not bool(result.get("subtopics")),
-                                        required_subtopics=tuple(result.get("subtopics", {})))
+                                        required_subtopics=tuple(result.get("subtopics", {})),
+                                        required_aspects=required_aspects,
+                                        evidence_numbers=evidence_numbers)
         if valid:
             return {"text": text, "mode": "local_qwen", "valid": True,
                     "validation_errors": [], "citations": sorted(_CITATION_RE.findall(text)),
@@ -336,7 +446,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             {"role": "user", "content":
              "上一版未通过校验（" + "；".join(errors) + "）。请按原要求重写，只输出修正后的中文回答。"
              "保留有效引用，删除未经证实的数字和范围判断。每个 requested_subtopics 中文名称必须单独成段，"
-             "段与段之间空一行，不要把多个细分项写在同一段。"},
+             "段与段之间空一行，不要把多个细分项写在同一段。requested_aspects 也必须每方面单独成段，"
+             "显式写出该方面的原始平均分、满分和评分份数。"},
         ]
         repaired_payload = _generate(repair_messages, endpoint=endpoint, timeout=timeout)
         repaired = str(repaired_payload.get("text", "")).strip()
@@ -344,7 +455,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         repaired_valid, repaired_errors = validate_answer(
             repaired, valid_ids, rating_summary=validation_rating,
             require_rating_winner=not bool(result.get("subtopics")),
-            required_subtopics=tuple(result.get("subtopics", {})))
+            required_subtopics=tuple(result.get("subtopics", {})), required_aspects=required_aspects,
+            evidence_numbers=evidence_numbers)
         if repaired_valid:
             return {"text": repaired, "mode": "local_qwen_repaired", "valid": True,
                     "validation_errors": errors, "citations": sorted(_CITATION_RE.findall(repaired)),

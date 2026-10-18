@@ -177,11 +177,13 @@ SUBTOPIC_NAMES = {"quality": "质量与口味", "portion": "分量", "variety": 
 class ParsedQuestion:
     question: str
     aspect: str | None = None
+    aspects: list[str] = field(default_factory=list)
     polarity: str | None = None
     airlines: list[str] = field(default_factory=list)
     filters: dict = field(default_factory=dict)
     retrieval_keywords: str = ""
     subtopics: dict[str, str] = field(default_factory=dict)
+    subtopics_by_aspect: dict[str, dict[str, str]] = field(default_factory=dict)
     comparison: bool = False
     recognized: list[str] = field(default_factory=list)
 
@@ -204,6 +206,19 @@ def _first_alias(text: str, mapping: dict[str, Iterable[str]]) -> str | None:
             if _contains(text, alias):
                 matches.append((text.find(alias.casefold()), -len(alias), value))
     return min(matches)[2] if matches else None
+
+
+def _all_aliases(text: str, mapping: dict[str, Iterable[str]]) -> list[str]:
+    matches = []
+    for value, aliases in mapping.items():
+        for alias in aliases:
+            if _contains(text, alias):
+                matches.append((text.find(alias.casefold()), -len(alias), value))
+    answer = []
+    for _, _, value in sorted(matches):
+        if value not in answer:
+            answer.append(value)
+    return answer
 
 
 def _airlines(text: str, known_airlines: Iterable[str]) -> list[str]:
@@ -248,8 +263,8 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
     """Return corpus-safe constraints; explicit question phrases override defaults."""
     raw = question.strip()
     folded = raw.casefold()
-    aspect = _first_alias(folded, ASPECT_ALIASES)
-    if aspect is None:
+    aspects = _all_aliases(folded, ASPECT_ALIASES)
+    if not aspects:
         # A question may name only a concrete attribute (for example “靠背能否
         # 调整” or “延误后怎么处理”) without naming its parent aspect.
         subtopic_aspect_matches = []
@@ -258,12 +273,16 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
                 for alias in aliases:
                     if _contains(folded, alias):
                         subtopic_aspect_matches.append((folded.find(alias.casefold()), -len(alias), candidate_aspect))
-        if subtopic_aspect_matches:
-            aspect = min(subtopic_aspect_matches)[2]
-    aspect = aspect or default_aspect
+        for _, _, candidate_aspect in sorted(subtopic_aspect_matches):
+            if candidate_aspect not in aspects:
+                aspects.append(candidate_aspect)
+    if not aspects and default_aspect:
+        aspects = [default_aspect]
+    aspect = aspects[0] if aspects else None
     if aspect is None and any(term in folded for term in ("怎么样", "好不好", "哪家好", "哪家更好",
                                                            "评价如何", "how is", "how was", "which is better")):
         aspect = "overall"
+        aspects = [aspect]
     polarity = _first_alias(folded, POLARITY_ALIASES) or default_polarity
     airlines = _airlines(folded, list(known_airlines))
     filters = dict(default_filters or {})
@@ -277,10 +296,15 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
     # Retain only useful Latin keywords which are not already represented by a
     # structured airline/cabin value. Chinese questions still retrieve through
     # the English aspect expansion in query_service.ASPECT_QUERIES.
-    subtopics = {}
-    for key, (aliases, expansion) in SUBTOPIC_RULES.get(aspect, {}).items():
-        if any(_contains(folded, alias) for alias in aliases):
-            subtopics[key] = expansion
+    subtopics_by_aspect = {}
+    for requested_aspect in aspects:
+        requested = {}
+        for key, (aliases, expansion) in SUBTOPIC_RULES.get(requested_aspect, {}).items():
+            if any(_contains(folded, alias) for alias in aliases):
+                requested[key] = expansion
+        if requested:
+            subtopics_by_aspect[requested_aspect] = requested
+    subtopics = subtopics_by_aspect.get(aspect, {})
     words = re.findall(r"[a-z][a-z0-9'-]{2,}", folded)
     stop = {"which", "what", "how", "does", "have", "with", "from", "that", "this",
             "airline", "airlines", "airways", "class", "better", "reviews", "review"}
@@ -293,5 +317,8 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
     recognized.extend(key for key in ("cabin", "traveller_type", "route_from", "route_to") if key in filters)
     comparison_words = ("比较", "对比", "哪家", "哪个好", "更好", "better", "compare", "versus", " vs ")
     if subtopics: recognized.append("subtopic")
-    return ParsedQuestion(raw, aspect, polarity, airlines, filters, keywords, subtopics,
-                          len(airlines) >= 2 or any(word in folded for word in comparison_words), recognized)
+    return ParsedQuestion(question=raw, aspect=aspect, aspects=aspects, polarity=polarity,
+                          airlines=airlines, filters=filters, retrieval_keywords=keywords,
+                          subtopics=subtopics, subtopics_by_aspect=subtopics_by_aspect,
+                          comparison=len(airlines) >= 2 or any(word in folded for word in comparison_words),
+                          recognized=recognized)

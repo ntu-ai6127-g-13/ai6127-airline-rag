@@ -301,6 +301,42 @@ def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polar
                     "以下按同一方面和筛选条件展示各航司的评论证据。检索样本不代表全体旅客，不能据此直接给出总体航司排名。"}
 
 
+@_single_query
+def query_aspects(aspects: list[str], *, query: str = "", polarity: str | None = None,
+                  filters: dict | None = None, classifier_manifest: str | Path | None = None,
+                  label_index_path: str | Path | None = None, top_k: int = 10,
+                  candidate_k: int = 60, chunks_path: str | Path = CHUNKS,
+                  subtopics_by_aspect: dict[str, dict[str, str]] | None = None) -> dict:
+    """Query several top-level service aspects under identical constraints."""
+    requested = list(dict.fromkeys(aspects))
+    if len(requested) < 2:
+        raise ValueError("Choose at least two distinct aspects")
+    unknown = [aspect for aspect in requested if aspect not in ASPECT_QUERIES]
+    if unknown:
+        raise ValueError("Unknown aspects: " + ", ".join(unknown))
+    started = time.monotonic()
+    per_aspect = dict(subtopics_by_aspect or {})
+    results = {
+        aspect: query_reviews(
+            query, aspect=aspect, polarity=polarity, filters=filters,
+            classifier_manifest=classifier_manifest, label_index_path=label_index_path,
+            subtopics=per_aspect.get(aspect), top_k=top_k, candidate_k=max(candidate_k, top_k),
+            chunks_path=chunks_path)
+        for aspect in requested
+    }
+    return {
+        "type": "multi_aspect", "query": query, "aspects": requested,
+        "aspect": None, "polarity": polarity, "filters": filters or {},
+        "subtopics_by_aspect": per_aspect, "results": results,
+        "rating_summaries": {aspect: part.get("rating_summary") for aspect, part in results.items()},
+        "status": ("evidence_available" if all(part["answer"]["status"] == "evidence_available"
+                                                for part in results.values())
+                   else "partial_evidence"),
+        "total_seconds": time.monotonic() - started,
+        "text": "以下按评价方面分别展示原始评分和评论证据。",
+    }
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(); parser.add_argument("query", nargs="?", default="")
     parser.add_argument("--aspect", choices=list(ASPECT_QUERIES)); parser.add_argument("--airline")
