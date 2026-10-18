@@ -1,21 +1,94 @@
-"""网页查询界面（检索组负责）。见手册第 23 节。
-
-运行：streamlit run app/streamlit_app.py
-"""
+"""Local evidence query UI: streamlit run app/streamlit_app.py."""
 import sys
+from datetime import date
 from pathlib import Path
 
 import streamlit as st
+import pandas as pd
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from src.config import CHUNKS, ROOT
+from src.query_service import query_reviews, compare_airlines
 
 st.set_page_config(page_title="航空服务评价检索", layout="wide")
 st.title("✈️ 航空服务评价检索")
 
-st.info(
-    "占位页面。检索组按手册第 23 节实现：\n\n"
-    "1. 侧边栏放筛选条件（舱位、航司、日期）\n"
-    "2. 主区域放查询框\n"
-    "3. 结果要显示**耗时**（报告 Q2 需要）\n"
-    "4. 每条结果可展开查看完整评论（parent-document retrieval）"
-)
+st.caption("按航司和评价方面查阅真实旅客评论。数据覆盖 2002–2019 年，不能代表航司当前服务。")
+
+@st.cache_data
+def filter_options():
+    frame=pd.read_parquet(CHUNKS,columns=["airline","cabin","route_from","route_to"])
+    return tuple(sorted(frame[column].dropna().astype(str).unique()) for column in frame.columns)
+
+if not CHUNKS.exists():
+    st.error("评论知识库尚未生成，请先完成数据构建。"); st.stop()
+airlines,cabins,origins,destinations=filter_options()
+aspect_names={"seat":"座椅舒适度","staff":"空乘服务","food":"餐饮","entertainment":"娱乐与 Wi-Fi",
+              "ground":"值机、行李与准点","value":"价格、退款与客服","overall":"总体体验","other":"清洁及其他"}
+manifest=ROOT/"outputs/query_quality_20261018/frozen_candidates.json"
+if not manifest.exists():
+    manifest=ROOT/"outputs/query_quality_standalone/frozen_candidates.json"
+with st.sidebar:
+    st.subheader("查询条件")
+    airline=st.selectbox("航司",["全部"]+airlines)
+    comparison=st.multiselect("比较航司（可选，选择 2–3 家）",airlines,max_selections=3)
+    cabin=st.selectbox("舱位",["全部"]+cabins)
+    aspect=st.selectbox("评价方面",list(aspect_names),format_func=aspect_names.get)
+    sentiment=st.radio("查看哪些评价",["好评和差评","好评","差评"])
+    use_labels=st.checkbox("启用实验分类器辅助排序",value=False,disabled=not manifest.exists(),
+                           help="标签只影响排序；不会因为被判为客观就删除证据。候选尚未通过完整查询验收。")
+    with st.expander("航线与日期条件"):
+        origin=st.selectbox("出发地",["不限"]+origins)
+        destination=st.selectbox("目的地",["不限"]+destinations)
+        limit_dates=st.checkbox("限定评论日期",value=False)
+        dates=st.date_input("评论日期范围",value=(date(2010,1,1),date(2019,12,31)),disabled=not limit_dates)
+        st.caption("启用这些条件后，仅检索含对应航线或日期记录的评论。")
+with st.form("query"):
+    query=st.text_input("补充英文关键词（可选）",placeholder="例如 overnight flight；也可以直接按所选方面查询")
+    submitted=st.form_submit_button("查找评论",type="primary")
+if submitted:
+    if len(comparison)==1:
+        st.error("比较航司时请选择至少两家；单航司查询请使用上方航司选项。"); st.stop()
+    filters={}
+    if airline!="全部": filters["airline"]=airline
+    if cabin!="全部": filters["cabin"]=cabin
+    if origin!="不限": filters["route_from"]=origin
+    if destination!="不限": filters["route_to"]=destination
+    if limit_dates:
+        if len(dates)!=2 or dates[0]>dates[1]:
+            st.error("请选择完整的起止日期。"); st.stop()
+        filters["date"]=[value.isoformat() for value in dates]
+    polarity={"好评和差评":None,"好评":"positive","差评":"negative"}[sentiment]
+    try:
+        with st.spinner("正在检索并整理原文证据……"):
+            if len(comparison)>=2:
+                st.session_state["result"]=compare_airlines(comparison,query=query,aspect=aspect,polarity=polarity,
+                    filters=filters,classifier_manifest=manifest if use_labels else None)
+            else:
+                st.session_state["result"]=query_reviews(query,aspect=aspect,polarity=polarity,filters=filters,
+                    classifier_manifest=manifest if use_labels else None)
+    except Exception as error:
+        st.error(str(error))
+        st.session_state.pop("result",None)
+def display_result(result):
+    answer=result["answer"]
+    st.write(answer["text"])
+    st.caption(f"耗时 {result['total_seconds']:.1f} 秒 · {len(result['evidence'])} 条证据 · {answer['review_count']} 条不同评论")
+    for i,item in enumerate(result["evidence"],1):
+        st.markdown(f"**[{i}] {item['airline']} · {item.get('cabin') or '舱位未知'}**")
+        st.write(item["text"])
+        if "pred_aspect" in item:
+            st.caption(f"模型标签：{aspect_names.get(item['pred_aspect'],item['pred_aspect'])} / {item['pred_polarity']}")
+        with st.expander("查看完整评论与来源"):
+            st.write(item.get("review_text") or item["text"])
+            st.caption(f"来源 {item['chunk_id']} · 日期 {item.get('date') or '未知'} · 航线 {item.get('route') or '未知'}")
+if "result" in st.session_state:
+    result=st.session_state["result"]
+    if result.get("type")=="comparison":
+        st.write(result["text"])
+        tabs=st.tabs(list(result["results"]))
+        for tab,part in zip(tabs,result["results"].values()):
+            with tab: display_result(part)
+    else: display_result(result)
+    import json
+    st.download_button("下载本次证据",json.dumps(result,ensure_ascii=False,indent=2),file_name="query_evidence.json",mime="application/json")
