@@ -237,22 +237,50 @@ def _airlines(text: str, known_airlines: Iterable[str]) -> list[str]:
 
 
 def _route_filters(text: str, origins: Iterable[str], destinations: Iterable[str]) -> dict:
-    known_from = {value.casefold(): value for value in origins}
-    known_to = {value.casefold(): value for value in destinations}
+    origin_values, destination_values = list(origins), list(destinations)
+    known_from = {value.casefold(): value for value in origin_values}
+    known_to = {value.casefold(): value for value in destination_values}
     cities = {**{key.casefold(): value for key, value in CITY_ALIASES.items()}, **known_from, **known_to}
     names = sorted(cities, key=len, reverse=True)
     token = "(" + "|".join(re.escape(name) for name in names) + ")"
     patterns = [
         re.compile(r"(?:从|由)\s*" + token + r"\s*(?:到|飞往|去)\s*" + token),
+        re.compile(token + r"\s*(?:飞往|飞到|飞|到|去往|去)\s*" + token),
         re.compile(r"(?:from)\s+" + token + r"\s+(?:to)\s+" + token),
     ]
+
+    def variants(city: str, values: list[str]) -> str | list[str] | None:
+        aliases = {
+            "Singapore": ("singapore", "changi", "sin"),
+            "London": ("london", "lhr", "lgw", "lcy", "ltn", "stn"),
+            "New York": ("new york", "jfk", "ewr", "lga"),
+            "Tokyo": ("tokyo", "narita", "haneda", "nrt", "hnd"),
+            "Paris": ("paris", "cdg", "orly"),
+        }.get(city, (city.casefold(),))
+        matches = []
+        for value in values:
+            folded = value.casefold().strip()
+            if re.search(r"\b(?:to|via)\b|[/,]", folded):
+                continue
+            if city == "London" and ("canada" in folded or "(on)" in folded):
+                continue
+            if any(re.search(r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])", folded)
+                   for alias in aliases):
+                matches.append(value)
+        matches = list(dict.fromkeys(matches))
+        if not matches:
+            return None
+        return matches[0] if len(matches) == 1 else matches
+
     for pattern in patterns:
         match = pattern.search(text)
         if match:
             origin, destination = cities[match.group(1)], cities[match.group(2)]
             result = {}
-            if origin.casefold() in known_from: result["route_from"] = known_from[origin.casefold()]
-            if destination.casefold() in known_to: result["route_to"] = known_to[destination.casefold()]
+            origin_values_for_city = variants(origin, origin_values)
+            destination_values_for_city = variants(destination, destination_values)
+            if origin_values_for_city is not None: result["route_from"] = origin_values_for_city
+            if destination_values_for_city is not None: result["route_to"] = destination_values_for_city
             return result
     return {}
 
@@ -284,6 +312,11 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
         aspect = "overall"
         aspects = [aspect]
     polarity = _first_alias(folded, POLARITY_ALIASES) or default_polarity
+    # “哪家最好 / which is best” asks for a comparison over both positive and
+    # negative evidence; “最好” must not silently become a positive-only filter.
+    if ("哪家" in folded or "which" in folded) and ("最好" in folded or "best" in folded):
+        if not any(term in folded for term in ("好评", "positive", "praise", "优点", "值得推荐")):
+            polarity = None
     airlines = _airlines(folded, list(known_airlines))
     filters = dict(default_filters or {})
     cabin = _first_alias(folded, CABIN_ALIASES)

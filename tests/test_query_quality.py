@@ -8,8 +8,10 @@ import pandas as pd
 from src.quality import classification_metrics
 from src.evaluate import evaluate_queries, evaluate_query_modes
 from src.generate import evidence_answer
-from src.query_service import (_direct_subtopic_match, compare_airlines, merge_subtopic_rankings,
-                               query_aspects, query_reviews, rank_evidence)
+from src.query_service import (_direct_subtopic_match, compare_airlines,
+                               compare_available_airlines, merge_subtopic_rankings,
+                               query_aspects, query_reviews, rank_evidence,
+                               scan_direct_subtopic_matches)
 
 
 class QueryQualityTests(unittest.TestCase):
@@ -60,12 +62,35 @@ class QueryQualityTests(unittest.TestCase):
         self.assertTrue(_direct_subtopic_match("The tray table was dirty and sticky.", "seat_cleanliness"))
         self.assertFalse(_direct_subtopic_match("The toilet seat and basin were stained.", "seat_cleanliness"))
 
+    def test_full_slice_subtopic_scan_finds_direct_matches_before_retrieval(self):
+        frame = pd.DataFrame([
+            {"chunk_id": "1", "review_id": "r1", "text": "The meal portion was tiny.",
+             "airline": "A", "cabin": "Economy", "traveller_type": "Solo",
+             "route_from": "SIN", "route_to": "LHR", "date": pd.Timestamp("2019-01-01")},
+            {"chunk_id": "2", "review_id": "r2", "text": "The meal portion was generous.",
+             "airline": "B", "cabin": "Economy", "traveller_type": "Solo",
+             "route_from": "SIN", "route_to": "LHR", "date": pd.Timestamp("2019-01-01")},
+            {"chunk_id": "3", "review_id": "r3", "text": "The food tasted good.",
+             "airline": "A", "cabin": "Economy", "traveller_type": "Solo",
+             "route_from": "SIN", "route_to": "LHR", "date": pd.Timestamp("2019-01-01")},
+        ])
+        with patch("src.query_service._subtopic_scan_frame", return_value=frame):
+            result = scan_direct_subtopic_matches("portion", filters={"airline": "A"})
+        self.assertEqual(result["scope_sentence_count"], 2)
+        self.assertEqual(result["direct_sentence_count"], 1)
+        self.assertEqual(result["direct_review_count"], 1)
+        self.assertEqual(result["candidate_ids"], ["1"])
+
     def test_subtopic_queries_are_retrieved_and_reranked_separately(self):
         def search(phrase, **kwargs):
             topic = "portion" if "portion" in phrase else "variety"
             return [{"chunk_id": topic, "text": topic, "review_id": topic}]
         with patch("src.query_service.search_with_filters", side_effect=search) as search_mock, \
              patch("src.query_service.rerank", side_effect=lambda phrase, hits, **kwargs: hits), \
+             patch("src.query_service.scan_direct_subtopic_matches", return_value={
+                 "scope_sentence_count": 2, "direct_sentence_count": 0, "direct_review_count": 0,
+                 "reranked_direct_count": 0, "rerank_cap": 240, "cap_applied": False,
+                 "candidate_ids": []}), \
              patch("src.query_service.pd.read_parquet") as parquet_mock, \
              patch("src.query_service.summarize_ratings", return_value={"available": False}):
             parquet_mock.return_value.set_index.return_value.loc.__getitem__.return_value.items.return_value = []
@@ -148,6 +173,19 @@ class QueryQualityTests(unittest.TestCase):
         self.assertEqual(query_mock.call_count, 3)
         self.assertEqual(list(result["results"]), ["food", "value", "ground"])
         self.assertEqual(set(result["rating_summaries"]), {"food", "value", "ground"})
+
+    def test_open_comparison_uses_discovered_airlines_and_preserves_route_filters(self):
+        selection = {"airlines": ["A Air", "B Air"], "candidates": [], "available": True}
+        compared = {"type": "comparison", "results": {}, "rating_summary": {}}
+        with patch("src.query_service.rank_airlines_by_rating", return_value=selection), \
+             patch("src.query_service.compare_airlines", return_value=compared) as compare_mock:
+            result = compare_available_airlines(
+                aspect="seat", filters={"route_from": "Singapore", "cabin": "Economy Class"},
+                subtopics={"legroom": "seat legroom"})
+        self.assertEqual(result["candidate_selection"], selection)
+        kwargs = compare_mock.call_args.kwargs
+        self.assertEqual(kwargs["filters"]["route_from"], "Singapore")
+        self.assertEqual(kwargs["subtopics"], {"legroom": "seat legroom"})
 
 
 if __name__=="__main__": unittest.main()

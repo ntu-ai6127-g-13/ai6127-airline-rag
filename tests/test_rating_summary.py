@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.rating_summary import summarize_ratings
+from src.rating_summary import rank_airlines_by_rating, summarize_ratings
 
 
 class RatingSummaryTests(unittest.TestCase):
@@ -47,6 +47,14 @@ class RatingSummaryTests(unittest.TestCase):
         result = summarize_ratings("other", reviews_path=self.reviews, chunks_path=self.chunks)
         self.assertFalse(result["available"])
         self.assertEqual(result["reason"], "no_rating_field")
+
+    def test_open_comparison_discovers_airlines_inside_structured_slice(self):
+        result = rank_airlines_by_rating(
+            "seat", filters={"cabin": "Economy Class", "route_from": "Singapore"},
+            reviews_path=self.reviews, chunks_path=self.chunks)
+        self.assertEqual(result["airlines"], ["A Air", "B Air"])
+        self.assertEqual(result["candidates"][0]["rating_count"], 40)
+        self.assertEqual(result["rating_field"], "seat_comfort")
 
 
 if __name__ == "__main__":

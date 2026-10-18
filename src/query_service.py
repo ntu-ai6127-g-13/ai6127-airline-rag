@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
-from functools import wraps
+from functools import lru_cache, wraps
 import json
 from pathlib import Path
 import re
@@ -18,7 +18,7 @@ from src.rerank import rerank
 from src.classify import classify_texts
 from src.generate import evidence_answer
 from src.label_index import count_label_matches, labels_for_chunks
-from src.rating_summary import summarize_ratings
+from src.rating_summary import rank_airlines_by_rating, summarize_ratings
 
 ASPECT_QUERIES = {
     "seat": "passenger seat comfort legroom recline",
@@ -83,6 +83,10 @@ SUBTOPIC_CONTEXT_PATTERNS = {
     ),
 }
 
+SUBTOPIC_SCAN_COLUMNS = ("chunk_id", "review_id", "text", "airline", "cabin",
+                         "traveller_type", "route_from", "route_to", "date")
+MAX_DIRECT_RERANK = 240
+
 
 def _direct_subtopic_match(text: str, topic: str) -> bool:
     folded = text.casefold()
@@ -92,6 +96,77 @@ def _direct_subtopic_match(text: str, topic: str) -> bool:
         return True
     return any(re.search(r"(?<![a-z0-9])" + re.escape(term) + r"(?![a-z0-9])", folded)
                for term in SUBTOPIC_ANCHORS.get(topic, ()))
+
+
+@lru_cache(maxsize=2)
+def _load_subtopic_scan_frame(path_text: str, modified_ns: int, size: int) -> pd.DataFrame:
+    del modified_ns, size
+    frame = pd.read_parquet(path_text, columns=list(SUBTOPIC_SCAN_COLUMNS))
+    frame["chunk_id"] = frame.chunk_id.astype(str)
+    return frame
+
+
+def _subtopic_scan_frame(chunks_path: str | Path) -> pd.DataFrame:
+    path = Path(chunks_path).resolve()
+    stat = path.stat()
+    return _load_subtopic_scan_frame(str(path), stat.st_mtime_ns, stat.st_size)
+
+
+def _filtered_scan_frame(frame: pd.DataFrame, filters: dict | None) -> pd.DataFrame:
+    mask = pd.Series(True, index=frame.index)
+    for column, value in (filters or {}).items():
+        if column not in SUBTOPIC_SCAN_COLUMNS:
+            raise ValueError(f"Unsupported subtopic scan filter: {column}")
+        series = frame[column]
+        if column == "date":
+            if not isinstance(value, (tuple, list)) or len(value) != 2:
+                raise ValueError("Date filter must contain start and end")
+            start, end = value
+            if start is not None:
+                mask &= series >= pd.Timestamp(start)
+            if end is not None:
+                mask &= series <= pd.Timestamp(end)
+        elif isinstance(value, (list, tuple, set)):
+            mask &= series.isin(value)
+        else:
+            mask &= series.eq(value)
+    return frame.loc[mask]
+
+
+def scan_direct_subtopic_matches(topic: str, *, filters: dict | None = None,
+                                 chunks_path: str | Path = CHUNKS,
+                                 rerank_limit: int = MAX_DIRECT_RERANK) -> dict:
+    """Scan the complete structured slice before semantic truncation."""
+    if topic not in SUBTOPIC_ANCHORS and topic not in SUBTOPIC_CONTEXT_PATTERNS:
+        raise ValueError("Unknown subtopic: " + topic)
+    scoped = _filtered_scan_frame(_subtopic_scan_frame(chunks_path), filters)
+    matched = scoped.loc[scoped.text.fillna("").map(
+        lambda text: _direct_subtopic_match(str(text), topic))].copy()
+    anchors = SUBTOPIC_ANCHORS.get(topic, ())
+    patterns = SUBTOPIC_CONTEXT_PATTERNS.get(topic, ())
+
+    def specificity(text: str) -> tuple[int, int]:
+        folded = text.casefold()
+        explicit = sum(bool(re.search(r"(?<![a-z0-9])" + re.escape(term) + r"(?![a-z0-9])", folded))
+                       for term in anchors)
+        contextual = sum(bool(re.search(pattern, folded)) for pattern in patterns)
+        return contextual * 4 + explicit, len(text)
+
+    candidates = []
+    for row in matched.itertuples(index=False):
+        strength, length = specificity(str(row.text))
+        candidates.append((str(row.chunk_id), strength, length))
+    candidates.sort(key=lambda item: (-item[1], item[2], item[0]))
+    selected = candidates[:rerank_limit]
+    return {
+        "scope_sentence_count": int(len(scoped)),
+        "direct_sentence_count": int(len(matched)),
+        "direct_review_count": int(matched.review_id.nunique()),
+        "reranked_direct_count": len(selected),
+        "rerank_cap": rerank_limit,
+        "cap_applied": len(candidates) > rerank_limit,
+        "candidate_ids": [item[0] for item in selected],
+    }
 
 
 class QueryBusyError(RuntimeError):
@@ -215,14 +290,28 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
     started = time.monotonic()
     if subtopics:
         rankings = {}
+        subtopic_analysis = {}
         per_topic_candidates = max(40, candidate_k // max(1, len(subtopics)))
         per_topic_limit = max(12, (top_k + len(subtopics) - 1) // len(subtopics) * 3)
         for topic, expansion in subtopics.items():
             topic_phrase = " ".join(part for part in [query.strip(), expansion, polarity_terms] if part)
             hits = search_with_filters(topic_phrase, filters=filters, top_k=per_topic_candidates,
                                        chunks_path=chunks_path)
-            ranked = (rerank(topic_phrase, hits, top_k=min(max(24, per_topic_limit), len(hits)),
-                             chunks_path=chunks_path) if hits else [])
+            scan = scan_direct_subtopic_matches(topic, filters=filters, chunks_path=chunks_path)
+            direct_ids = list(scan.get("candidate_ids", ()))
+            scan_summary = {key: value for key, value in scan.items() if key != "candidate_ids"}
+            # Put explicit matches from the complete structured slice into the
+            # cross-encoder before truncation. Hybrid hits remain as semantic
+            # backfill for wording not covered by the direct rules.
+            combined = [(chunk_id, 0.0) for chunk_id in direct_ids]
+            seen_ids = set(direct_ids)
+            for hit in hits:
+                chunk_id = str(hit["chunk_id"] if isinstance(hit, dict) else hit[0])
+                if chunk_id not in seen_ids:
+                    combined.append(hit)
+                    seen_ids.add(chunk_id)
+            ranked = (rerank(topic_phrase, combined, top_k=len(combined), chunks_path=chunks_path)
+                      if combined else [])
             ranked = [{**row, "_direct_subtopic_match": _direct_subtopic_match(row.get("text", ""), topic)}
                       for row in ranked]
             ranked.sort(key=lambda row: not row["_direct_subtopic_match"])
@@ -230,9 +319,12 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             if len(direct) >= 2:
                 ranked = direct
             rankings[topic] = ranked[:per_topic_limit]
+            subtopic_analysis[topic] = {**scan_summary, "semantic_candidate_count": len(hits),
+                                        "combined_rerank_count": len(combined)}
         scored = merge_subtopic_rankings(rankings, limit=max(30, top_k))
         phrase = " | ".join("%s: %s" % (topic, expansion) for topic, expansion in subtopics.items())
     else:
+        subtopic_analysis = {}
         hits = search_with_filters(phrase, filters=filters, top_k=candidate_k, chunks_path=chunks_path)
         scored = rerank(phrase, hits, top_k=min(max(30, top_k),len(hits)), chunks_path=chunks_path) if hits else []
     retrieval_seconds = time.monotonic()-started
@@ -262,10 +354,13 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
     direct_subtopic_evidence_counts = {
         topic: sum(topic in row.get("direct_subtopic_matches", []) for row in selected)
         for topic in subtopics}
+    for topic, count in direct_subtopic_evidence_counts.items():
+        subtopic_analysis[topic]["displayed_direct_count"] = count
     result = {"query": query, "retrieval_query": phrase, "aspect": aspect, "polarity": polarity,
             "filters": filters or {}, "evidence": selected, "baseline_evidence": baseline,
             "subtopics": subtopics, "subtopic_evidence_counts": subtopic_evidence_counts,
             "direct_subtopic_evidence_counts": direct_subtopic_evidence_counts,
+            "subtopic_analysis": subtopic_analysis,
             "answer": answer, "baseline_answer": evidence_answer(baseline, aspect=aspect),
             "retrieval_seconds": retrieval_seconds,
             "total_seconds": time.monotonic()-started, "classifier_used": predictions is not None,
@@ -299,6 +394,30 @@ def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polar
             "status":"insufficient_evidence" if missing else "evidence_available",
             "text":("部分航司的证据不足，暂时无法可靠比较："+"、".join(missing)) if missing else
                     "以下按同一方面和筛选条件展示各航司的评论证据。检索样本不代表全体旅客，不能据此直接给出总体航司排名。"}
+
+
+@_single_query
+def compare_available_airlines(*, aspect: str, query: str = "", polarity: str | None = None,
+                               filters: dict | None = None,
+                               classifier_manifest: str | Path | None = None,
+                               label_index_path: str | Path | None = None, top_k: int = 10,
+                               subtopics: dict[str, str] | None = None) -> dict:
+    """Discover and compare viable airlines when the question says “哪家”."""
+    common = dict(filters or {})
+    common.pop("airline", None)
+    selection = rank_airlines_by_rating(aspect, filters=common, limit=3)
+    airlines = selection.get("airlines", [])
+    if len(airlines) < 2:
+        raise ValueError("当前出发地、目的地、舱位等条件下少于两家航司有可用评分，无法比较哪家更好。")
+    result = compare_airlines(
+        airlines, aspect=aspect, query=query, polarity=polarity, filters=common,
+        classifier_manifest=classifier_manifest, label_index_path=label_index_path,
+        top_k=top_k, subtopics=subtopics)
+    result["comparison_scope"] = "automatically_discovered_airlines"
+    result["candidate_selection"] = selection
+    result["text"] = ("系统先按出发地、目的地、舱位和其他条件筛选评论，再从同口径原始评分中选择三家"
+                      "具有较充分数据的候选航司，最后逐家检索所问细分属性的原文。")
+    return result
 
 
 @_single_query
