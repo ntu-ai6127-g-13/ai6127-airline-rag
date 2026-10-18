@@ -163,7 +163,7 @@ SUBTOPIC_NAMES = {"quality": "质量与口味", "portion": "分量", "variety": 
                   "drinks": "饮品", "special_meals": "特殊餐食", "temperature": "餐食温度",
                   "content": "娱乐内容", "screen": "屏幕", "wifi": "Wi-Fi", "audio": "耳机与音质",
                   "usability": "系统操作", "legroom": "腿部空间", "width": "座位宽度",
-                  "recline": "靠背调节与躺平", "comfort": "乘坐舒适度", "condition": "座椅机械状况",
+                  "recline": "靠背调节与躺平", "comfort": "座椅舒适度", "condition": "座椅机械状况",
                   "seat_cleanliness": "座椅清洁度", "power": "充电与电源", "attitude": "服务态度", "efficiency": "服务效率",
                   "professionalism": "专业程度", "availability": "响应与在场服务",
                   "punctuality": "准点表现", "delay_handling": "延误与取消处置",
