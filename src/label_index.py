@@ -20,6 +20,7 @@ ASPECTS = {"seat", "staff", "food", "entertainment", "ground", "value", "overall
 SUBJECTIVITY = {"subjective", "objective"}
 POLARITY = {"positive", "negative", "NA"}
 REQUIRED_COLUMNS = ["chunk_id", "review_id", "aspect", "subjectivity", "polarity"]
+FILTER_COLUMNS = ["airline", "cabin", "traveller_type", "route_from", "route_to", "date"]
 
 
 def sha256(path: str | Path) -> str:
@@ -82,6 +83,80 @@ def labels_for_chunks(chunk_ids: list[str], path: str | Path) -> list[dict]:
     if missing:
         raise RuntimeError(f"离线标签索引缺少 {len(missing)} 个检索结果；首个缺失 ID：{missing[0]}")
     return [lookup[str(chunk_id)] for chunk_id in chunk_ids]
+
+
+@lru_cache(maxsize=2)
+def _load_count_frame_cached(
+    label_path_text: str,
+    label_modified_ns: int,
+    label_size: int,
+    chunks_path_text: str,
+    chunks_modified_ns: int,
+    chunks_size: int,
+) -> pd.DataFrame:
+    del label_modified_ns, label_size, chunks_modified_ns, chunks_size
+    labels = pd.read_parquet(label_path_text, columns=REQUIRED_COLUMNS)
+    validate_labels(labels)
+    metadata = pd.read_parquet(chunks_path_text, columns=["chunk_id", *FILTER_COLUMNS])
+    metadata["chunk_id"] = metadata.chunk_id.astype(str)
+    if not metadata.chunk_id.is_unique:
+        raise ValueError("知识库 chunk_id 存在重复，无法统计全量标签")
+    merged = labels.merge(metadata, on="chunk_id", how="left", validate="one_to_one")
+    if merged[FILTER_COLUMNS].isna().all(axis=1).any():
+        raise ValueError("离线标签无法与知识库元数据完整对齐")
+    return merged
+
+
+def count_label_matches(
+    path: str | Path,
+    *,
+    aspect: str,
+    polarity: str | None = None,
+    filters: dict | None = None,
+    chunks_path: str | Path = CHUNKS,
+) -> dict:
+    """Count full-corpus label matches for structured fields, not free-text relevance."""
+    if aspect not in ASPECTS:
+        raise ValueError("未知方面标签")
+    if polarity not in {None, "positive", "negative"}:
+        raise ValueError("未知极性标签")
+    unknown = set(filters or {}) - set(FILTER_COLUMNS)
+    if unknown:
+        raise ValueError(f"全量标签统计不支持筛选字段：{sorted(unknown)}")
+    label_path = Path(path).resolve()
+    chunk_path = Path(chunks_path).resolve()
+    label_stat = label_path.stat()
+    chunk_stat = chunk_path.stat()
+    frame = _load_count_frame_cached(
+        str(label_path), label_stat.st_mtime_ns, label_stat.st_size,
+        str(chunk_path), chunk_stat.st_mtime_ns, chunk_stat.st_size,
+    )
+    mask = frame.aspect.eq(aspect) & frame.subjectivity.eq("subjective")
+    if polarity is not None:
+        mask &= frame.polarity.eq(polarity)
+    for column, value in (filters or {}).items():
+        series = frame[column]
+        if column == "date":
+            if not isinstance(value, (tuple, list)) or len(value) != 2:
+                raise ValueError("日期筛选必须是起止日期")
+            start, end = value
+            if start is not None:
+                mask &= series >= pd.Timestamp(start)
+            if end is not None:
+                mask &= series <= pd.Timestamp(end)
+        elif isinstance(value, (list, tuple, set)):
+            mask &= series.isin(value)
+        else:
+            mask &= series.eq(value)
+    matched = frame.loc[mask, ["chunk_id", "review_id", "polarity"]]
+    return {
+        "sentence_count": len(matched),
+        "review_count": int(matched.review_id.nunique()),
+        "positive_count": int(matched.polarity.eq("positive").sum()),
+        "negative_count": int(matched.polarity.eq("negative").sum()),
+        "basis": "offline_labels_and_structured_filters",
+        "includes_free_text_relevance": False,
+    }
 
 
 def _load_retrieval_pool(chunks_path: Path, ids_path: Path) -> tuple[pd.DataFrame, list[str]]:
