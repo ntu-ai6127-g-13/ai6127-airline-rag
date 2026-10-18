@@ -20,6 +20,22 @@ _ASPECT_NAMES = {"seat": "座椅舒适度", "staff": "空乘服务", "food": "�
 _AIRLINE_NAMES_ZH = {"Singapore Airlines": "新加坡航空", "United Airlines": "美国联合航空",
                      "Qatar Airways": "卡塔尔航空", "Cathay Pacific Airways": "国泰航空",
                      "British Airways": "英国航空", "Emirates": "阿联酋航空"}
+_CABIN_NAMES_ZH = {"Economy Class": "经济舱", "Premium Economy": "超级经济舱",
+                   "Business Class": "商务舱", "First Class": "头等舱"}
+_SUBTOPIC_SUBJECTS = {
+    "quality": "餐食质量与口味", "portion": "餐食分量", "variety": "餐食品种与选择",
+    "drinks": "机上饮品", "special_meals": "特殊餐食", "temperature": "餐食温度",
+    "content": "娱乐内容", "screen": "娱乐屏幕", "wifi": "机上 Wi-Fi",
+    "audio": "耳机与音质", "usability": "娱乐系统操作", "legroom": "座位腿部空间",
+    "width": "座位宽度", "recline": "座椅靠背调节与躺平", "comfort": "座椅舒适度",
+    "condition": "座椅状况", "power": "座位充电与电源", "attitude": "空乘服务态度",
+    "efficiency": "空乘服务效率", "professionalism": "空乘专业程度",
+    "availability": "空乘响应与在场服务", "punctuality": "航班准点表现",
+    "delay_handling": "延误与取消处置", "baggage": "行李服务", "checkin": "值机服务",
+    "gate_service": "登机口与登机服务", "lounge": "机场休息室", "price": "票价",
+    "refund": "退款与改签", "support": "客服", "booking": "预订系统",
+    "cleanliness": "客舱清洁", "toilet": "机上洗手间", "cabin_temperature": "客舱温度",
+}
 
 
 def _citation_id(prefix: str, number: int) -> str:
@@ -176,7 +192,9 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
         sections = []
         comparison_query = result.get("type") == "comparison"
         for topic in subtopics:
-            matches = [row for row in rows if topic in row.get("matched_subtopics", [])]
+            matches = sorted(
+                (row for row in rows if topic in row.get("matched_subtopics", [])),
+                key=lambda row: topic not in row.get("direct_subtopic_matches", []))
             if comparison_query:
                 chosen = []
                 used_airlines = set()
@@ -189,19 +207,38 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                         break
             else:
                 chosen = matches[:2]
-            name = SUBTOPIC_NAMES.get(topic, topic)
+            name = _SUBTOPIC_SUBJECTS.get(topic, SUBTOPIC_NAMES.get(topic, topic))
             if not chosen:
-                sections.append(f"{name}：没有找到足够直接的原文")
+                sections.append(f"关于{name}，目前没有找到足够直接的评论依据")
                 continue
+            polarities = [row.get("pred_polarity") for row in chosen
+                          if row.get("pred_polarity") in {"positive", "negative"}]
+            if polarities and all(value == "negative" for value in polarities):
+                direction = "检索到的直接评论偏负面"
+            elif polarities and all(value == "positive" for value in polarities):
+                direction = "检索到的直接评论偏正面"
+            elif {"positive", "negative"}.issubset(set(polarities)):
+                direction = "检索到的直接评论看法不一"
+            else:
+                direction = "检索到的直接评论提供了一些具体信息"
             details = []
-            for row in chosen:
+            for row_index, row in enumerate(chosen):
                 airline = str(row.get("airline") or "")
                 airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
-                prefix = f"{airline_label}有旅客提到" if comparison_query else "有旅客提到"
-                details.append(f"{prefix}“{quote(row)}”[{row['citation_id']}]")
-            sections.append(f"{name}：" + "；".join(details))
-        return ("这些细分问题需要分别看原文；现有的上位方面总体分不能拆成细分项分数。"
-                + "。".join(sections) + "。这些评论来自2002–2019年，不能直接代表当前服务。")
+                cabin = str(row.get("cabin") or "")
+                cabin_label = _CABIN_NAMES_ZH.get(cabin, cabin)
+                if comparison_query:
+                    prefix = f"{airline_label}的旅客写道"
+                elif cabin_label:
+                    prefix = f"{'一位' if row_index == 0 else '另一位'}{cabin_label}旅客写道"
+                else:
+                    prefix = "一位旅客写道" if row_index == 0 else "另一位旅客写道"
+                details.append(f"{prefix}：“{quote(row)}”[{row['citation_id']}]")
+            airline = str(chosen[0].get("airline") or "")
+            airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
+            subject = f"{airline_label}的{name}" if airline_label and not comparison_query else name
+            sections.append(f"关于{subject}，{direction}。" + "；".join(details))
+        return "\n\n".join(sections) + "\n\n这些原文记录的是具体旅客经历，不能代表所有航班。"
     if rating.get("available") and rating.get("comparison", {}).get("status") == "clear_difference":
         comparison = rating["comparison"]
         winner, runner = comparison["winner"], comparison["runner_up"]
@@ -248,6 +285,15 @@ def model_health(endpoint: str = DEFAULT_ENDPOINT, timeout: float = 0.5) -> dict
         return {"status": "unavailable"}
 
 
+def _generate(messages: list[dict], *, endpoint: str, timeout: float) -> dict:
+    body = json.dumps({"messages": messages, "max_tokens": 320,
+                       "temperature": 0.0}, ensure_ascii=False).encode("utf-8")
+    request = urllib.request.Request(endpoint.rstrip("/") + "/generate", data=body,
+                                     headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
 def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDPOINT,
                     timeout: float = 45.0, use_model: bool = True) -> dict:
     """Generate, validate, and fall back without ever losing the evidence."""
@@ -263,24 +309,38 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     if not use_model or not rows:
         return {"text": fallback, "mode": "program_fallback", "valid": True,
                 "validation_errors": [], "citations": sorted(_CITATION_RE.findall(fallback)), "model_seconds": 0.0}
-    body = json.dumps({"messages": _prompt(question, result, rows), "max_tokens": 320,
-                       "temperature": 0.0}, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(endpoint.rstrip("/") + "/generate", data=body,
-                                     headers={"Content-Type": "application/json"}, method="POST")
+    messages = _prompt(question, result, rows)
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+        payload = _generate(messages, endpoint=endpoint, timeout=timeout)
         text = str(payload.get("text", "")).strip()
+        model_seconds = float(payload.get("seconds", 0.0))
         valid, errors = validate_answer(text, valid_ids, rating_summary=result.get("rating_summary"),
                                         require_rating_winner=not bool(result.get("subtopics")),
                                         required_subtopics=tuple(result.get("subtopics", {})))
         if valid:
             return {"text": text, "mode": "local_qwen", "valid": True,
                     "validation_errors": [], "citations": sorted(_CITATION_RE.findall(text)),
-                    "model_seconds": float(payload.get("seconds", 0.0))}
+                    "model_seconds": model_seconds}
+        repair_messages = messages + [
+            {"role": "assistant", "content": text},
+            {"role": "user", "content":
+             "上一版未通过校验（" + "；".join(errors) + "）。请按原要求重写，只输出修正后的中文回答。"
+             "保留有效引用，删除未经证实的数字和范围判断，并逐项写出 requested_subtopics 的中文名称。"},
+        ]
+        repaired_payload = _generate(repair_messages, endpoint=endpoint, timeout=timeout)
+        repaired = str(repaired_payload.get("text", "")).strip()
+        model_seconds += float(repaired_payload.get("seconds", 0.0))
+        repaired_valid, repaired_errors = validate_answer(
+            repaired, valid_ids, rating_summary=result.get("rating_summary"),
+            require_rating_winner=not bool(result.get("subtopics")),
+            required_subtopics=tuple(result.get("subtopics", {})))
+        if repaired_valid:
+            return {"text": repaired, "mode": "local_qwen_repaired", "valid": True,
+                    "validation_errors": errors, "citations": sorted(_CITATION_RE.findall(repaired)),
+                    "model_seconds": model_seconds}
         return {"text": fallback, "mode": "validation_fallback", "valid": True,
-                "validation_errors": errors, "citations": sorted(_CITATION_RE.findall(fallback)),
-                "model_seconds": float(payload.get("seconds", 0.0))}
+                "validation_errors": errors + repaired_errors,
+                "citations": sorted(_CITATION_RE.findall(fallback)), "model_seconds": model_seconds}
     except (OSError, ValueError, KeyError, urllib.error.URLError, socket.timeout) as error:
         return {"text": fallback, "mode": "service_fallback", "valid": True,
                 "validation_errors": [type(error).__name__], "citations": sorted(_CITATION_RE.findall(fallback)),
