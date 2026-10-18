@@ -191,6 +191,7 @@ if "result" in st.session_state:
         st.subheader("回答")
         st.markdown(grounded["text"])
         mode={"local_qwen":"本地 Qwen3 4B · 引用校验通过",
+              "local_qwen_repaired":"本地 Qwen3 4B · 自动修正后校验通过",
               "rating_decision":"原始评分汇总 + 评论原文",
               "validation_fallback":"模型回答未通过校验 · 已使用程序回答",
               "service_fallback":"本地模型未连接 · 已使用程序回答",

@@ -130,6 +130,35 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertIn("腿部空间", answer["text"])
         self.assertNotIn("A Air明显更好", answer["text"])
 
+    def test_single_subtopic_fallback_answers_directly(self):
+        row = {**evidence("1", "Singapore Airlines", "negative"),
+               "text": "The portion size was terribly small.",
+               "pred_aspect": "food", "matched_subtopics": ["portion"],
+               "direct_subtopic_matches": ["portion"]}
+        result = {"aspect": "food", "subtopics": {"portion": "meal portion size"},
+                  "rating_summary": {"available": False}, "evidence": [row]}
+        answer = answer_question("新航餐食分量怎么样", result, use_model=False)
+        self.assertIn("关于新加坡航空的餐食分量", answer["text"])
+        self.assertIn("直接评论偏负面", answer["text"])
+        self.assertNotIn("这些细分问题需要分别看原文", answer["text"])
+
+    def test_style_validation_failure_is_repaired_once(self):
+        row = {**evidence("1", "A Air", "negative"),
+               "matched_subtopics": ["legroom"], "direct_subtopic_matches": ["legroom"]}
+        result = {"aspect": "seat", "subtopics": {"legroom": "seat legroom"},
+                  "rating_summary": {"available": False}, "evidence": [row]}
+        first = unittest.mock.MagicMock()
+        first.__enter__.return_value.read.return_value = json.dumps(
+            {"text": "腿部空间方面，普遍认为很差。[1]", "seconds": 1}).encode()
+        second = unittest.mock.MagicMock()
+        second.__enter__.return_value.read.return_value = json.dumps(
+            {"text": "腿部空间方面，有评论认为很差。[1]", "seconds": 1}).encode()
+        with patch("urllib.request.urlopen", side_effect=[first, second]) as request:
+            answer = answer_question("腿部空间怎么样", result)
+        self.assertEqual(request.call_count, 2)
+        self.assertEqual(answer["mode"], "local_qwen_repaired")
+        self.assertIn("有评论", answer["text"])
+
 
 if __name__ == "__main__":
     unittest.main()
