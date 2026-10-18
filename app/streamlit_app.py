@@ -66,7 +66,13 @@ if submitted:
         filters["date"]=[value.isoformat() for value in dates]
     polarity={"好评和差评":None,"好评":"positive","差评":"negative"}[sentiment]
     try:
-        with st.spinner("正在检索并整理原文证据；启用分类时首次运行可能需要约一分钟……"):
+        if use_labels and label_index.exists():
+            spinner_text="正在检索并读取离线标签；服务启动后的首次查询通常需要约 20–30 秒，后续约 2–5 秒……"
+        elif use_labels:
+            spinner_text="正在检索并进行本地实时分类；首次运行可能需要约一分钟……"
+        else:
+            spinner_text="正在检索并整理原文证据；服务启动后的首次查询需要加载检索模型……"
+        with st.spinner(spinner_text):
             if len(comparison)>=2:
                 st.session_state["result"]=compare_airlines(comparison,query=query,aspect=aspect,polarity=polarity,
                     filters=filters,classifier_manifest=manifest if use_labels and not label_index.exists() else None,
