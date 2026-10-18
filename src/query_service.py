@@ -117,7 +117,8 @@ def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polar
                label_index_path=label_index_path, top_k=top_k,
                candidate_k=max(60, top_k)) for airline in airlines}
     missing = [name for name,result in results.items() if result["answer"]["status"]=="insufficient_evidence"]
-    return {"type":"comparison", "aspect":aspect, "results":results,
+    return {"type":"comparison", "query":query, "aspect":aspect, "polarity":polarity,
+            "filters":common, "airlines":airlines, "results":results,
             "status":"insufficient_evidence" if missing else "evidence_available",
             "text":("部分航司的证据不足，暂时无法可靠比较："+"、".join(missing)) if missing else
                     "以下按同一方面和筛选条件展示各航司的评论证据。检索样本不代表全体旅客，不能据此直接给出总体航司排名。"}

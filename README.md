@@ -6,9 +6,34 @@
 
 已有知识库和检索索引后，可运行 `.venv/bin/streamlit run app/streamlit_app.py`
 打开本地证据查询界面，按航司、舱位、方面、航线与日期筛选，并对照 2–3 家航司的原文。
+界面也接受中文或英文自然语言问题，并用本地 Qwen3 4B 根据检索原文生成带编号引用的回答。
+模型在独立 MLX 环境中常驻；若模型服务不可用或回答未通过引用校验，系统会自动返回程序生成的有据摘要。
 查询质量目标、可选本地分类器、无 gold 选参监控及评测命令见
 [查询质量实验说明](experiments/query_quality/README.md)。实验分类器尚需独立查询验收；本机存在完整标签索引时，
 标签辅助排序默认开启且只调整顺序，不按预测标签删除评论。
+
+### 启动自然语言问答
+
+Apple Silicon 本机已经按下列流程准备好 Qwen 权重时，分别在两个终端运行：
+
+```bash
+# 终端 1：模型只加载一次，默认仅监听本机 127.0.0.1:8765
+outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
+
+# 终端 2：检索与问答页面
+.venv/bin/streamlit run app/streamlit_app.py \
+  --server.address 127.0.0.1 --server.port 8517 --server.fileWatcherType none
+```
+
+首次准备模型环境与固定版本权重时运行：
+
+```bash
+.venv/bin/python scripts/setup_query_model.py
+```
+
+页面支持“新航经济舱的座位怎么样？”和“比较新航与卡塔尔航空商务舱的餐饮评价”等问题。
+自然语言只会被解析成语料中已有的航司、舱位、航线和评价方面；检索计数由程序计算，
+生成模型不能修改筛选条件、证据编号或全量匹配数。评论数据截至 2019 年，回答不代表当前服务。
 配对结果的人工评审界面可用 `.venv/bin/streamlit run app/query_review.py --server.port 8518` 打开；未评分的结果不会通过质量验收。
 
 2026-10-19 定稿的 1,000 句 gold 已接入复评。当前代码可重建 C 组弱监督权重；
