@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "release_id": "gold_frozen_1000_20261019_v1",
+  "status": "frozen",
+  "frozen_at": "2026-10-18T17:23:55+00:00",
+  "data_file": "data/eval/gold_human_frozen_1000_20261019_v1.csv",
+  "gold_sha256": "8a4926c0bbfd22c79ed06cf2b8ef783e09902a5d5743a2994d64a6679a57b223",
+  "record_count": 1000,
+  "statistics": {
+    "record_count": 1000,
+    "approved": 1000,
+    "pending": 0,
+    "rejected": 0,
+    "unique_ids": 1000,
+    "unique_texts_normalized": 1000,
+    "label_distribution": {
+      "negative": 548,
+      "positive": 371,
+      "objective": 81
+    },
+    "aspect_distribution": {
+      "value": 132,
+      "entertainment": 117,
+      "ground": 252,
+      "food": 105,
+      "other": 95,
+      "staff": 106,
+      "seat": 92,
+      "overall": 101
+    },
+    "changed_sentence_count": 9,
+    "changed_sentence_ids": [
+      "E0114",
+      "E0201",
+      "E0264",
+      "E0294",
+      "E0363",
+      "E0420",
+      "E0519",
+      "E0535",
+      "E0808"
+    ],
+    "changed_fields_count": {
+      "subjectivity": 4,
+      "polarity": 6,
+      "aspect": 3
+    },
+    "review_event_count": 1136,
+    "review_completed_at": "2026-10-18T17:18:22.450+00:00",
+    "original_pairwise_agreement": {
+      "subjectivity": 0.9276666666666666,
+      "polarity": 0.91,
+      "aspect": 0.8086666666666666,
+      "joint": 0.75
+    },
+    "original_matching_pairs": {
+      "subjectivity": 2783,
+      "polarity": 2730,
+      "aspect": 2426,
+      "joint": 2250
+    },
+    "original_pairs_denominator": 3000
+  },
+  "dataset_scope": "post_hoc_aspect_agreement_selected_1000",
+  "source_snapshot_sha256": {
+    "candidate_snapshot.csv": "f82b1b1fbe1fcb5c076e4bf8954c5c4058f9153ee029e25f7419b38ea940def8",
+    "original_annotations_snapshot.csv": "639e560693ef51cad5e87d31db843af4dca9fd00390ff5d16bedf7515fe3e17f"
+  },
+  "checks": {
+    "all_approved": true,
+    "ids_text_and_labels_match_database": true,
+    "audit_matches_event_history": true,
+    "valid_label_combinations": true,
+    "original_snapshots_unchanged": true
+  },
+  "leakage_check": "not_performed_in_this_freeze",
+  "provenance": {
+    "final_labels": "All 1000 records were approved in the local human review interface. The frozen CSV retains the saved decisions without relabeling or filtering at freeze time.",
+    "candidate_history": "Prior human-unanimous, human-majority and AI-assisted adjudication provenance is retained in the CSV; the final reviewer confirmed every retained record.",
+    "selection": "Post-hoc subset selected by original aspect agreement. It is not an unfiltered random evaluation sample.",
+    "agreement": "Original pairwise agreement is computed from the three original annotators on the selected 1000 sentences (3000 pairs per field), not from the final adjudicated labels. Review completion is not inter-annotator agreement.",
+    "format": "CSV with text and label as its first two columns; not the required eval.xls submission file.",
+    "revision_policy": "Create a new version for any correction; do not overwrite this frozen CSV.",
+    "local_archive": "Full raw snapshots, review event history and SQLite backup are retained locally and are not included in this GitHub publication.",
+    "publication_manifest": "Repository-relative release metadata; this is not the byte-identical local freeze manifest, which contains machine-specific paths."
+  }
+}
