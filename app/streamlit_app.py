@@ -8,7 +8,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.config import CHUNKS, ROOT
-from src.query_service import query_reviews, compare_airlines
+from src.query_service import query_reviews, compare_airlines, query_session
 from src.question_parser import parse_question
 from src.grounded_qa import answer_question, model_health
 
@@ -85,6 +85,7 @@ if submitted:
         st.error("还不能确定你想问哪个评价方面。请在问题中写明座位、空乘、餐饮、娱乐、地勤、性价比或总体体验，或在侧栏选择。"); st.stop()
     if not question.strip():
         question=f"请根据评论说明{aspect_names[aspect]}的评价情况。"
+    query_status=None
     try:
         if use_labels and label_index.exists():
             spinner_text="正在检索、读取离线标签并生成有据回答；首次查询通常约 30–45 秒，后续约 10–15 秒……"
@@ -92,7 +93,7 @@ if submitted:
             spinner_text="正在检索并进行本地实时分类；首次运行可能需要约一分钟……"
         else:
             spinner_text="正在检索并生成有据回答；服务启动后的首次查询需要加载检索模型……"
-        with st.spinner(spinner_text):
+        with st.status(spinner_text,expanded=True) as query_status, query_session():
             if len(requested_comparison)>=2:
                 result=compare_airlines(requested_comparison,query=parsed.retrieval_keywords,aspect=aspect,polarity=polarity,
                     filters=filters,classifier_manifest=manifest if use_labels and not label_index.exists() else None,
@@ -103,11 +104,16 @@ if submitted:
                     classifier_manifest=manifest if use_labels and not label_index.exists() else None,
                     label_index_path=label_index if use_labels and label_index.exists() else None,
                     top_k=evidence_limit,candidate_k=max(60,evidence_limit))
+            query_status.update(label=f"已找到 {sum(len(part['evidence']) for part in result['results'].values()) if result.get('type')=='comparison' else len(result['evidence'])} 条证据，正在生成并校验回答……",
+                                state="running",expanded=True)
             result["question"]=question
             result["parsed_question"]=parsed.to_dict()
             result["grounded_answer"]=answer_question(question,result,use_model=use_local_qa)
             st.session_state["result"]=result
+            query_status.update(label="问答完成",state="complete",expanded=False)
     except Exception as error:
+        if query_status is not None:
+            query_status.update(label="本次查询未完成",state="error",expanded=True)
         st.error(str(error))
         st.session_state.pop("result",None)
 def display_result(result,citation_prefix=""):

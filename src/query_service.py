@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
+from functools import wraps
 import json
 from pathlib import Path
+import threading
 import time
 
 import pandas as pd
@@ -25,6 +28,33 @@ ASPECT_QUERIES = {
     "overall": "overall airline travel experience",
     "other": "cabin cleanliness toilets aircraft amenities",
 }
+
+
+class QueryBusyError(RuntimeError):
+    """Raised instead of loading a second copy of the retrieval models."""
+
+
+_QUERY_RUNTIME_LOCK = threading.RLock()
+
+
+@contextmanager
+def query_session(wait_seconds: float = 1.0):
+    """Allow one complete local query at a time on memory-constrained hosts."""
+    acquired = _QUERY_RUNTIME_LOCK.acquire(timeout=wait_seconds)
+    if not acquired:
+        raise QueryBusyError("已有一个问题正在处理，请等待当前回答完成后再提交。")
+    try:
+        yield
+    finally:
+        _QUERY_RUNTIME_LOCK.release()
+
+
+def _single_query(func):
+    @wraps(func)
+    def wrapped(*args, **kwargs):
+        with query_session():
+            return func(*args, **kwargs)
+    return wrapped
 
 
 def rank_evidence(candidates: list[dict], predictions: list[dict] | None = None,
@@ -56,6 +86,7 @@ def rank_evidence(candidates: list[dict], predictions: list[dict] | None = None,
     return selected
 
 
+@_single_query
 def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str | None = None,
                   filters: dict | None = None, top_k: int = 10, candidate_k: int = 60,
                   classifier_manifest: str | Path | None = None, chunks_path: str | Path = CHUNKS,
@@ -105,6 +136,7 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
     return result
 
 
+@_single_query
 def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polarity: str | None = None,
                      filters: dict | None = None, classifier_manifest: str | Path | None = None,
                      label_index_path: str | Path | None = None, top_k: int = 10) -> dict:

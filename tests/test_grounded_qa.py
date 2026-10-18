@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 import unittest
 from unittest.mock import patch
 
 from src.grounded_qa import answer_question, collect_evidence, validate_answer
 from src.question_parser import parse_question
+from src.query_service import QueryBusyError, query_session
 
 
 def evidence(chunk_id: str, airline: str, polarity: str) -> dict:
@@ -38,6 +40,16 @@ class QuestionParserTests(unittest.TestCase):
 
 
 class GroundedAnswerTests(unittest.TestCase):
+    def test_second_concurrent_query_fails_fast(self):
+        def contender():
+            with query_session(wait_seconds=0.01):
+                return "unexpected"
+        with query_session():
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(contender)
+                with self.assertRaises(QueryBusyError):
+                    future.result(timeout=1)
+
     def test_comparison_citation_ids_are_unique(self):
         result = {"type": "comparison", "results": {
             "A Air": {"evidence": [evidence("1", "A Air", "positive")]},

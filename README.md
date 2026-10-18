@@ -20,9 +20,8 @@ Apple Silicon 本机已经按下列流程准备好 Qwen 权重时，分别在两
 # 终端 1：模型只加载一次，默认仅监听本机 127.0.0.1:8765
 outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 
-# 终端 2：检索与问答页面
-.venv/bin/streamlit run app/streamlit_app.py \
-  --server.address 127.0.0.1 --server.port 8517 --server.fileWatcherType none
+# 终端 2：检索与问答页面；异常退出时会自动重启
+.venv/bin/python scripts/run_query_app.py --port 8517
 ```
 
 首次准备模型环境与固定版本权重时运行：
