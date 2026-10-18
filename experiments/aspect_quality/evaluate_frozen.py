@@ -38,6 +38,7 @@ def main(out):
     nli=cached('r35_choice_aspect_nli_sentiment')
     baseline=cached('r36_choice_subjective_consensus')
     pd.testing.assert_frame_equal(consensus(raw_baseline,nli),baseline)
+    cached_baseline=baseline.copy()
     directory=out/'final_evaluation';directory.mkdir(exist_ok=False)
     rows=gold[['sentence_id','text']].rename(columns={'sentence_id':'id'})
     rows.to_json(directory/'texts.jsonl',orient='records',lines=True,force_ascii=False)
@@ -74,6 +75,10 @@ def main(out):
     flush()
     try:
         selected=frozen['selected_without_gold'];computed={}
+        # Development replay found one polarity difference when batching changed.
+        # Re-run baseline on the identical final input/order for a fair comparison.
+        raw_baseline=predict('baseline')
+        baseline=consensus(raw_baseline,nli)
         if selected=='baseline':raw=raw_baseline
         elif selected=='ensemble':
             computed={v:predict(v) for v in ['hierarchy','fewshot','rotated']}
@@ -91,6 +96,8 @@ def main(out):
         deltas=(hits[samples].sum(axis=1)-old_hits[samples].sum(axis=1))/counts[samples].sum(axis=1)
         report={'status':'completed','selected_without_gold':selected,'frozen_sha256':sha(freeze),'gold_sha256':release['gold_sha256'],
             'gold_n':len(gold),'baseline_r36':old,'selected_metrics':metrics,'targets':CLASSIFIER_TARGETS,
+            'previous_cached_r36':classification_metrics(gold,cached_baseline),
+            'baseline_replay_different_rows':int((~baseline.eq(cached_baseline).all(axis=1)).sum()),
             'delta_vs_r36':{k:metrics[k]-old[k] for k in CLASSIFIER_TARGETS},
             'joint_delta_parent_bootstrap_95':np.quantile(deltas,[.025,.975]).tolist(),
             'gold_used_for_training':False,'gold_used_for_selection':False,'independent_test':False,
@@ -104,6 +111,7 @@ def main(out):
               'independent_query_acceptance_passed':False,'production_ready':False,'previous_model_retained':True})
         lines=['# 本轮方面分类优化结果','',f'非 gold 开发阶段预选：`{selected}`。5 个预先规定候选，固定本地 Qwen 权重；未做权重微调。',
                '新开发 silver 96 句，加旧开发 monitor 40 句与弱标签/合成代理 294 句。新 silver 在查看预测前由助手标注，不是人工 gold。','',
+               '原 r36 在相同的 1,000 句输入及顺序上重新运行；同时保留旧缓存分数和复跑差异计数。','',
                '| 指标 | 目标 | 原 r36 | 本轮预选 | 变化（百分点） |','|---|---:|---:|---:|---:|']
         for k,target in CLASSIFIER_TARGETS.items():lines.append(f'| {k} | {target:.1%} | {old[k]:.1%} | {metrics[k]:.1%} | {(metrics[k]-old[k])*100:+.2f} |')
         lines+=['',f'全部分类点估计过线：{metrics["point_targets_passed"]}。原模型未替换。',
