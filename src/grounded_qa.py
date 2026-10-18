@@ -113,7 +113,7 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
 2. 评分均值、评分人数和差值只能逐字使用 rating_summary 中给出的数值；不要统计检索证据的正负条数。
 3. 评分汇总是主要定量依据，评论原文用来解释具体优缺点。引用格式严格为 [1]、[2] 或比较查询中的 [A1]、[B2]，只能使用存在的编号。
 4. 自动分类标签仅供选证据参考，应按英文原文理解。不要把检索到的几句话当作总体好评率。
-5. requested_subtopics 非空时，必须使用它的中文值作为逐项小标题，并优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。回答中不要使用“多数、普遍、更多人、较多、整体、总体”等范围词，应写“检索到的原文同时包含……”并说明正反例。
+5. requested_subtopics 非空时，每个细分项必须单独成段，段与段之间空一行；单航司问题的每段以具体航司名和细分项开头，例如“关于新加坡航空的腿部空间”，不要写成“关于航司的腿部空间”。随后给出该项的发现和引用。禁止把多个细分项挤在同一段。优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。回答中不要使用“多数、普遍、更多人、较多、整体、总体”等范围词，应写“检索到的原文同时包含……”并说明正反例。
 6. 数据来自 2002–2019 年，只能描述这批历史评论，不能声称是当前服务。用自然、具体的中文，避免套话和“整体呈现某种倾向”。回答控制在 150–350 个中文字符。"""
     if subtopics:
         system = system.replace(
@@ -150,10 +150,18 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if (require_rating_winner and comparison.get("status") == "clear_difference"
             and comparison.get("winner") not in clean):
         reasons.append("missing_required_winner")
+    paragraphs = [paragraph.strip() for paragraph in _PARAGRAPH_RE.split(clean) if paragraph.strip()]
+    topic_paragraphs = {}
     for topic in required_subtopics:
         name = SUBTOPIC_NAMES.get(topic, topic)
-        if name not in clean:
+        containing = [index for index, paragraph in enumerate(paragraphs) if name in paragraph]
+        topic_paragraphs[topic] = containing
+        if not containing:
             reasons.append("missing_subtopic:" + topic)
+    if len(required_subtopics) > 1:
+        used = [indices[0] for indices in topic_paragraphs.values() if indices]
+        if len(set(used)) != len(used):
+            reasons.append("subtopics_not_separated")
     if required_subtopics and re.search(
             r"多数|普遍|大部分|更多(?:人|旅客|评论)|较多(?:人|旅客|评论)|整体|总体", clean):
         reasons.append("unsupported_prevalence_claim")
@@ -163,8 +171,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     # Generic caveats are allowed without citations because they describe system
     # limits, not the review evidence.
     exemptions = ("数据", "样本", "检索", "不能代表", "证据不足", "自动标签", "截至", "评分")
-    for paragraph in _PARAGRAPH_RE.split(clean):
-        paragraph = paragraph.strip()
+    for paragraph in paragraphs:
         if len(paragraph) < 8 or _CITATION_RE.search(paragraph) or any(term in paragraph for term in exemptions):
             continue
         reasons.append("uncited_claim")
@@ -328,7 +335,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             {"role": "assistant", "content": text},
             {"role": "user", "content":
              "上一版未通过校验（" + "；".join(errors) + "）。请按原要求重写，只输出修正后的中文回答。"
-             "保留有效引用，删除未经证实的数字和范围判断，并逐项写出 requested_subtopics 的中文名称。"},
+             "保留有效引用，删除未经证实的数字和范围判断。每个 requested_subtopics 中文名称必须单独成段，"
+             "段与段之间空一行，不要把多个细分项写在同一段。"},
         ]
         repaired_payload = _generate(repair_messages, endpoint=endpoint, timeout=timeout)
         repaired = str(repaired_payload.get("text", "")).strip()

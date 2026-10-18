@@ -170,6 +170,28 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("unsupported_prevalence_claim", reasons)
 
+    def test_multiple_subtopics_must_use_separate_paragraphs(self):
+        same_paragraph = "腿部空间方面较窄。[1] 靠背调节与躺平方面可以后仰。[2]"
+        ok, reasons = validate_answer(same_paragraph, {"1", "2"},
+                                      required_subtopics=("legroom", "recline"))
+        self.assertFalse(ok)
+        self.assertIn("subtopics_not_separated", reasons)
+        separated = "腿部空间方面较窄。[1]\n\n靠背调节与躺平方面可以后仰。[2]"
+        self.assertTrue(validate_answer(separated, {"1", "2"},
+                                        required_subtopics=("legroom", "recline"))[0])
+
+    def test_multiple_subtopic_fallback_uses_separate_paragraphs(self):
+        legroom = {**evidence("1", "Singapore Airlines", "negative"),
+                   "matched_subtopics": ["legroom"], "direct_subtopic_matches": ["legroom"]}
+        recline = {**evidence("2", "Singapore Airlines", "positive"),
+                   "matched_subtopics": ["recline"], "direct_subtopic_matches": ["recline"]}
+        result = {"aspect": "seat", "subtopics": {"legroom": "seat legroom", "recline": "seat recline"},
+                  "rating_summary": {"available": False}, "evidence": [legroom, recline]}
+        text = answer_question("腿部空间和靠背怎么样", result, use_model=False)["text"]
+        self.assertIn("腿部空间", text)
+        self.assertIn("靠背调节与躺平", text)
+        self.assertGreaterEqual(text.count("\n\n"), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
