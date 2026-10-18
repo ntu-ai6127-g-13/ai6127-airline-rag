@@ -8,7 +8,8 @@ import pandas as pd
 from src.quality import classification_metrics
 from src.evaluate import evaluate_queries, evaluate_query_modes
 from src.generate import evidence_answer
-from src.query_service import rank_evidence, query_reviews, compare_airlines
+from src.query_service import (_direct_subtopic_match, compare_airlines, merge_subtopic_rankings,
+                               query_reviews, rank_evidence)
 
 
 class QueryQualityTests(unittest.TestCase):
@@ -36,6 +37,38 @@ class QueryQualityTests(unittest.TestCase):
                  {"chunk_id":"y","review_id":"different","text":"independent evidence"}]
         selected=rank_evidence(rows,top_k=5,max_per_review=2)
         self.assertEqual([r["chunk_id"] for r in selected],["0","1","y"])
+
+    def test_subtopic_merge_covers_each_facet_before_repeating(self):
+        rankings = {
+            "recline": [{"chunk_id": "r1", "text": "recline one"},
+                        {"chunk_id": "r2", "text": "recline two"}],
+            "comfort": [{"chunk_id": "c1", "text": "comfort one"},
+                        {"chunk_id": "r1", "text": "also comfort"}],
+            "legroom": [{"chunk_id": "l1", "text": "legroom one"}],
+        }
+        merged = merge_subtopic_rankings(rankings, limit=4)
+        self.assertEqual([row["chunk_id"] for row in merged[:3]], ["r1", "c1", "l1"])
+        self.assertEqual(merged[0]["matched_subtopics"], ["recline", "comfort"])
+
+    def test_direct_subtopic_match_respects_word_boundaries(self):
+        self.assertFalse(_direct_subtopic_match("The seat was comfortable.", "drinks"))
+        self.assertTrue(_direct_subtopic_match("Tea and coffee were available.", "drinks"))
+        self.assertTrue(_direct_subtopic_match("We were rebooked after cancellation.", "delay_handling"))
+
+    def test_subtopic_queries_are_retrieved_and_reranked_separately(self):
+        def search(phrase, **kwargs):
+            topic = "portion" if "portion" in phrase else "variety"
+            return [{"chunk_id": topic, "text": topic, "review_id": topic}]
+        with patch("src.query_service.search_with_filters", side_effect=search) as search_mock, \
+             patch("src.query_service.rerank", side_effect=lambda phrase, hits, **kwargs: hits), \
+             patch("src.query_service.pd.read_parquet") as parquet_mock, \
+             patch("src.query_service.summarize_ratings", return_value={"available": False}):
+            parquet_mock.return_value.set_index.return_value.loc.__getitem__.return_value.items.return_value = []
+            result = query_reviews(aspect="food", top_k=2, subtopics={
+                "portion": "meal portion size", "variety": "meal variety choice"})
+        self.assertEqual(search_mock.call_count, 2)
+        self.assertEqual({row["chunk_id"] for row in result["evidence"]}, {"portion", "variety"})
+        self.assertEqual(result["subtopic_evidence_counts"], {"portion": 1, "variety": 1})
 
     def test_one_review_with_many_sentences_is_insufficient(self):
         rows=[{"chunk_id":str(i),"review_id":"same","text":"evidence"} for i in range(5)]

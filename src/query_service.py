@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from functools import wraps
 import json
 from pathlib import Path
+import re
 import threading
 import time
 
@@ -29,6 +30,52 @@ ASPECT_QUERIES = {
     "overall": "overall airline travel experience",
     "other": "cabin cleanliness toilets aircraft amenities",
 }
+
+# These terms are used only to prefer evidence which explicitly mentions the
+# requested attribute. Semantic retrieval still supplies recall and can
+# backfill when reviewers describe the same idea with unexpected wording.
+SUBTOPIC_ANCHORS = {
+    "quality": ("quality", "taste", "tasted", "tasty", "delicious", "bland", "inedible", "fresh", "flavour", "flavor"),
+    "portion": ("portion", "quantity", "serving size", "amount of food", "amount of meal", "meal size", "enough food"),
+    "variety": ("variety", "selection", "choice", "choices", "menu", "options"),
+    "drinks": ("drink", "beverage", "wine", "coffee", "tea", "juice"),
+    "special_meals": ("special meal", "vegetarian", "vegan", "child meal", "halal", "dietary", "allergy", "allergic", "allergies"),
+    "temperature": ("served hot", "served cold", "cold meal", "hot meal", "meal temperature", "reheated"),
+    "content": ("movie", "film", "program", "programme", "selection", "content", "channel"),
+    "screen": ("screen", "display", "touchscreen", "touch screen"),
+    "wifi": ("wi-fi", "wifi", "internet", "connection", "connectivity"),
+    "audio": ("headphone", "headset", "earphone", "audio", "sound quality"),
+    "usability": ("interface", "remote control", "remote", "system froze", "responsive", "touch screen"),
+    "legroom": ("legroom", "leg room", "knee room", "seat pitch", "leg space"),
+    "width": ("seat width", "wide seat", "narrow seat", "shoulder room"),
+    "recline": ("recline", "reclined", "reclining", "backrest", "seat back", "lie flat", "lie-flat", "upright position"),
+    "comfort": ("comfortable", "uncomfortable", "comfort", "seat cushion", "padding", "hard seat", "sore"),
+    "condition": ("broken seat", "damaged seat", "worn seat", "dirty seat", "seat was broken", "seat did not work"),
+    "power": ("power socket", "power outlet", "usb", "charging", "charger", "electrical outlet"),
+    "attitude": ("friendly", "polite", "rude", "attitude", "courteous", "smile", "helpful"),
+    "efficiency": ("efficient", "prompt", "quickly", "slow service", "response time", "responsive"),
+    "professionalism": ("professional", "competent", "trained", "knowledgeable", "inexperienced"),
+    "availability": ("call button", "crew available", "crew disappeared", "nowhere to be seen", "attentive", "unattentive"),
+    "punctuality": ("on time", "punctual", "arrived early", "departed late", "flight was delayed"),
+    "delay_handling": ("rebook", "rebooked", "rebooking", "compensation", "hotel", "delay handling", "cancellation", "cancelled", "disruption", "missed connection"),
+    "baggage": ("baggage", "luggage", "bag drop", "lost bag", "damaged bag", "suitcase"),
+    "checkin": ("check-in", "check in", "checkin", "check-in desk", "check-in counter", "kiosk"),
+    "gate_service": ("gate agent", "gate staff", "boarding", "boarding gate", "boarding call", "boarding group", "priority boarding"),
+    "lounge": ("lounge", "club room"),
+    "price": ("price", "fare", "expensive", "cheap", "cost", "value for money"),
+    "refund": ("refund", "reimburse", "money back", "cancellation fee", "change fee", "rebooking fee"),
+    "support": ("customer service", "call centre", "call center", "hotline", "complaint", "complaints", "phone support"),
+    "booking": ("booking", "reservation", "website", "mobile app", "online ticket"),
+    "cleanliness": ("clean", "cleanliness", "dirty", "filthy", "stain", "stained", "stains", "hygiene"),
+    "toilet": ("toilet", "lavatory", "washroom", "restroom"),
+    "cabin_temperature": ("cabin temperature", "too cold", "too hot", "air conditioning", "freezing cabin"),
+}
+
+
+def _direct_subtopic_match(text: str, topic: str) -> bool:
+    folded = text.casefold()
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(term) + r"(?![a-z0-9])", folded)
+               for term in SUBTOPIC_ANCHORS.get(topic, ()))
 
 
 class QueryBusyError(RuntimeError):
@@ -87,22 +134,88 @@ def rank_evidence(candidates: list[dict], predictions: list[dict] | None = None,
     return selected
 
 
+def merge_subtopic_rankings(rankings: dict[str, list[dict]], *, limit: int) -> list[dict]:
+    """Merge per-subtopic rankings while guaranteeing early coverage of every facet.
+
+    A simple global sort can fill the first page with one easy-to-retrieve facet.
+    Round-robin selection makes a multi-part question auditable: when evidence is
+    available, each requested facet appears before a second item from any facet.
+    Reciprocal-rank scores then order the remaining candidates without treating
+    reranker scores from different queries as directly comparable.
+    """
+    if limit < 1:
+        raise ValueError("limit must be positive")
+    merged: dict[str, dict] = {}
+    order: list[str] = []
+    seen_in_order: set[str] = set()
+    max_depth = max((len(rows) for rows in rankings.values()), default=0)
+    for topic, rows in rankings.items():
+        for rank, item in enumerate(rows, 1):
+            key = str(item["chunk_id"])
+            if key not in merged:
+                merged[key] = dict(item)
+                merged[key]["matched_subtopics"] = []
+                merged[key]["direct_subtopic_matches"] = []
+                merged[key]["subtopic_retrieval_score"] = 0.0
+            if topic not in merged[key]["matched_subtopics"]:
+                merged[key]["matched_subtopics"].append(topic)
+            if item.get("_direct_subtopic_match") and topic not in merged[key]["direct_subtopic_matches"]:
+                merged[key]["direct_subtopic_matches"].append(topic)
+            merged[key]["subtopic_retrieval_score"] += 1.0 / (10 + rank)
+    # First preserve facet coverage in the visible part of the result.
+    for rank in range(max_depth):
+        for rows in rankings.values():
+            if rank >= len(rows):
+                continue
+            key = str(rows[rank]["chunk_id"])
+            if key not in seen_in_order:
+                order.append(key)
+                seen_in_order.add(key)
+    # The second ordering key is deterministic for repeatable evaluations.
+    remaining = sorted((key for key in merged if key not in seen_in_order),
+                       key=lambda key: (-merged[key]["subtopic_retrieval_score"], key))
+    order.extend(remaining)
+    answer = [merged[key] for key in order[:limit]]
+    for item in answer:
+        item.pop("_direct_subtopic_match", None)
+    return answer
+
+
 @_single_query
 def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str | None = None,
                   filters: dict | None = None, top_k: int = 10, candidate_k: int = 60,
                   classifier_manifest: str | Path | None = None, chunks_path: str | Path = CHUNKS,
                   label_index_path: str | Path | None = None,
+                  subtopics: dict[str, str] | None = None,
                   include_candidates: bool = False) -> dict:
     if aspect is not None and aspect not in ASPECT_QUERIES: raise ValueError("Unknown aspect")
     if polarity not in {None,"positive","negative"}: raise ValueError("Unknown polarity")
     if not isinstance(top_k,int) or isinstance(top_k,bool) or top_k < 1: raise ValueError("top_k must be positive")
     if not isinstance(candidate_k,int) or candidate_k < top_k: raise ValueError("candidate_k must be >= top_k")
-    phrase = " ".join(part for part in [query.strip(), ASPECT_QUERIES.get(aspect,""),
-        {"positive":"positive praise satisfied", "negative":"negative complaints dissatisfied"}.get(polarity,"")] if part)
+    subtopics = dict(subtopics or {})
+    polarity_terms = {"positive":"positive praise satisfied", "negative":"negative complaints dissatisfied"}.get(polarity,"")
+    phrase = " ".join(part for part in [query.strip(), ASPECT_QUERIES.get(aspect,""), polarity_terms] if part)
     if not phrase: raise ValueError("Provide a query or choose an aspect")
     started = time.monotonic()
-    hits = search_with_filters(phrase, filters=filters, top_k=candidate_k, chunks_path=chunks_path)
-    scored = rerank(phrase, hits, top_k=min(max(30, top_k),len(hits)), chunks_path=chunks_path) if hits else []
+    if subtopics:
+        rankings = {}
+        per_topic_candidates = max(40, candidate_k // max(1, len(subtopics)))
+        per_topic_limit = max(12, (top_k + len(subtopics) - 1) // len(subtopics) * 3)
+        for topic, expansion in subtopics.items():
+            topic_phrase = " ".join(part for part in [query.strip(), expansion, polarity_terms] if part)
+            hits = search_with_filters(topic_phrase, filters=filters, top_k=per_topic_candidates,
+                                       chunks_path=chunks_path)
+            ranked = (rerank(topic_phrase, hits, top_k=min(max(24, per_topic_limit), len(hits)),
+                             chunks_path=chunks_path) if hits else [])
+            ranked = [{**row, "_direct_subtopic_match": _direct_subtopic_match(row.get("text", ""), topic)}
+                      for row in ranked]
+            ranked.sort(key=lambda row: not row["_direct_subtopic_match"])
+            rankings[topic] = ranked[:per_topic_limit]
+        scored = merge_subtopic_rankings(rankings, limit=max(30, top_k))
+        phrase = " | ".join("%s: %s" % (topic, expansion) for topic, expansion in subtopics.items())
+    else:
+        hits = search_with_filters(phrase, filters=filters, top_k=candidate_k, chunks_path=chunks_path)
+        scored = rerank(phrase, hits, top_k=min(max(30, top_k),len(hits)), chunks_path=chunks_path) if hits else []
     retrieval_seconds = time.monotonic()-started
     if scored:
         metadata = pd.read_parquet(chunks_path, columns=["chunk_id","review_id","review_text","airline","cabin","date","route"],
@@ -125,8 +238,15 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
     corpus_label_matches = count_label_matches(label_index_path, aspect=aspect, polarity=polarity,
         filters=filters, chunks_path=chunks_path) if label_index_path and aspect is not None else None
     rating_summary = summarize_ratings(aspect, filters=filters, chunks_path=chunks_path) if aspect else None
+    subtopic_evidence_counts = {topic: sum(topic in row.get("matched_subtopics", []) for row in selected)
+                                for topic in subtopics}
+    direct_subtopic_evidence_counts = {
+        topic: sum(topic in row.get("direct_subtopic_matches", []) for row in selected)
+        for topic in subtopics}
     result = {"query": query, "retrieval_query": phrase, "aspect": aspect, "polarity": polarity,
             "filters": filters or {}, "evidence": selected, "baseline_evidence": baseline,
+            "subtopics": subtopics, "subtopic_evidence_counts": subtopic_evidence_counts,
+            "direct_subtopic_evidence_counts": direct_subtopic_evidence_counts,
             "answer": answer, "baseline_answer": evidence_answer(baseline, aspect=aspect),
             "retrieval_seconds": retrieval_seconds,
             "total_seconds": time.monotonic()-started, "classifier_used": predictions is not None,
@@ -142,18 +262,20 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
 @_single_query
 def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polarity: str | None = None,
                      filters: dict | None = None, classifier_manifest: str | Path | None = None,
-                     label_index_path: str | Path | None = None, top_k: int = 10) -> dict:
+                     label_index_path: str | Path | None = None, top_k: int = 10,
+                     subtopics: dict[str, str] | None = None) -> dict:
     """Compare evidence under identical constraints without claiming corpus-wide rankings."""
     if not 2 <= len(set(airlines)) <= 3 or len(set(airlines)) != len(airlines):
         raise ValueError("Choose two or three distinct airlines")
     common = dict(filters or {}); common.pop("airline", None)
     results = {airline: query_reviews(query, aspect=aspect, polarity=polarity,
                filters={**common,"airline":airline}, classifier_manifest=classifier_manifest,
-               label_index_path=label_index_path, top_k=top_k,
+               label_index_path=label_index_path, subtopics=subtopics, top_k=top_k,
                candidate_k=max(60, top_k)) for airline in airlines}
     missing = [name for name,result in results.items() if result["answer"]["status"]=="insufficient_evidence"]
     rating_summary = summarize_ratings(aspect, filters=common, airlines=airlines)
     return {"type":"comparison", "query":query, "aspect":aspect, "polarity":polarity,
+            "subtopics":dict(subtopics or {}),
             "filters":common, "airlines":airlines, "results":results, "rating_summary":rating_summary,
             "status":"insufficient_evidence" if missing else "evidence_available",
             "text":("部分航司的证据不足，暂时无法可靠比较："+"、".join(missing)) if missing else
