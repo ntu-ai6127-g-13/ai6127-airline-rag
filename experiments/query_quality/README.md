@@ -29,7 +29,7 @@
 
 需要上一轮的 `outputs/c_no_gold_optimization_20261018/` 非 gold 选参记录和权重，以及 `outputs/c_gold_smoke_20261018/` 的冻结 C 源码和评估输入。silver 扩展会自动复制本目录固定的 80 条 AI 开发标签，并生成只含 ID、原文、父评论和分区的文本清单。大文件不进 Git；这些是现有工作区的复跑命令，不代表仅 clone 就拥有全部历史数据。
 
-本地 MLX 运行环境单独位于 `outputs/query_quality_runtime/venv311/`，不会更改项目 `.venv` 的依赖。固定 `mlx-lm==0.31.2`；实际完整依赖记录在该运行目录的 `requirements.lock.txt`。
+本地 MLX 运行环境单独位于 `outputs/query_quality_runtime/venv311/`，不会更改项目 `.venv` 的依赖。固定 `mlx-lm==0.31.2`；实际完整依赖已保存到本目录的 `requirements-mlx.lock.txt`，重建脚本按这个锁定文件安装。
 
 ## 从 Git 代码独立重建零样本分类器
 
