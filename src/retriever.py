@@ -694,6 +694,8 @@ def search_with_filters(
     _validate_filters(filters)
     metadata = _load_metadata(chunks_path)
     allowed = set(metadata.index[_filter_mask(metadata, filters)])
+    if not allowed:
+        return []
 
     pool_size = top_k * candidate_multiplier
     candidates = search_hybrid(
