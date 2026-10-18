@@ -123,3 +123,61 @@ def summarize_ratings(aspect: str, *, filters: dict | None = None, airlines: lis
         comparison = {"status": "insufficient_ratings", "winner": None}
     result["comparison"] = comparison
     return result
+
+
+def rank_airlines_by_rating(aspect: str, *, filters: dict | None = None,
+                            reviews_path: str | Path = REVIEWS,
+                            chunks_path: str | Path = CHUNKS,
+                            limit: int = 3) -> dict:
+    """Discover comparison candidates inside the user's structured slice.
+
+    A small empirical-Bayes shrinkage keeps a carrier with two perfect scores
+    from automatically beating a carrier with many slightly lower scores.
+    The returned raw means and counts remain the values shown to the user.
+    """
+    if aspect not in RATING_FIELDS:
+        return {"available": False, "aspect": aspect, "airlines": [], "candidates": []}
+    if not 2 <= limit <= 3:
+        raise ValueError("Open comparison supports two or three airlines")
+    field, scale = RATING_FIELDS[aspect]
+    query_filters = dict(filters or {})
+    query_filters.pop("airline", None)
+    frame = _apply_filters(_load_review_ratings(reviews_path, chunks_path), query_filters)
+    values = pd.to_numeric(frame[field], errors="coerce")
+    usable = frame.assign(_rating=values).dropna(subset=["airline", "_rating"])
+    if usable.empty:
+        return {"available": True, "aspect": aspect, "rating_field": field, "scale": scale,
+                "filters": query_filters, "airlines": [], "candidates": []}
+    global_mean = float(usable._rating.mean())
+    grouped = usable.groupby("airline")._rating.agg(["count", "mean"])
+    max_n = int(grouped["count"].max())
+    minimum_n = min(30, max(2, max_n // 3))
+    eligible = grouped[grouped["count"] >= minimum_n].copy()
+    if len(eligible) < 2:
+        minimum_n = 1
+        eligible = grouped.copy()
+    prior_strength = max(5, minimum_n)
+    eligible["selection_score"] = ((eligible["count"] * eligible["mean"] +
+                                     prior_strength * global_mean) /
+                                    (eligible["count"] + prior_strength))
+    eligible = eligible.sort_values(["selection_score", "count", "mean"], ascending=False)
+    chosen_names = list(eligible.index[:1])
+    if len(eligible) >= 2:
+        coverage_order = eligible.drop(index=chosen_names).sort_values(
+            ["count", "selection_score", "mean"], ascending=False)
+        chosen_names.append(coverage_order.index[0])
+    for name in eligible.index:
+        if name not in chosen_names:
+            chosen_names.append(name)
+        if len(chosen_names) == limit:
+            break
+    chosen = eligible.loc[chosen_names[:limit]]
+    candidates = [{"airline": str(name), "rating_count": int(row["count"]),
+                   "rating_mean": round(float(row["mean"]), 3),
+                   "selection_score": round(float(row["selection_score"]), 3)}
+                  for name, row in chosen.iterrows()]
+    return {"available": True, "aspect": aspect, "rating_field": field, "scale": scale,
+            "filters": query_filters, "global_mean": round(global_mean, 3),
+            "minimum_candidate_ratings": minimum_n,
+            "airlines": [row["airline"] for row in candidates], "candidates": candidates,
+            "eligible_airline_count": int(len(eligible))}

@@ -132,12 +132,21 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
         system = system.replace(
             "1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。",
             "1. 第一行直接回答用户，并按 requested_subtopics 给出具体发现。comparison 只是上位方面的评分比较，不能强制成为细分问题的结论。")
+        if result.get("type") == "comparison":
+            system += """
+7. 这是细分属性的航司比较。必须逐家写出 parent_aspect_rating_summary 中的原始上位方面平均分、满分和评分份数，明确它不是细分项独立评分。结合 comparison_subtopic_coverage 和直接原文判断：任一主要候选的直接评论不足 3 条时，不得宣布细分项“最好”，应明确说证据不足，并指出现有评分和原文支持到什么程度。没有直接原文的候选必须明确写出缺证据。"""
     if requested_aspects:
         system += """
 7. requested_aspects 非空时，必须严格按照 requested_aspects 的顺序回答；每个评价方面单独成段，段与段之间空一行。每段必须明确写出方面名称、该方面的原始平均分、满分和评分份数，例如“原始餐饮评分为 3.80/5（900 份）”，再用属于该 query_aspect 的原文解释。不得用一个方面的评分回答另一个方面。回答控制在 220–550 个中文字符。"""
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
                "rating_summary": None if subtopics else _rating_payload(result.get("rating_summary")),
+               "parent_aspect_rating_summary": (_rating_payload(result.get("rating_summary"))
+                                                if subtopics and result.get("type") == "comparison" else None),
+               "comparison_subtopic_coverage": {
+                   airline: part.get("subtopic_analysis", {})
+                   for airline, part in result.get("results", {}).items()
+               } if subtopics and result.get("type") == "comparison" else {},
                "requested_aspects": requested_aspects,
                "rating_summaries": {requested_aspects.get(key, key): _rating_payload(value)
                                     for key, value in result.get("rating_summaries", {}).items()},
@@ -150,7 +159,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
                     require_rating_winner: bool = True,
                     required_subtopics: tuple[str, ...] = (),
                     required_aspects: tuple[str, ...] = (),
-                    evidence_numbers: set[str] | None = None) -> tuple[bool, list[str]]:
+                    evidence_numbers: set[str] | None = None,
+                    require_all_rating_values: bool = False) -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
     clean = text.strip()
@@ -172,6 +182,14 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if (require_rating_winner and comparison.get("status") == "clear_difference"
             and comparison.get("winner") not in clean):
         reasons.append("missing_required_winner")
+    if require_all_rating_values and (rating_summary or {}).get("available"):
+        for airline, data in rating_summary.get("airlines", {}).items():
+            airline_names = {airline, _AIRLINE_NAMES_ZH.get(airline, airline)}
+            if not any(name in clean for name in airline_names):
+                reasons.append("missing_rating_airline:" + airline)
+            expected = f"{data['mean']:.2f}" if data.get("mean") is not None else None
+            if expected and expected not in clean:
+                reasons.append("missing_rating_value:" + airline)
     paragraphs = [paragraph.strip() for paragraph in _PARAGRAPH_RE.split(clean) if paragraph.strip()]
     topic_paragraphs = {}
     for topic in required_subtopics:
@@ -302,9 +320,21 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
     if subtopics:
         sections = []
         comparison_query = result.get("type") == "comparison"
+        if comparison_query and rating.get("available"):
+            rating_parts = []
+            for airline, data in rating.get("airlines", {}).items():
+                label = _AIRLINE_NAMES_ZH.get(airline, airline)
+                if data.get("mean") is None:
+                    rating_parts.append(f"{label}无可用评分")
+                else:
+                    rating_parts.append(f"{label} {data['mean']:.2f}/{rating['scale']}（{data['n']:,} 份）")
+            sections.append(f"相同路线、舱位和其他条件下，原始{aspect_name}评分为："
+                            + "；".join(rating_parts)
+                            + "。这是上位方面评分，不是所问细分项的独立评分。")
         for topic in subtopics:
             matches = sorted(
-                (row for row in rows if topic in row.get("matched_subtopics", [])),
+                (row for row in rows if topic in (row.get("direct_subtopic_matches", [])
+                                                  if comparison_query else row.get("matched_subtopics", []))),
                 key=lambda row: topic not in row.get("direct_subtopic_matches", []))
             if comparison_query:
                 chosen = []
@@ -316,11 +346,17 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                         used_airlines.add(airline)
                     if len(chosen) == len(by_airline):
                         break
+                missing_airlines = [airline for airline in by_airline if airline not in used_airlines]
             else:
                 chosen = matches[:2]
+                missing_airlines = []
             name = _SUBTOPIC_SUBJECTS.get(topic, SUBTOPIC_NAMES.get(topic, topic))
             if not chosen:
-                sections.append(f"关于{name}，目前没有找到足够直接的评论依据")
+                if comparison_query:
+                    labels = "、".join(_AIRLINE_NAMES_ZH.get(airline, airline) for airline in by_airline)
+                    sections.append(f"关于{name}，{labels}目前都没有检索到直接提及该细分项的原文，无法判断哪家最好。")
+                else:
+                    sections.append(f"关于{name}，目前没有找到足够直接的评论依据")
                 continue
             polarities = [row.get("pred_polarity") for row in chosen
                           if row.get("pred_polarity") in {"positive", "negative"}]
@@ -345,10 +381,15 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                 else:
                     prefix = "一位旅客写道" if row_index == 0 else "另一位旅客写道"
                 details.append(f"{prefix}：“{quote(row)}”[{row['citation_id']}]")
+            if comparison_query:
+                details.extend(f"{_AIRLINE_NAMES_ZH.get(airline, airline)}当前没有检索到直接提及该细分项的原文"
+                               for airline in missing_airlines)
             airline = str(chosen[0].get("airline") or "")
             airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
             subject = f"{airline_label}的{name}" if airline_label and not comparison_query else name
-            sections.append(f"关于{subject}，{direction}。" + "；".join(details))
+            if comparison_query:
+                direction = "现有直接评论不足以可靠判定哪家最好"
+            sections.append(f"关于{subject}，{direction}。" + "；".join(details) + "。")
         return "\n\n".join(sections) + "\n\n这些原文记录的是具体旅客经历，不能代表所有航班。"
     if rating.get("available") and rating.get("comparison", {}).get("status") == "clear_difference":
         comparison = rating["comparison"]
@@ -423,9 +464,13 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     messages = _prompt(question, result, rows)
     if result.get("type") == "multi_aspect":
         validation_rating = {"rating_summaries": result.get("rating_summaries", {})}
+    elif result.get("subtopics") and result.get("type") == "comparison":
+        validation_rating = result.get("rating_summary")
     else:
         validation_rating = None if result.get("subtopics") else result.get("rating_summary")
     required_aspects = tuple(result.get("aspects", ())) if result.get("type") == "multi_aspect" else ()
+    require_all_rating_values = bool(result.get("subtopics") and result.get("type") == "comparison"
+                                     and (result.get("rating_summary") or {}).get("available"))
     evidence_numbers = {token.replace(",", "") for row in rows for token in
                         re.findall(r"\d[\d,]*(?:\.\d+)?", str(row.get("text", "")))}
     try:
@@ -436,7 +481,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
                                         require_rating_winner=not bool(result.get("subtopics")),
                                         required_subtopics=tuple(result.get("subtopics", {})),
                                         required_aspects=required_aspects,
-                                        evidence_numbers=evidence_numbers)
+                                        evidence_numbers=evidence_numbers,
+                                        require_all_rating_values=require_all_rating_values)
         if valid:
             return {"text": text, "mode": "local_qwen", "valid": True,
                     "validation_errors": [], "citations": sorted(_CITATION_RE.findall(text)),
@@ -456,7 +502,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             repaired, valid_ids, rating_summary=validation_rating,
             require_rating_winner=not bool(result.get("subtopics")),
             required_subtopics=tuple(result.get("subtopics", {})), required_aspects=required_aspects,
-            evidence_numbers=evidence_numbers)
+            evidence_numbers=evidence_numbers,
+            require_all_rating_values=require_all_rating_values)
         if repaired_valid:
             return {"text": repaired, "mode": "local_qwen_repaired", "valid": True,
                     "validation_errors": errors, "citations": sorted(_CITATION_RE.findall(repaired)),

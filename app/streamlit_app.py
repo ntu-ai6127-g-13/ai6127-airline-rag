@@ -8,7 +8,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.config import CHUNKS, ROOT
-from src.query_service import compare_airlines, query_aspects, query_reviews, query_session
+from src.query_service import (compare_airlines, compare_available_airlines, query_aspects,
+                               query_reviews, query_session)
 from src.question_parser import SUBTOPIC_NAMES, parse_question
 from src.grounded_qa import answer_question, model_health
 
@@ -82,13 +83,14 @@ if submitted:
     polarity=parsed.polarity
     filters=parsed.filters
     requested_comparison=list(comparison) or (parsed.airlines if len(parsed.airlines)>=2 else [])
+    open_comparison=parsed.comparison and not requested_comparison and "airline" not in filters
     if aspect is None:
         st.error("还不能确定你想问哪个评价方面。请在问题中写明座位、空乘、餐饮、娱乐、地勤、性价比或总体体验，或在侧栏选择。"); st.stop()
     if not question.strip():
         question=f"请根据评论说明{aspect_names[aspect]}的评价情况。"
     query_status=None
     try:
-        if len(requested_comparison)>=2 and len(aspects)>1:
+        if (len(requested_comparison)>=2 or open_comparison) and len(aspects)>1:
             st.error("当前一次查询可以比较多家航司的一个方面，或查询一家航司的多个方面；请先选择其中一种。")
             st.stop()
         if use_labels and label_index.exists():
@@ -104,6 +106,11 @@ if submitted:
                     label_index_path=label_index if use_labels and label_index.exists() else None,
                     subtopics=parsed.subtopics,
                     top_k=evidence_limit)
+            elif open_comparison:
+                result=compare_available_airlines(query=parsed.retrieval_keywords,aspect=aspect,polarity=polarity,
+                    filters=filters,classifier_manifest=manifest if use_labels and not label_index.exists() else None,
+                    label_index_path=label_index if use_labels and label_index.exists() else None,
+                    subtopics=parsed.subtopics,top_k=evidence_limit)
             elif len(aspects)>1:
                 result=query_aspects(aspects,query=parsed.retrieval_keywords,polarity=polarity,filters=filters,
                     classifier_manifest=manifest if use_labels and not label_index.exists() else None,
@@ -147,9 +154,15 @@ def display_result(result,citation_prefix=""):
                f"{answer['review_count']} 条不同评论 · {label_mode}")
     if result.get("subtopics"):
         direct_counts=result.get("direct_subtopic_evidence_counts",{})
+        analysis=result.get("subtopic_analysis",{})
         st.caption("细分证据覆盖："+" · ".join(
-            f"{SUBTOPIC_NAMES.get(topic,topic)} {direct_counts.get(topic,0)} 条直接原文"
+            (f"{SUBTOPIC_NAMES.get(topic,topic)}：当前条件下直接匹配 "
+             f"{analysis.get(topic,{}).get('direct_sentence_count',direct_counts.get(topic,0)):,} 句/"
+             f"{analysis.get(topic,{}).get('direct_review_count',direct_counts.get(topic,0)):,} 条评论，"
+             f"本页展示 {direct_counts.get(topic,0)} 句")
             for topic in result["subtopics"]))
+        st.caption("系统先扫描符合航司、舱位、航线和日期条件的完整语料切片，再把直接提及细分属性的原文送入重排；"
+                   "本地 Qwen 根据本页展示的代表性原文作答，完整直接匹配数量用于判断证据是否充足。")
     for i,item in enumerate(result["evidence"],1):
         st.markdown(f"**[{citation_prefix}{i}] {item['airline']} · {item.get('cabin') or '舱位未知'}**")
         st.write(item["text"])
@@ -224,6 +237,15 @@ if "result" in st.session_state:
     if result.get("type")=="comparison":
         st.subheader("检索证据")
         st.write(result["text"])
+        if result.get("candidate_selection"):
+            selection=result["candidate_selection"]
+            st.info("自动比较候选："+"、".join(
+                f"{row['airline']}（{aspect_names.get(result.get('aspect'),result.get('aspect'))}原始评分 "
+                f"{row['rating_mean']:.2f}/{selection['scale']}，{row['rating_count']} 份）"
+                for row in selection["candidates"]))
+            st.caption(f"候选航司先按结构化路线和舱位筛选，再对小样本评分进行收缩排序；"
+                       f"进入候选的最低同口径评分数为 {selection['minimum_candidate_ratings']}。"
+                       "细分属性没有独立评分，最终回答还会核对各航司的对应原文。")
         tabs=st.tabs(list(result["results"]))
         for index,(tab,part) in enumerate(zip(tabs,result["results"].values())):
             with tab: display_result(part,chr(ord("A")+index))

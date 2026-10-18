@@ -67,6 +67,20 @@ class QuestionParserTests(unittest.TestCase):
         self.assertEqual(parsed.aspect, "food")
         self.assertEqual(parsed.aspects, ["food", "value", "ground"])
 
+    def test_route_comparison_extracts_direction_and_does_not_filter_positive_only(self):
+        parsed = parse_question(
+            "新加坡飞伦敦经济舱，哪家航司腿部空间评价最好？",
+            known_airlines=self.airlines,
+            origins=["Singapore", "BA16 Singapore", "London"],
+            destinations=["London", "London Heathrow", "London Gatwick", "Singapore"],
+        )
+        self.assertEqual(parsed.filters["route_from"], ["Singapore", "BA16 Singapore"])
+        self.assertEqual(parsed.filters["route_to"], ["London", "London Heathrow", "London Gatwick"])
+        self.assertEqual(parsed.filters["cabin"], "Economy Class")
+        self.assertEqual(parsed.subtopics, {"legroom": "seat legroom leg room knee space pitch cramped"})
+        self.assertIsNone(parsed.polarity)
+        self.assertTrue(parsed.comparison)
+
 
 class GroundedAnswerTests(unittest.TestCase):
     rating_summary = {"available": True, "scale": 5, "airlines": {
@@ -140,14 +154,19 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertIn("[", answer["text"])
 
     def test_subtopic_comparison_does_not_use_broad_rating_as_winner(self):
-        a = {**evidence("1", "A Air", "positive"), "matched_subtopics": ["legroom"]}
-        b = {**evidence("2", "B Air", "negative"), "matched_subtopics": ["legroom"]}
+        a = {**evidence("1", "A Air", "positive"), "matched_subtopics": ["legroom"],
+             "direct_subtopic_matches": ["legroom"]}
+        b = {**evidence("2", "B Air", "negative"), "matched_subtopics": ["legroom"],
+             "direct_subtopic_matches": ["legroom"]}
         result = {"type": "comparison", "aspect": "seat", "subtopics": {"legroom": "seat legroom"},
                   "rating_summary": self.rating_summary,
                   "results": {"A Air": {"evidence": [a]}, "B Air": {"evidence": [b]}}}
         answer = answer_question("哪家腿部空间更好", result, use_model=False)
         self.assertEqual(answer["mode"], "program_fallback")
         self.assertIn("腿部空间", answer["text"])
+        self.assertIn("原始座椅舒适度评分", answer["text"])
+        self.assertIn("A Air 4.20/5（100 份）", answer["text"])
+        self.assertIn("不足以可靠判定哪家最好", answer["text"])
         self.assertNotIn("A Air明显更好", answer["text"])
 
     def test_single_subtopic_fallback_answers_directly(self):
