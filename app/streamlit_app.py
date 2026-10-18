@@ -1,7 +1,9 @@
 """Local evidence query UI: streamlit run app/streamlit_app.py."""
 import sys
+import html
 from datetime import date
 from pathlib import Path
+import time
 
 import streamlit as st
 import pandas as pd
@@ -50,7 +52,7 @@ with st.sidebar:
     qa_health=model_health()
     use_local_qa=st.checkbox("使用本地 Qwen 生成回答",value=qa_health.get("status")=="ready")
     if qa_health.get("status")=="ready":
-        st.caption("Qwen3 4B 已就绪；回答会经过引用校验。")
+        st.caption("Qwen3 4B 已就绪；回答会实时生成，并在完成后经过引用校验。")
     elif use_local_qa:
         st.caption("模型服务未连接；查询仍会返回程序生成的有据回答。")
     with st.expander("航线与日期条件"):
@@ -62,6 +64,7 @@ with st.sidebar:
 with st.form("query"):
     question=st.text_input("请输入问题",placeholder="例如：新航经济舱的座位舒适度怎么样？请给出评论依据")
     submitted=st.form_submit_button("生成有据回答",type="primary")
+live_answer_slot=st.empty()
 if submitted:
     if len(comparison)==1:
         st.error("比较航司时请选择至少两家；单航司查询请使用上方航司选项。"); st.stop()
@@ -129,7 +132,22 @@ if submitted:
                                 state="running",expanded=True)
             result["question"]=question
             result["parsed_question"]=parsed.to_dict()
-            result["grounded_answer"]=answer_question(question,result,use_model=use_local_qa)
+            stream_state={"updated":0.0}
+            def stream_answer(text,event):
+                now=time.monotonic()
+                if event=="delta" and now-stream_state["updated"]<0.06 and not text.endswith("\n"):
+                    return
+                stream_state["updated"]=now
+                if event=="start":
+                    live_answer_slot.info("已完成检索，本地 Qwen 正在生成回答……")
+                elif event=="reset":
+                    live_answer_slot.info("初稿未通过引用或数字校验，正在自动修正……")
+                else:
+                    cursor=" ▌" if event=="delta" else ""
+                    live_answer_slot.markdown("### 回答\n\n"+text+cursor)
+            result["grounded_answer"]=answer_question(
+                question,result,use_model=use_local_qa,
+                on_stream=stream_answer if use_local_qa else None)
             st.session_state["result"]=result
             query_status.update(label="问答完成",state="complete",expanded=False)
     except Exception as error:
@@ -137,6 +155,8 @@ if submitted:
             query_status.update(label="本次查询未完成",state="error",expanded=True)
         st.error(str(error))
         st.session_state.pop("result",None)
+if submitted and "result" in st.session_state:
+    live_answer_slot.empty()
 def display_result(result,citation_prefix=""):
     answer=result["answer"]
     st.write(answer["text"])
@@ -218,6 +238,81 @@ def display_rating_summary(result):
                "方面高分为 4–5、低分为 1–2，总体高分为 8–10、低分为 1–4。好评/差评选项只控制下方原文，"
                "不会从评分汇总中删掉另一类评分。")
 
+def display_sentiment_overview(result):
+    """Render review-level positive/negative cards from the complete matching pool."""
+    groups=[]
+    if result.get("subtopics"):
+        for topic in result["subtopics"]:
+            if result.get("type")=="comparison":
+                summaries={
+                    airline:(part.get("subtopic_analysis",{}).get(topic,{})
+                             .get("polarity_summary"))
+                    for airline,part in result.get("results",{}).items()
+                }
+                direct_counts={
+                    airline:part.get("subtopic_analysis",{}).get(topic,{}).get("direct_review_count")
+                    for airline,part in result.get("results",{}).items()
+                }
+            else:
+                summary=(result.get("subtopic_analysis",{}).get(topic,{})
+                         .get("polarity_summary"))
+                airline=result.get("filters",{}).get("airline") or next(
+                    (row.get("airline") for row in result.get("evidence",[]) if row.get("airline")),"所选航司")
+                summaries={str(airline):summary}
+                direct_counts={str(airline):result.get("subtopic_analysis",{}).get(topic,{}).get("direct_review_count")}
+            groups.append((SUBTOPIC_NAMES.get(topic,topic),summaries,direct_counts,True))
+    elif result.get("type")=="comparison":
+        summaries=result.get("label_distributions") or {
+            airline:part.get("corpus_label_matches")
+            for airline,part in result.get("results",{}).items()
+        }
+        groups.append((aspect_names.get(result.get("aspect"),result.get("aspect")),summaries,{},False))
+    elif result.get("corpus_label_matches"):
+        airline=result.get("filters",{}).get("airline") or next(
+            (row.get("airline") for row in result.get("evidence",[]) if row.get("airline")),"所选航司")
+        groups.append((aspect_names.get(result.get("aspect"),result.get("aspect")),
+                       {str(airline):result["corpus_label_matches"]},{},False))
+    groups=[(name,{airline:data for airline,data in summaries.items() if data},direct_counts,direct)
+            for name,summaries,direct_counts,direct in groups]
+    groups=[group for group in groups if group[1]]
+    if not groups:
+        return
+    st.subheader("评论倾向概览")
+    st.caption("按完整匹配池统计，每条评论只计一次；百分比的分母为能明确归入正向或负向的评论。")
+    for group_index,(name,summaries,direct_counts,direct) in enumerate(groups):
+        if len(groups)>1 or result.get("subtopics"):
+            st.markdown(f"**{name}**")
+        columns=st.columns(min(3,len(summaries)))
+        for index,(airline,data) in enumerate(summaries.items()):
+            total=int(data.get("labeled_review_count") or 0)
+            positive=int(data.get("positive_review_count") or 0)
+            negative=int(data.get("negative_review_count") or 0)
+            if not total:
+                continue
+            positive_pct=positive/total*100
+            negative_pct=negative/total*100
+            ambiguous=int(data.get("ambiguous_review_count") or 0)
+            scope_total=(direct_counts.get(airline) if direct else data.get("review_count"))
+            scope=(f"相关评论总数 {int(scope_total):,} 条 · " if scope_total is not None else "")
+            tie=f" · 另有 {ambiguous:,} 条正负票数持平" if ambiguous else ""
+            with columns[index % len(columns)]:
+                st.markdown(f"**{airline}**")
+                st.markdown(
+                    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+                    '<div style="border:1px solid #86d6a3;background:#edf9f1;border-radius:12px;padding:14px;text-align:center">'
+                    '<div style="color:#18723a;font-weight:700">正向</div>'
+                    f'<div style="color:#14532d;font-size:1.7rem;font-weight:800">{positive_pct:.1f}%</div>'
+                    f'<div style="color:#3f5f49">{positive:,} 条</div></div>'
+                    '<div style="border:1px solid #ef9a9a;background:#fff1f1;border-radius:12px;padding:14px;text-align:center">'
+                    '<div style="color:#b42318;font-weight:700">负向</div>'
+                    f'<div style="color:#7f1d1d;font-size:1.7rem;font-weight:800">{negative_pct:.1f}%</div>'
+                    f'<div style="color:#6f4545">{negative:,} 条</div></div></div>'
+                    f'<div style="text-align:center;margin-top:8px;color:#667085;font-size:.88rem">'
+                    f'{html.escape(scope)}纳入正负比例 {total:,} 条{html.escape(tie)}</div>',
+                    unsafe_allow_html=True)
+        if group_index<len(groups)-1:
+            st.divider()
+
 if "result" in st.session_state:
     result=st.session_state["result"]
     if result.get("grounded_answer"):
@@ -232,6 +327,7 @@ if "result" in st.session_state:
               "program_fallback":"程序回答"}.get(grounded.get("mode"),grounded.get("mode",""))
         timing=f" · 生成 {grounded['model_seconds']:.1f} 秒" if grounded.get("model_seconds") else ""
         st.caption(f"回答模式：{mode}{timing}")
+        display_sentiment_overview(result)
         st.divider()
     display_rating_summary(result)
     if result.get("type")=="comparison":

@@ -25,7 +25,7 @@ def main() -> None:
     if not args.model.exists():
         raise FileNotFoundError(f"Local model not found: {args.model}")
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
-    from mlx_lm import generate, load
+    from mlx_lm import generate, load, stream_generate
     from mlx_lm.sample_utils import make_sampler
 
     started = time.monotonic()
@@ -54,7 +54,7 @@ def main() -> None:
                              "loaded_seconds": loaded_seconds})
 
         def do_POST(self) -> None:
-            if self.path != "/generate":
+            if self.path not in {"/generate", "/generate_stream"}:
                 self._json(404, {"error": "not_found"}); return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
@@ -67,6 +67,31 @@ def main() -> None:
                 temperature = float(payload.get("temperature", 0.0))
                 prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
                 request_started = time.monotonic()
+                if self.path == "/generate_stream":
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+                    self.send_header("Cache-Control", "no-cache")
+                    self.send_header("Connection", "close")
+                    self.end_headers()
+                    self.close_connection = True
+                    try:
+                        with lock:
+                            for response in stream_generate(
+                                    model, tokenizer, prompt=prompt, max_tokens=max_tokens,
+                                    sampler=make_sampler(temp=temperature)):
+                                if response.text:
+                                    event = json.dumps({"type": "delta", "text": response.text},
+                                                       ensure_ascii=False).encode("utf-8") + b"\n"
+                                    self.wfile.write(event)
+                                    self.wfile.flush()
+                        done_payload = {"type": "done", "seconds": round(
+                            time.monotonic() - request_started, 3)}
+                    except Exception as error:
+                        done_payload = {"type": "error", "error": type(error).__name__,
+                                        "detail": str(error)[:500]}
+                    self.wfile.write(json.dumps(done_payload, ensure_ascii=False).encode("utf-8") + b"\n")
+                    self.wfile.flush()
+                    return
                 with lock:
                     output = generate(model, tokenizer, prompt=prompt, max_tokens=max_tokens,
                                       sampler=make_sampler(temp=temperature), verbose=False)
@@ -74,6 +99,8 @@ def main() -> None:
                                  "seconds": round(time.monotonic() - request_started, 3)})
             except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
                 self._json(400, {"error": str(error)})
+            except (BrokenPipeError, ConnectionResetError):
+                return
             except Exception as error:
                 self._json(500, {"error": type(error).__name__, "detail": str(error)[:500]})
 

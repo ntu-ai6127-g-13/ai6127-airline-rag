@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import unittest
 from unittest.mock import patch
 
-from src.grounded_qa import answer_question, collect_evidence, validate_answer
+from src.grounded_qa import _generate, answer_question, collect_evidence, validate_answer
 from src.question_parser import parse_question
 from src.query_service import QueryBusyError, query_session
 
@@ -101,6 +101,24 @@ class GroundedAnswerTests(unittest.TestCase):
                 with self.assertRaises(QueryBusyError):
                     future.result(timeout=1)
 
+    def test_local_generation_stream_emits_cumulative_text(self):
+        class Response:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def __iter__(self):
+                return iter([
+                    '{"type":"delta","text":"餐饮"}\n'.encode(),
+                    '{"type":"delta","text":"评分"}\n'.encode(),
+                    b'{"type":"done","seconds":1.25}\n',
+                ])
+        updates = []
+        with patch("urllib.request.urlopen", return_value=Response()) as request:
+            result = _generate([{"role": "user", "content": "test"}], endpoint="http://local",
+                               timeout=2, on_stream=lambda text, event: updates.append((text, event)))
+        self.assertTrue(request.call_args.args[0].full_url.endswith("/generate_stream"))
+        self.assertEqual(updates, [("餐饮", "delta"), ("餐饮评分", "delta")])
+        self.assertEqual(result, {"text": "餐饮评分", "seconds": 1.25})
+
     def test_comparison_citation_ids_are_unique(self):
         result = {"type": "comparison", "results": {
             "A Air": {"evidence": [evidence("1", "A Air", "positive")]},
@@ -142,6 +160,23 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertNotIn("正向", answer["text"])
         self.assertEqual(answer["mode"], "rating_decision")
 
+    def test_broad_comparison_adds_one_sentence_full_review_distribution(self):
+        distribution = lambda positive, negative: {
+            "labeled_review_count": positive + negative,
+            "positive_review_count": positive,
+            "negative_review_count": negative,
+            "positive_share": positive / (positive + negative),
+        }
+        result = {"type": "comparison", "aspect": "seat", "rating_summary": self.rating_summary,
+                  "label_distributions": {
+                      "A Air": distribution(75, 25), "B Air": distribution(40, 60)},
+                  "results": {"A Air": {"evidence": [evidence("1", "A Air", "positive")]},
+                              "B Air": {"evidence": [evidence("2", "B Air", "negative")]}}}
+        text = answer_question("哪家座椅更好", result, use_model=False)["text"]
+        self.assertIn("该方面全部相关评论的自动标签汇总：A Air共命中 100 条，其中可明确归类的 100 条里正向 "
+                      "75 条（75.0%）、负向 25 条（25.0%）；B Air共命中 100 条，其中可明确归类的 100 条里"
+                      "正向 40 条（40.0%）、负向 60 条（60.0%）。", text)
+
     def test_invalid_model_answer_falls_back_to_program_answer(self):
         result = {"aspect": "seat", "evidence": [
             evidence("1", "A Air", "positive"), evidence("2", "A Air", "negative"),
@@ -168,6 +203,36 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertIn("A Air 4.20/5（100 份）", answer["text"])
         self.assertIn("不足以可靠判定哪家最好", answer["text"])
         self.assertNotIn("A Air明显更好", answer["text"])
+
+    def test_subtopic_comparison_uses_full_direct_aggregate_when_decisive(self):
+        a = {**evidence("1", "Singapore Airlines", "positive"),
+             "matched_subtopics": ["variety"], "direct_subtopic_matches": ["variety"]}
+        b = {**evidence("2", "Emirates", "negative"),
+             "matched_subtopics": ["variety"], "direct_subtopic_matches": ["variety"]}
+        rating = {"available": True, "scale": 5, "airlines": {
+            "Singapore Airlines": {"n": 704, "mean": 3.88, "median": 4.0, "std": 1.0,
+                                   "high_share": .7, "low_share": .1},
+            "Emirates": {"n": 1136, "mean": 3.18, "median": 3.0, "std": 1.0,
+                         "high_share": .45, "low_share": .2}},
+            "comparison": {"status": "clear_difference", "winner": "Singapore Airlines",
+                           "runner_up": "Emirates", "difference": .70}}
+        def analysis(positive, negative, low, high):
+            total = positive + negative
+            return {"variety": {"direct_review_count": total, "polarity_summary": {
+                "labeled_review_count": total, "positive_review_count": positive,
+                "negative_review_count": negative, "positive_share": positive / total,
+                "positive_share_ci95_low": low, "positive_share_ci95_high": high}}}
+        result = {"type": "comparison", "aspect": "food",
+                  "subtopics": {"variety": "meal variety"}, "rating_summary": rating,
+                  "results": {
+                      "Singapore Airlines": {"evidence": [a], "subtopic_analysis": analysis(82, 41, .58, .74)},
+                      "Emirates": {"evidence": [b], "subtopic_analysis": analysis(72, 95, .36, .51)},
+                  }}
+        text = answer_question("哪家餐食品种更好", result, use_model=False)["text"]
+        self.assertIn("就整体餐饮而言，新加坡航空在这批同条件历史评分中明确更好", text)
+        self.assertIn("完整直接原文的自动标签汇总明确更支持新加坡航空", text)
+        self.assertIn("新加坡航空共命中 123 条，其中可明确归类的 123 条里正向 82 条（66.7%）、负向 41 条（33.3%）", text)
+        self.assertIn("阿联酋航空共命中 167 条，其中可明确归类的 167 条里正向 72 条（43.1%）、负向 95 条（56.9%）", text)
 
     def test_single_subtopic_fallback_answers_directly(self):
         row = {**evidence("1", "Singapore Airlines", "negative"),
