@@ -63,7 +63,10 @@ def main() -> None:
                 messages = payload["messages"]
                 if not isinstance(messages, list) or not 1 <= len(messages) <= 8:
                     raise ValueError("invalid_messages")
-                max_tokens = min(max(int(payload.get("max_tokens", 420)), 32), 600)
+                # Grounded answers normally use fewer than 600 tokens.  Evidence
+                # translation batches may need more while still staying inside
+                # the same local-only model process.
+                max_tokens = min(max(int(payload.get("max_tokens", 420)), 32), 1600)
                 temperature = float(payload.get("temperature", 0.0))
                 prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
                 request_started = time.monotonic()

@@ -5,7 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 import unittest
 from unittest.mock import patch
 
-from src.grounded_qa import _generate, answer_question, collect_evidence, validate_answer
+from src.grounded_qa import (_generate, answer_question, collect_evidence,
+                             localize_evidence, validate_answer)
 from src.question_parser import parse_question
 from src.query_service import QueryBusyError, query_session
 
@@ -118,6 +119,30 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertTrue(request.call_args.args[0].full_url.endswith("/generate_stream"))
         self.assertEqual(updates, [("餐饮", "delta"), ("餐饮评分", "delta")])
         self.assertEqual(result, {"text": "餐饮评分", "seconds": 1.25})
+
+    def test_chinese_mode_attaches_translated_evidence_without_replacing_source(self):
+        row = evidence("1", "A Air", "negative")
+        result = {"language": "zh", "evidence": [row]}
+        with patch("src.grounded_qa._translate_batch_cached", return_value=("翻译后的评论。",)):
+            localize_evidence(result, language="zh")
+        self.assertEqual(row["text"], "Quoted review 1")
+        self.assertEqual(row["display_text"], "翻译后的评论。")
+        self.assertEqual(result["evidence_translation"]["status"], "translated")
+
+    def test_english_program_fallback_contains_no_chinese(self):
+        row = evidence("1", "A Air", "positive")
+        result = {"language": "en", "aspect": "seat", "evidence": [row],
+                  "rating_summary": {"available": True, "scale": 5, "airlines": {
+                      "A Air": {"n": 100, "mean": 4.2, "median": 4.0, "std": .8,
+                                "high_share": .8, "low_share": .1}}}}
+        answer = answer_question("How are the seats?", result, use_model=False)
+        self.assertIn("historical seat comfort rating", answer["text"])
+        self.assertNotRegex(answer["text"], r"[\u3400-\u9fff]")
+
+    def test_english_validation_rejects_chinese_output(self):
+        ok, reasons = validate_answer("座椅不错。[1]", {"1"}, language="en")
+        self.assertFalse(ok)
+        self.assertIn("wrong_output_language", reasons)
 
     def test_comparison_citation_ids_are_unique(self):
         result = {"type": "comparison", "results": {
