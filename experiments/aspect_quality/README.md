@@ -58,3 +58,17 @@ gold 审计还需 `outputs/gold_release_audit_20261019/` 的先前缓存登记�
 
 这轮实验通过开发代理，不代表分类验收通过；小批查询的用户体验认可也不替代完整定量验收。
 正式模型与全量标签索引保持原版本，直到质量评估完成。
+
+## 对新句子使用预选候选
+
+输入 JSONL 每行仅包含字符串 `id` 和非空 `text`。独立预测入口核验冻结代码、权重和示例，
+按预选方案运行本地 Qwen 与 NLI 共识，保持实验状态，不修改原查询模型指针：
+
+```bash
+.venv/bin/python experiments/aspect_quality/predict_cli.py \
+  --manifest outputs/aspect_quality_20261019/frozen_candidates.json \
+  --input new_texts.jsonl --output outputs/aspect_predictions_new.jsonl
+```
+
+运行目录及输出文件必须使用未占用路径。共识方案需要运行多个 Qwen 组件，耗时高于单个提示方案；
+全量索引的推理吞吐与缓存仍需单独验证。
