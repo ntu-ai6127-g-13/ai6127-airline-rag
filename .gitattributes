@@ -1,0 +1,2 @@
+# Preserve the frozen CSV byte-for-byte, including its original CRLF endings.
+data/eval/gold_human_frozen_1000_20261019_v1.csv -text whitespace=cr-at-eol
