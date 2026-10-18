@@ -34,6 +34,8 @@ with st.sidebar:
     cabin=st.selectbox("舱位",["全部"]+cabins)
     aspect=st.selectbox("评价方面",list(aspect_names),format_func=aspect_names.get)
     sentiment=st.radio("查看哪些评价",["好评和差评","好评","差评"])
+    evidence_limit=st.select_slider("每家展示证据数",options=[10,20,30],value=10,
+                                    help="全量匹配数会单独显示；这里只控制页面展示的高相关原文数量。")
     labels_available=label_index.exists() or manifest.exists()
     use_labels=st.checkbox("分类标签辅助排序",value=labels_available,disabled=not labels_available,
                            help="自动标签用于辅助排序和展示，可能有误；可关闭以查看原检索顺序，原文证据始终保留。")
@@ -68,17 +70,25 @@ if submitted:
             if len(comparison)>=2:
                 st.session_state["result"]=compare_airlines(comparison,query=query,aspect=aspect,polarity=polarity,
                     filters=filters,classifier_manifest=manifest if use_labels and not label_index.exists() else None,
-                    label_index_path=label_index if use_labels and label_index.exists() else None)
+                    label_index_path=label_index if use_labels and label_index.exists() else None,
+                    top_k=evidence_limit)
             else:
                 st.session_state["result"]=query_reviews(query,aspect=aspect,polarity=polarity,filters=filters,
                     classifier_manifest=manifest if use_labels and not label_index.exists() else None,
-                    label_index_path=label_index if use_labels and label_index.exists() else None)
+                    label_index_path=label_index if use_labels and label_index.exists() else None,
+                    top_k=evidence_limit,candidate_k=max(60,evidence_limit))
     except Exception as error:
         st.error(str(error))
         st.session_state.pop("result",None)
 def display_result(result):
     answer=result["answer"]
     st.write(answer["text"])
+    full=result.get("corpus_label_matches")
+    if full:
+        st.info(f"全库离线标签中，符合当前结构化条件的评价有 {full['sentence_count']:,} 句，"
+                f"来自 {full['review_count']:,} 条不同评论；当前展示相关性最高的 {len(result['evidence'])} 条。")
+        if result.get("query"):
+            st.caption("全量数按航司、方面、正负、舱位、航线和日期计算，不代表全部都与补充关键词同等相关。")
     label_mode={"offline_index":"离线标签","realtime_classifier":"实时分类","none":"未使用标签"}.get(
         result.get("label_lookup_mode"),"未使用标签")
     st.caption(f"耗时 {result['total_seconds']:.1f} 秒 · {len(result['evidence'])} 条证据 · "

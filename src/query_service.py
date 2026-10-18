@@ -13,7 +13,7 @@ from src.retriever import search_with_filters
 from src.rerank import rerank
 from src.classify import classify_texts
 from src.generate import evidence_answer
-from src.label_index import labels_for_chunks
+from src.label_index import count_label_matches, labels_for_chunks
 
 ASPECT_QUERIES = {
     "seat": "passenger seat comfort legroom recline",
@@ -70,7 +70,7 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
     if not phrase: raise ValueError("Provide a query or choose an aspect")
     started = time.monotonic()
     hits = search_with_filters(phrase, filters=filters, top_k=candidate_k, chunks_path=chunks_path)
-    scored = rerank(phrase, hits, top_k=min(30,len(hits)), chunks_path=chunks_path) if hits else []
+    scored = rerank(phrase, hits, top_k=min(max(30, top_k),len(hits)), chunks_path=chunks_path) if hits else []
     retrieval_seconds = time.monotonic()-started
     if scored:
         metadata = pd.read_parquet(chunks_path, columns=["chunk_id","review_id","review_text","airline","cabin","date","route"],
@@ -90,6 +90,8 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
         label_lookup_mode = "realtime_classifier"
     selected = rank_evidence(baseline, predictions, aspect=aspect, polarity=polarity, top_k=top_k)
     answer = evidence_answer(selected, aspect=aspect)
+    corpus_label_matches = count_label_matches(label_index_path, aspect=aspect, polarity=polarity,
+        filters=filters, chunks_path=chunks_path) if label_index_path and aspect is not None else None
     result = {"query": query, "retrieval_query": phrase, "aspect": aspect, "polarity": polarity,
             "filters": filters or {}, "evidence": selected, "baseline_evidence": baseline,
             "answer": answer, "baseline_answer": evidence_answer(baseline, aspect=aspect),
@@ -97,6 +99,7 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             "total_seconds": time.monotonic()-started, "classifier_used": predictions is not None,
             "classifier_is_experimental": predictions is not None, "hard_label_filter": False,
             "label_lookup_mode": label_lookup_mode,
+            "corpus_label_matches": corpus_label_matches,
             "acceptance_evaluated": False}
     if include_candidates: result["candidate_evidence"] = baseline
     return result
@@ -104,14 +107,15 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
 
 def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polarity: str | None = None,
                      filters: dict | None = None, classifier_manifest: str | Path | None = None,
-                     label_index_path: str | Path | None = None) -> dict:
+                     label_index_path: str | Path | None = None, top_k: int = 10) -> dict:
     """Compare evidence under identical constraints without claiming corpus-wide rankings."""
     if not 2 <= len(set(airlines)) <= 3 or len(set(airlines)) != len(airlines):
         raise ValueError("Choose two or three distinct airlines")
     common = dict(filters or {}); common.pop("airline", None)
     results = {airline: query_reviews(query, aspect=aspect, polarity=polarity,
                filters={**common,"airline":airline}, classifier_manifest=classifier_manifest,
-               label_index_path=label_index_path) for airline in airlines}
+               label_index_path=label_index_path, top_k=top_k,
+               candidate_k=max(60, top_k)) for airline in airlines}
     missing = [name for name,result in results.items() if result["answer"]["status"]=="insufficient_evidence"]
     return {"type":"comparison", "aspect":aspect, "results":results,
             "status":"insufficient_evidence" if missing else "evidence_available",
