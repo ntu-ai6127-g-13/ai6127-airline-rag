@@ -149,11 +149,27 @@ def count_label_matches(
         else:
             mask &= series.eq(value)
     matched = frame.loc[mask, ["chunk_id", "review_id", "polarity"]]
+    # A review can contribute several aspect sentences.  For the overview we
+    # count each review once so long reviews do not dominate the percentages.
+    # Exact ties are exposed separately and excluded from the positive/negative
+    # denominator because they do not have a unique review-level direction.
+    review_votes = matched.groupby(["review_id", "polarity"]).size().unstack(fill_value=0)
+    positive_votes = review_votes.get("positive", pd.Series(0, index=review_votes.index))
+    negative_votes = review_votes.get("negative", pd.Series(0, index=review_votes.index))
+    positive_reviews = int((positive_votes > negative_votes).sum())
+    negative_reviews = int((negative_votes > positive_votes).sum())
+    ambiguous_reviews = int((positive_votes == negative_votes).sum())
+    labeled_reviews = positive_reviews + negative_reviews
     return {
         "sentence_count": len(matched),
         "review_count": int(matched.review_id.nunique()),
         "positive_count": int(matched.polarity.eq("positive").sum()),
         "negative_count": int(matched.polarity.eq("negative").sum()),
+        "labeled_review_count": labeled_reviews,
+        "positive_review_count": positive_reviews,
+        "negative_review_count": negative_reviews,
+        "ambiguous_review_count": ambiguous_reviews,
+        "positive_share": round(positive_reviews / labeled_reviews, 4) if labeled_reviews else None,
         "basis": "offline_labels_and_structured_filters",
         "includes_free_text_relevance": False,
     }

@@ -52,7 +52,33 @@ class LabelIndexTests(unittest.TestCase):
                                          filters={"airline": "A", "cabin": "Economy"}, chunks_path=chunk_path)
         self.assertEqual(result["sentence_count"], 1)
         self.assertEqual(result["review_count"], 1)
+        self.assertEqual(result["labeled_review_count"], 1)
+        self.assertEqual(result["negative_review_count"], 1)
+        self.assertEqual(result["positive_share"], 0.0)
         self.assertFalse(result["includes_free_text_relevance"])
+
+    def test_full_match_distribution_counts_each_review_once(self):
+        labels = pd.DataFrame([
+            {"chunk_id": "a", "review_id": "r1", "aspect": "seat", "subjectivity": "subjective", "polarity": "positive"},
+            {"chunk_id": "b", "review_id": "r1", "aspect": "seat", "subjectivity": "subjective", "polarity": "positive"},
+            {"chunk_id": "c", "review_id": "r2", "aspect": "seat", "subjectivity": "subjective", "polarity": "negative"},
+        ])
+        chunks = pd.DataFrame([
+            {"chunk_id": key, "airline": "A", "cabin": "Economy", "traveller_type": "Solo",
+             "route_from": "SIN", "route_to": "LHR", "date": pd.Timestamp("2018-01-01")}
+            for key in ("a", "b", "c")
+        ])
+        with tempfile.TemporaryDirectory() as directory:
+            label_path = Path(directory) / "labels.parquet"
+            chunk_path = Path(directory) / "chunks.parquet"
+            labels.to_parquet(label_path, index=False)
+            chunks.to_parquet(chunk_path, index=False)
+            result = count_label_matches(label_path, aspect="seat", chunks_path=chunk_path)
+        self.assertEqual(result["sentence_count"], 3)
+        self.assertEqual(result["labeled_review_count"], 2)
+        self.assertEqual(result["positive_review_count"], 1)
+        self.assertEqual(result["negative_review_count"], 1)
+        self.assertEqual(result["positive_share"], .5)
 
     def test_query_prefers_offline_labels_without_realtime_classifier(self):
         candidates = [

@@ -8,7 +8,7 @@ import pandas as pd
 from src.quality import classification_metrics
 from src.evaluate import evaluate_queries, evaluate_query_modes
 from src.generate import evidence_answer
-from src.query_service import (_direct_subtopic_match, compare_airlines,
+from src.query_service import (_direct_review_polarity_summary, _direct_subtopic_match, compare_airlines,
                                compare_available_airlines, merge_subtopic_rankings,
                                query_aspects, query_reviews, rank_evidence,
                                scan_direct_subtopic_matches)
@@ -80,6 +80,20 @@ class QueryQualityTests(unittest.TestCase):
         self.assertEqual(result["direct_sentence_count"], 1)
         self.assertEqual(result["direct_review_count"], 1)
         self.assertEqual(result["candidate_ids"], ["1"])
+
+    def test_direct_polarity_summary_counts_each_review_once_and_requires_parent_aspect(self):
+        candidates = [("1", "r1"), ("2", "r1"), ("3", "r2"), ("4", "r3")]
+        predictions = [
+            {"aspect": "food", "subjectivity": "subjective", "polarity": "positive"},
+            {"aspect": "food", "subjectivity": "subjective", "polarity": "positive"},
+            {"aspect": "food", "subjectivity": "subjective", "polarity": "negative"},
+            {"aspect": "seat", "subjectivity": "subjective", "polarity": "positive"},
+        ]
+        result = _direct_review_polarity_summary(candidates, predictions, aspect="food")
+        self.assertEqual(result["labeled_review_count"], 2)
+        self.assertEqual(result["positive_review_count"], 1)
+        self.assertEqual(result["negative_review_count"], 1)
+        self.assertEqual(result["positive_share"], .5)
 
     def test_subtopic_queries_are_retrieved_and_reranked_separately(self):
         def search(phrase, **kwargs):

@@ -5,6 +5,7 @@ import argparse
 from contextlib import contextmanager
 from functools import lru_cache, wraps
 import json
+import math
 from pathlib import Path
 import re
 import threading
@@ -158,6 +159,7 @@ def scan_direct_subtopic_matches(topic: str, *, filters: dict | None = None,
         candidates.append((str(row.chunk_id), strength, length))
     candidates.sort(key=lambda item: (-item[1], item[2], item[0]))
     selected = candidates[:rerank_limit]
+    review_by_id = {str(row.chunk_id): str(row.review_id) for row in matched.itertuples(index=False)}
     return {
         "scope_sentence_count": int(len(scoped)),
         "direct_sentence_count": int(len(matched)),
@@ -166,7 +168,46 @@ def scan_direct_subtopic_matches(topic: str, *, filters: dict | None = None,
         "rerank_cap": rerank_limit,
         "cap_applied": len(candidates) > rerank_limit,
         "candidate_ids": [item[0] for item in selected],
+        "all_direct_candidates": [(item[0], review_by_id[item[0]]) for item in candidates],
     }
+
+
+def _direct_review_polarity_summary(candidates: list[tuple[str, str]], predictions: list[dict],
+                                    *, aspect: str | None) -> dict:
+    """Aggregate automatic polarity once per review for direct subtopic hits."""
+    by_review: dict[str, list[str]] = {}
+    for (_, review_id), prediction in zip(candidates, predictions):
+        if (prediction.get("subjectivity") != "subjective"
+                or prediction.get("polarity") not in {"positive", "negative"}
+                or (aspect is not None and prediction.get("aspect") != aspect)):
+            continue
+        by_review.setdefault(review_id, []).append(prediction["polarity"])
+    positive = negative = ambiguous = 0
+    for polarities in by_review.values():
+        positive_votes = polarities.count("positive")
+        negative_votes = polarities.count("negative")
+        if positive_votes > negative_votes:
+            positive += 1
+        elif negative_votes > positive_votes:
+            negative += 1
+        else:
+            ambiguous += 1
+    labeled = positive + negative
+    share = positive / labeled if labeled else None
+    if labeled:
+        z = 1.96
+        denominator = 1 + z * z / labeled
+        centre = (share + z * z / (2 * labeled)) / denominator
+        margin = z * math.sqrt((share * (1 - share) / labeled) + z * z / (4 * labeled * labeled)) / denominator
+        low, high = max(0.0, centre - margin), min(1.0, centre + margin)
+    else:
+        low = high = None
+    return {"basis": "offline_labels_on_direct_aspect_aligned_reviews",
+            "labeled_review_count": labeled, "positive_review_count": positive,
+            "negative_review_count": negative, "ambiguous_review_count": ambiguous,
+            "positive_share": round(share, 4) if share is not None else None,
+            "positive_share_ci95_low": round(low, 4) if low is not None else None,
+            "positive_share_ci95_high": round(high, 4) if high is not None else None}
 
 
 class QueryBusyError(RuntimeError):
@@ -299,7 +340,14 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
                                        chunks_path=chunks_path)
             scan = scan_direct_subtopic_matches(topic, filters=filters, chunks_path=chunks_path)
             direct_ids = list(scan.get("candidate_ids", ()))
-            scan_summary = {key: value for key, value in scan.items() if key != "candidate_ids"}
+            all_direct_candidates = list(scan.get("all_direct_candidates", ()))
+            scan_summary = {key: value for key, value in scan.items()
+                            if key not in {"candidate_ids", "all_direct_candidates"}}
+            if label_index_path and all_direct_candidates:
+                aggregate_predictions = labels_for_chunks(
+                    [chunk_id for chunk_id, _ in all_direct_candidates], label_index_path)
+                scan_summary["polarity_summary"] = _direct_review_polarity_summary(
+                    all_direct_candidates, aggregate_predictions, aspect=aspect)
             # Put explicit matches from the complete structured slice into the
             # cross-encoder before truncation. Hybrid hits remain as semantic
             # backfill for wording not covered by the direct rules.
@@ -346,7 +394,10 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
         label_lookup_mode = "realtime_classifier"
     selected = rank_evidence(baseline, predictions, aspect=aspect, polarity=polarity, top_k=top_k)
     answer = evidence_answer(selected, aspect=aspect)
-    corpus_label_matches = count_label_matches(label_index_path, aspect=aspect, polarity=polarity,
+    # The overview always needs both directions.  ``polarity`` only narrows the
+    # displayed evidence and must not turn the distribution into a tautological
+    # 100% positive/negative chart.
+    corpus_label_matches = count_label_matches(label_index_path, aspect=aspect, polarity=None,
         filters=filters, chunks_path=chunks_path) if label_index_path and aspect is not None else None
     rating_summary = summarize_ratings(aspect, filters=filters, chunks_path=chunks_path) if aspect else None
     subtopic_evidence_counts = {topic: sum(topic in row.get("matched_subtopics", []) for row in selected)
@@ -388,9 +439,14 @@ def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polar
                candidate_k=max(60, top_k)) for airline in airlines}
     missing = [name for name,result in results.items() if result["answer"]["status"]=="insufficient_evidence"]
     rating_summary = summarize_ratings(aspect, filters=common, airlines=airlines)
+    label_distributions = {
+        airline: result.get("corpus_label_matches") for airline, result in results.items()
+        if result.get("corpus_label_matches")
+    }
     return {"type":"comparison", "query":query, "aspect":aspect, "polarity":polarity,
             "subtopics":dict(subtopics or {}),
             "filters":common, "airlines":airlines, "results":results, "rating_summary":rating_summary,
+            "label_distributions":label_distributions,
             "status":"insufficient_evidence" if missing else "evidence_available",
             "text":("部分航司的证据不足，暂时无法可靠比较："+"、".join(missing)) if missing else
                     "以下按同一方面和筛选条件展示各航司的评论证据。检索样本不代表全体旅客，不能据此直接给出总体航司排名。"}

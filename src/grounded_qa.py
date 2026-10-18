@@ -7,6 +7,7 @@ import socket
 import textwrap
 import urllib.error
 import urllib.request
+from typing import Callable
 
 from src.question_parser import SUBTOPIC_NAMES
 
@@ -120,10 +121,18 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
     subtopics = {topic: SUBTOPIC_NAMES.get(topic, topic) for topic in result.get("subtopics", {})}
     requested_aspects = {aspect: _ASPECT_NAMES.get(aspect, aspect)
                          for aspect in result.get("aspects", [])}
+    full_label_distributions = dict(result.get("label_distributions", {}))
+    if not full_label_distributions and result.get("corpus_label_matches"):
+        airline = result.get("filters", {}).get("airline")
+        if isinstance(airline, (list, tuple, set)):
+            airline = "所选航司"
+        if not airline and rows:
+            airline = rows[0].get("airline")
+        full_label_distributions[str(airline or "所选航司")] = result["corpus_label_matches"]
     system = """你是航空评论分析助手。只能依据输入的原始评分汇总和评论证据作答，不能使用外部知识。
 要求：
 1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。
-2. 评分均值、评分人数和差值只能逐字使用 rating_summary 中给出的数值；不要统计检索证据的正负条数。
+2. 评分均值、评分人数和差值只能逐字使用 rating_summary 中给出的数值；正负比例只能使用 full_label_distributions 或 comparison_subtopic_decisions 中的全量统计，不能统计页面展示的几条证据。
 3. 评分汇总是主要定量依据，评论原文用来解释具体优缺点。引用格式严格为 [1]、[2] 或比较查询中的 [A1]、[B2]，只能使用存在的编号。
 4. 自动分类标签仅供选证据参考，应按英文原文理解。不要把检索到的几句话当作总体好评率。
 5. requested_subtopics 非空时，每个细分项必须单独成段，段与段之间空一行；单航司问题的每段以具体航司名和细分项开头，例如“关于新加坡航空的腿部空间”，不要写成“关于航司的腿部空间”。随后给出该项的发现和引用。禁止把多个细分项挤在同一段。优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。回答中不要使用“多数、普遍、更多人、较多、整体、总体”等范围词，应写“检索到的原文同时包含……”并说明正反例。
@@ -134,7 +143,16 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
             "1. 第一行直接回答用户，并按 requested_subtopics 给出具体发现。comparison 只是上位方面的评分比较，不能强制成为细分问题的结论。")
         if result.get("type") == "comparison":
             system += """
-7. 这是细分属性的航司比较。必须逐家写出 parent_aspect_rating_summary 中的原始上位方面平均分、满分和评分份数，明确它不是细分项独立评分。结合 comparison_subtopic_coverage 和直接原文判断：任一主要候选的直接评论不足 3 条时，不得宣布细分项“最好”，应明确说证据不足，并指出现有评分和原文支持到什么程度。没有直接原文的候选必须明确写出缺证据。"""
+7. 这是细分属性的航司比较。必须逐家写出 parent_aspect_rating_summary 中的原始上位方面平均分、满分和评分份数，明确它不是细分项独立评分。上位 comparison 为 clear_difference 时，先明确说明 winner 在所问上位方面的历史评分更好。每个细分项严格服从 comparison_subtopic_decisions：clear_difference 才明确该项更支持 winner；no_clear_difference 应报告方向但说明差异不足以可靠区分；insufficient_evidence 才说证据不足。每个细分项把各航司的正向数量与百分比、负向数量与百分比合并在一句“自动标签汇总”中；这些汇总来自完整直接命中原文，不是页面展示的几条证据。随后用可见引用举例。没有直接原文的候选必须明确写出缺证据。"""
+        else:
+            system += """
+7. subtopic_coverage 包含每个细分项完整直接命中原文的统计。若 polarity_summary 可用，在对应细分项段落里用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
+    elif result.get("type") == "comparison":
+        system += """
+7. full_label_distributions 是各航司在当前结构化条件下、该上位方面的全量离线标签统计。用一句话分别写出每家航司的总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
+    elif full_label_distributions:
+        system += """
+7. full_label_distributions 是当前结构化条件下、该方面的全量离线标签统计。用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
     if requested_aspects:
         system += """
 7. requested_aspects 非空时，必须严格按照 requested_aspects 的顺序回答；每个评价方面单独成段，段与段之间空一行。每段必须明确写出方面名称、该方面的原始平均分、满分和评分份数，例如“原始餐饮评分为 3.80/5（900 份）”，再用属于该 query_aspect 的原文解释。不得用一个方面的评分回答另一个方面。回答控制在 220–550 个中文字符。"""
@@ -147,6 +165,12 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
                    airline: part.get("subtopic_analysis", {})
                    for airline, part in result.get("results", {}).items()
                } if subtopics and result.get("type") == "comparison" else {},
+               "subtopic_coverage": (result.get("subtopic_analysis", {})
+                                     if subtopics and result.get("type") != "comparison" else {}),
+               "comparison_subtopic_decisions": {
+                   topic: _comparison_subtopic_decision(result, topic) for topic in subtopics
+               } if subtopics and result.get("type") == "comparison" else {},
+               "full_label_distributions": full_label_distributions,
                "requested_aspects": requested_aspects,
                "rating_summaries": {requested_aspects.get(key, key): _rating_payload(value)
                                     for key, value in result.get("rating_summaries", {}).items()},
@@ -160,7 +184,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
                     required_subtopics: tuple[str, ...] = (),
                     required_aspects: tuple[str, ...] = (),
                     evidence_numbers: set[str] | None = None,
-                    require_all_rating_values: bool = False) -> tuple[bool, list[str]]:
+                    require_all_rating_values: bool = False,
+                    allow_aggregate_counts: bool = False) -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
     clean = text.strip()
@@ -176,7 +201,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
                       re.findall(r"\d[\d,]*(?:\.\d+)?", without_citations)]
     unexpected = set(numeric_tokens) - (_allowed_numbers(rating_summary) | set(evidence_numbers or ()))
     if unexpected: reasons.append("unverified_numeric_claim:" + ",".join(sorted(unexpected)))
-    if re.search(r"[零一二三四五六七八九十百]+\s*条", without_citations):
+    if not allow_aggregate_counts and re.search(r"[零一二三四五六七八九十百]+\s*条", without_citations):
         reasons.append("retrieved_label_count_claim")
     comparison = (rating_summary or {}).get("comparison", {})
     if (require_rating_winner and comparison.get("status") == "clear_difference"
@@ -266,6 +291,58 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     return not reasons, reasons
 
 
+def _comparison_subtopic_decision(result: dict, topic: str) -> dict:
+    summaries = {}
+    for airline, part in result.get("results", {}).items():
+        analysis = part.get("subtopic_analysis", {}).get(topic, {})
+        polarity = analysis.get("polarity_summary") or {}
+        summaries[airline] = {
+            "direct_review_count": analysis.get("direct_review_count", 0),
+            **polarity,
+        }
+    eligible = [(airline, data) for airline, data in summaries.items()
+                if data.get("labeled_review_count", 0) >= 10
+                and data.get("positive_share") is not None]
+    if len(eligible) != len(summaries) or len(eligible) < 2:
+        return {"status": "insufficient_evidence", "summaries": summaries,
+                "minimum_labeled_reviews": 10}
+    ranked = sorted(eligible, key=lambda item: (-item[1]["positive_share"], item[0]))
+    leader, leader_data = ranked[0]
+    runner, runner_data = ranked[1]
+    difference = leader_data["positive_share"] - runner_data["positive_share"]
+    decisive = (leader_data.get("positive_share_ci95_low") is not None
+                and runner_data.get("positive_share_ci95_high") is not None
+                and leader_data["positive_share_ci95_low"] > runner_data["positive_share_ci95_high"])
+    return {"status": "clear_difference" if decisive else "no_clear_difference",
+            "winner": leader if decisive else None, "leader": leader, "runner_up": runner,
+            "positive_share_difference": round(difference, 4), "summaries": summaries,
+            "minimum_labeled_reviews": 10}
+
+
+def _polarity_distribution_sentence(summaries: dict[str, dict], *, direct: bool = False) -> str:
+    """Format one compact sentence from full-corpus, review-level label totals."""
+    parts = []
+    for airline, data in summaries.items():
+        labeled = int(data.get("labeled_review_count") or 0)
+        positive = int(data.get("positive_review_count") or 0)
+        negative = int(data.get("negative_review_count") or 0)
+        if not labeled:
+            continue
+        positive_share = positive / labeled * 100
+        negative_share = negative / labeled * 100
+        label = _AIRLINE_NAMES_ZH.get(airline, airline)
+        matched = int(data.get("direct_review_count") or data.get("review_count") or labeled)
+        parts.append(
+            f"{label}共命中 {matched:,} 条，其中可明确归类的 {labeled:,} 条里正向 "
+            f"{positive:,} 条（{positive_share:.1f}%）、"
+            f"负向 {negative:,} 条（{negative_share:.1f}%）"
+        )
+    if not parts:
+        return ""
+    scope = "全部直接相关评论" if direct else "该方面全部相关评论"
+    return f"{scope}的自动标签汇总：" + "；".join(parts) + "。"
+
+
 def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
     """Produce a useful answer without an LLM, grounded in visible evidence."""
     del question
@@ -300,7 +377,12 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                 quote = textwrap.shorten(str(row["text"]).strip(), width=125, placeholder="…")
                 details.append(f"{prefix}：“{quote}”[{row['citation_id']}]")
             evidence_text = "；".join(details) if details else "当前筛选条件下没有检索到可核对的原文"
-            sections.append(f"关于{airline_label}的{aspect_name}，{rating_text}。{evidence_text}。")
+            distribution = (result.get("results", {}).get(aspect, {})
+                            .get("corpus_label_matches"))
+            distribution_text = _polarity_distribution_sentence(
+                {airline_label: distribution}) if distribution else ""
+            sections.append(f"关于{airline_label}的{aspect_name}，{rating_text}。"
+                            f"{distribution_text}{evidence_text}。")
         return "\n\n".join(sections) + "\n\n评分和原文来自 2002–2019 年的历史评论，不能代表当前服务。"
     if not rows:
         return "当前筛选条件下没有检索到足够的评论证据，因此暂时无法回答。可以放宽航司、舱位、航线或日期条件后重试。"
@@ -328,9 +410,19 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                     rating_parts.append(f"{label}无可用评分")
                 else:
                     rating_parts.append(f"{label} {data['mean']:.2f}/{rating['scale']}（{data['n']:,} 份）")
-            sections.append(f"相同路线、舱位和其他条件下，原始{aspect_name}评分为："
-                            + "；".join(rating_parts)
-                            + "。这是上位方面评分，不是所问细分项的独立评分。")
+            comparison = rating.get("comparison", {})
+            if comparison.get("status") == "clear_difference":
+                winner = comparison["winner"]
+                winner_label = _AIRLINE_NAMES_ZH.get(winner, winner)
+                lead = (f"就整体{aspect_name}而言，{winner_label}在这批同条件历史评分中明确更好，"
+                        f"领先第二名 {comparison['difference']:.2f} 分。")
+            elif comparison.get("status") == "no_clear_difference":
+                lead = (f"就整体{aspect_name}而言，现有评分差 {comparison['difference']:.2f} 分，"
+                        "不足以可靠区分胜负。")
+            else:
+                lead = f"就整体{aspect_name}而言，当前同条件评分样本不足以作可靠排名。"
+            sections.append(lead + f"原始{aspect_name}评分为：" + "；".join(rating_parts)
+                            + "。这些是上位方面评分，不是所问细分项的独立评分。")
         for topic in subtopics:
             matches = sorted(
                 (row for row in rows if topic in (row.get("direct_subtopic_matches", [])
@@ -339,13 +431,18 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
             if comparison_query:
                 chosen = []
                 used_airlines = set()
-                for row in matches:
-                    airline = str(row.get("airline") or "所选航司")
-                    if airline not in used_airlines:
-                        chosen.append(row)
-                        used_airlines.add(airline)
-                    if len(chosen) == len(by_airline):
-                        break
+                decision = _comparison_subtopic_decision(result, topic)
+                summaries = decision.get("summaries", {})
+                for airline in by_airline:
+                    candidates = [row for row in matches if str(row.get("airline") or "") == airline]
+                    if not candidates:
+                        continue
+                    share = summaries.get(airline, {}).get("positive_share")
+                    preferred = "positive" if share is not None and share >= .5 else "negative"
+                    selected = next((row for row in candidates
+                                     if row.get("pred_polarity") == preferred), candidates[0])
+                    chosen.append(selected)
+                    used_airlines.add(airline)
                 missing_airlines = [airline for airline in by_airline if airline not in used_airlines]
             else:
                 chosen = matches[:2]
@@ -388,8 +485,25 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
             airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
             subject = f"{airline_label}的{name}" if airline_label and not comparison_query else name
             if comparison_query:
-                direction = "现有直接评论不足以可靠判定哪家最好"
-            sections.append(f"关于{subject}，{direction}。" + "；".join(details) + "。")
+                aggregate = _polarity_distribution_sentence(
+                    decision.get("summaries", {}), direct=True)
+                if decision.get("status") == "clear_difference":
+                    winner = decision["winner"]
+                    direction = (f"完整直接原文的自动标签汇总明确更支持"
+                                 f"{_AIRLINE_NAMES_ZH.get(winner, winner)}。{aggregate}")
+                elif decision.get("status") == "no_clear_difference":
+                    leader = decision["leader"]
+                    direction = (f"自动标签汇总暂时偏向{_AIRLINE_NAMES_ZH.get(leader, leader)}，"
+                                 f"但差异不足以可靠判定胜负。{aggregate}")
+                else:
+                    direction = f"现有直接原文仍不足以可靠判定哪家最好。{aggregate}"
+            else:
+                polarity_summary = (result.get("subtopic_analysis", {}).get(topic, {})
+                                    .get("polarity_summary"))
+                if polarity_summary:
+                    direction += "。" + _polarity_distribution_sentence(
+                        {airline_label or "所选航司": polarity_summary}, direct=True)
+            sections.append(f"关于{subject}，{direction.rstrip('。')}。" + "；".join(details) + "。")
         return "\n\n".join(sections) + "\n\n这些原文记录的是具体旅客经历，不能代表所有航班。"
     if rating.get("available") and rating.get("comparison", {}).get("status") == "clear_difference":
         comparison = rating["comparison"]
@@ -400,20 +514,22 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
         details = []
         if good: details.append(f"{winner_label}的旅客提到“{quote(good)}”[{good['citation_id']}]")
         if bad: details.append(f"{runner_label}的旅客则提到“{quote(bad)}”[{bad['citation_id']}]")
+        distribution = _polarity_distribution_sentence(result.get("label_distributions", {}))
         return (f"{winner_label}明显更好，而且评分差距很大。原始{aspect_name}评分中，{winner_label}为"
                 f"{winner_data['mean']:.2f}/{rating['scale']}（{winner_data['n']:,}份），{runner_label}为"
                 f"{runner_data['mean']:.2f}/{rating['scale']}（{runner_data['n']:,}份），相差{comparison['difference']:.2f}分；"
                 f"{winner_label}的高分占比为{winner_data['high_share']*100:.1f}%，{runner_label}仅为{runner_data['high_share']*100:.1f}%，"
-                f"后者的低分占比达到{runner_data['low_share']*100:.1f}%。"
+                f"后者的低分占比达到{runner_data['low_share']*100:.1f}%。{distribution}"
                 + "；".join(details) + "。评分和原文均来自2002–2019年的评论，不能直接代表当前服务。")
     if rating.get("available") and rating.get("comparison", {}).get("status") == "no_clear_difference":
         comparison = rating["comparison"]
         leader, runner = comparison["leader"], comparison["runner_up"]
         leader_label, runner_label = _AIRLINE_NAMES_ZH.get(leader, leader), _AIRLINE_NAMES_ZH.get(runner, runner)
         first, second = rating["airlines"][leader], rating["airlines"][runner]
+        distribution = _polarity_distribution_sentence(result.get("label_distributions", {}))
         return (f"这批评分不足以可靠地区分谁更好。{leader_label}为{first['mean']:.2f}/{rating['scale']}（{first['n']:,}份），"
                 f"{runner_label}为{second['mean']:.2f}/{rating['scale']}（{second['n']:,}份），只差{comparison['difference']:.2f}分，"
-                "没有达到预设的实际意义门槛；此时硬给出胜负会夸大数据差异。")
+                f"没有达到预设的实际意义门槛；此时硬给出胜负会夸大数据差异。{distribution}")
     if rating.get("available") and len(rating.get("airlines", {})) == 1:
         airline, data = next(iter(rating["airlines"].items()))
         airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
@@ -422,8 +538,10 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
             "评价偏低" if data["mean"] < rating["scale"] * .55 else "评价处于中间水平")
         cited = [row for row in (good, bad) if row]
         detail = "；".join(f"“{quote(row)}”[{row['citation_id']}]" for row in cited)
+        distribution = _polarity_distribution_sentence(
+            {airline: result.get("corpus_label_matches")}) if result.get("corpus_label_matches") else ""
         return (f"{airline_label}的{aspect_name}历史评分为{data['mean']:.2f}/{rating['scale']}，共{data['n']:,}份评分，{interpretation}。"
-                f"代表性原文包括{detail}。数据截至2019年。")
+                f"{distribution}代表性原文包括{detail}。数据截至2019年。")
     cited = rows[:2]
     details = "；".join(f"“{quote(row)}”[{row['citation_id']}]" for row in cited)
     return f"原始评论表没有足够的同口径评分来形成明确结论。目前能核对的原文包括{details}。"
@@ -437,17 +555,42 @@ def model_health(endpoint: str = DEFAULT_ENDPOINT, timeout: float = 0.5) -> dict
         return {"status": "unavailable"}
 
 
-def _generate(messages: list[dict], *, endpoint: str, timeout: float) -> dict:
+StreamCallback = Callable[[str, str], None]
+
+
+def _generate(messages: list[dict], *, endpoint: str, timeout: float,
+              on_stream: StreamCallback | None = None) -> dict:
     body = json.dumps({"messages": messages, "max_tokens": 480,
                        "temperature": 0.0}, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(endpoint.rstrip("/") + "/generate", data=body,
+    path = "/generate_stream" if on_stream else "/generate"
+    request = urllib.request.Request(endpoint.rstrip("/") + path, data=body,
                                      headers={"Content-Type": "application/json"}, method="POST")
     with urllib.request.urlopen(request, timeout=timeout) as response:
-        return json.loads(response.read().decode("utf-8"))
+        if on_stream is None:
+            return json.loads(response.read().decode("utf-8"))
+        chunks = []
+        seconds = 0.0
+        completed = False
+        for raw_line in response:
+            if not raw_line.strip():
+                continue
+            event = json.loads(raw_line.decode("utf-8"))
+            if event.get("type") == "delta":
+                chunks.append(str(event.get("text", "")))
+                on_stream("".join(chunks), "delta")
+            elif event.get("type") == "done":
+                seconds = float(event.get("seconds", 0.0))
+                completed = True
+            elif event.get("type") == "error":
+                raise RuntimeError(str(event.get("error", "stream_generation_failed")))
+        if not completed:
+            raise RuntimeError("stream_ended_without_completion")
+        return {"text": "".join(chunks).strip(), "seconds": seconds}
 
 
 def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDPOINT,
-                    timeout: float = 45.0, use_model: bool = True) -> dict:
+                    timeout: float = 45.0, use_model: bool = True,
+                    on_stream: StreamCallback | None = None) -> dict:
     """Generate, validate, and fall back without ever losing the evidence."""
     rows = collect_evidence(result)
     valid_ids = {row["citation_id"] for row in rows}
@@ -473,8 +616,43 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
                                      and (result.get("rating_summary") or {}).get("available"))
     evidence_numbers = {token.replace(",", "") for row in rows for token in
                         re.findall(r"\d[\d,]*(?:\.\d+)?", str(row.get("text", "")))}
+    allow_aggregate_counts = bool(
+        result.get("corpus_label_matches") or result.get("label_distributions")
+        or result.get("subtopics")
+    )
+    if allow_aggregate_counts:
+        aggregate_parts = list(result.get("results", {}).values())
+        aggregate_parts.append(result)
+        for part in aggregate_parts:
+            full = part.get("corpus_label_matches") or {}
+            for value in full.values():
+                if isinstance(value, int) and not isinstance(value, bool):
+                    evidence_numbers.add(str(value))
+                elif isinstance(value, float):
+                    evidence_numbers.update({f"{value:.4f}", f"{value*100:.1f}"})
+            full_total = int(full.get("labeled_review_count") or 0)
+            if full_total:
+                for key in ("positive_review_count", "negative_review_count"):
+                    evidence_numbers.add(f"{int(full.get(key) or 0) / full_total * 100:.1f}")
+            for analysis in part.get("subtopic_analysis", {}).values():
+                for value in analysis.values():
+                    if isinstance(value, int) and not isinstance(value, bool):
+                        evidence_numbers.add(str(value))
+                polarity_summary = analysis.get("polarity_summary") or {}
+                for value in polarity_summary.values():
+                    if isinstance(value, int) and not isinstance(value, bool):
+                        evidence_numbers.add(str(value))
+                    elif isinstance(value, float):
+                        evidence_numbers.update({f"{value:.4f}", f"{value*100:.1f}"})
+                polarity_total = int(polarity_summary.get("labeled_review_count") or 0)
+                if polarity_total:
+                    for key in ("positive_review_count", "negative_review_count"):
+                        evidence_numbers.add(
+                            f"{int(polarity_summary.get(key) or 0) / polarity_total * 100:.1f}")
     try:
-        payload = _generate(messages, endpoint=endpoint, timeout=timeout)
+        if on_stream:
+            on_stream("", "start")
+        payload = _generate(messages, endpoint=endpoint, timeout=timeout, on_stream=on_stream)
         text = str(payload.get("text", "")).strip()
         model_seconds = float(payload.get("seconds", 0.0))
         valid, errors = validate_answer(text, valid_ids, rating_summary=validation_rating,
@@ -482,8 +660,11 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
                                         required_subtopics=tuple(result.get("subtopics", {})),
                                         required_aspects=required_aspects,
                                         evidence_numbers=evidence_numbers,
-                                        require_all_rating_values=require_all_rating_values)
+                                        require_all_rating_values=require_all_rating_values,
+                                        allow_aggregate_counts=allow_aggregate_counts)
         if valid:
+            if on_stream:
+                on_stream(text, "complete")
             return {"text": text, "mode": "local_qwen", "valid": True,
                     "validation_errors": [], "citations": sorted(_CITATION_RE.findall(text)),
                     "model_seconds": model_seconds}
@@ -495,7 +676,10 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
              "段与段之间空一行，不要把多个细分项写在同一段。requested_aspects 也必须每方面单独成段，"
              "显式写出该方面的原始平均分、满分和评分份数。"},
         ]
-        repaired_payload = _generate(repair_messages, endpoint=endpoint, timeout=timeout)
+        if on_stream:
+            on_stream("", "reset")
+        repaired_payload = _generate(repair_messages, endpoint=endpoint, timeout=timeout,
+                                     on_stream=on_stream)
         repaired = str(repaired_payload.get("text", "")).strip()
         model_seconds += float(repaired_payload.get("seconds", 0.0))
         repaired_valid, repaired_errors = validate_answer(
@@ -503,15 +687,22 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             require_rating_winner=not bool(result.get("subtopics")),
             required_subtopics=tuple(result.get("subtopics", {})), required_aspects=required_aspects,
             evidence_numbers=evidence_numbers,
-            require_all_rating_values=require_all_rating_values)
+            require_all_rating_values=require_all_rating_values,
+            allow_aggregate_counts=allow_aggregate_counts)
         if repaired_valid:
+            if on_stream:
+                on_stream(repaired, "complete")
             return {"text": repaired, "mode": "local_qwen_repaired", "valid": True,
                     "validation_errors": errors, "citations": sorted(_CITATION_RE.findall(repaired)),
                     "model_seconds": model_seconds}
+        if on_stream:
+            on_stream(fallback, "replace")
         return {"text": fallback, "mode": "validation_fallback", "valid": True,
                 "validation_errors": errors + repaired_errors,
                 "citations": sorted(_CITATION_RE.findall(fallback)), "model_seconds": model_seconds}
-    except (OSError, ValueError, KeyError, urllib.error.URLError, socket.timeout) as error:
+    except (OSError, ValueError, KeyError, RuntimeError, urllib.error.URLError, socket.timeout) as error:
+        if on_stream:
+            on_stream(fallback, "replace")
         return {"text": fallback, "mode": "service_fallback", "valid": True,
                 "validation_errors": [type(error).__name__], "citations": sorted(_CITATION_RE.findall(fallback)),
                 "model_seconds": 0.0}
