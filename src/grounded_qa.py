@@ -169,7 +169,7 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
 7. 这是细分属性的航司比较。必须逐家写出 parent_aspect_rating_summary 中的原始上位方面平均分、满分和评分份数，明确它不是细分项独立评分。上位 comparison 为 clear_difference 时，先明确说明 winner 在所问上位方面的历史评分更好。每个细分项严格服从 comparison_subtopic_decisions：clear_difference 才明确该项更支持 winner；no_clear_difference 应报告方向但说明差异不足以可靠区分；insufficient_evidence 才说证据不足。每个细分项把各航司的正向数量与百分比、负向数量与百分比合并在一句“自动标签汇总”中；这些汇总来自完整直接命中原文，不是页面展示的几条证据。随后用可见引用举例。没有直接原文的候选必须明确写出缺证据。"""
         else:
             system += """
-7. subtopic_coverage 包含每个细分项完整直接命中原文的统计。若 polarity_summary 可用，在对应细分项段落里用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
+7. subtopic_coverage 包含每个细分项完整直接命中原文的统计，single_subtopic_directions 是基于完整匹配池计算的总体方向。每个细分项的“偏正面/偏负面/正负接近”结论必须严格服从 single_subtopic_directions，绝不能根据页面展示的几条 evidence 决定。若 polarity_summary 可用，在对应细分项段落里用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。展示引用只用于举例，优先给一条主流方向和一条反例。"""
     elif result.get("type") == "comparison":
         system += """
 7. full_label_distributions 是各航司在当前结构化条件下、该上位方面的全量离线标签统计。用一句话分别写出每家航司的总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
@@ -187,7 +187,7 @@ Rules:
 3. Use citations exactly as supplied, such as [1], [A1], or [B2]. Every substantive evidence claim needs a valid citation.
 4. Automatic labels are supporting statistics rather than human gold labels. Describe the data as historical reviews from 2002–2019.
 5. When requested_subtopics is nonempty, give each requested subtopic its own paragraph in the requested order. Parent-aspect ratings are context and cannot decide a subtopic winner. Follow comparison_subtopic_decisions: declare a subtopic winner only for clear_difference; describe direction without a winner for no_clear_difference; abstain only for insufficient_evidence.
-6. When aggregate statistics are available, include each airline's total matched reviews and the positive and negative counts and percentages in one compact sentence. Then support the interpretation with representative evidence.
+6. For a single-airline subtopic, the positive/negative/mixed conclusion must follow single_subtopic_directions, which was computed from the full direct-match pool. Never infer the overall direction from the few displayed evidence excerpts. When aggregate statistics are available, include total matched reviews and the positive and negative counts and percentages in one compact sentence. Displayed quotations are examples only; prefer one majority-direction example and one counterexample.
 7. Translate nothing into Chinese and do not output Chinese characters. Write natural, specific English and avoid boilerplate. Keep the answer concise."""
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
@@ -200,6 +200,9 @@ Rules:
                } if subtopics and result.get("type") == "comparison" else {},
                "subtopic_coverage": (result.get("subtopic_analysis", {})
                                      if subtopics and result.get("type") != "comparison" else {}),
+               "single_subtopic_directions": {
+                   topic: _single_subtopic_direction(result, topic) for topic in subtopics
+               } if subtopics and result.get("type") != "comparison" else {},
                "comparison_subtopic_decisions": {
                    topic: _comparison_subtopic_decision(result, topic) for topic in subtopics
                } if subtopics and result.get("type") == "comparison" else {},
@@ -219,7 +222,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
                     evidence_numbers: set[str] | None = None,
                     require_all_rating_values: bool = False,
                     allow_aggregate_counts: bool = False,
-                    language: str = "zh") -> tuple[bool, list[str]]:
+                    language: str = "zh",
+                    expected_subtopic_directions: dict[str, str] | None = None) -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
     clean = text.strip()
@@ -259,6 +263,20 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
         topic_paragraphs[topic] = containing
         if not containing:
             reasons.append("missing_subtopic:" + topic)
+    for topic, expected in (expected_subtopic_directions or {}).items():
+        indices = topic_paragraphs.get(topic, [])
+        relevant = " ".join(paragraphs[index] for index in indices)
+        if language == "en":
+            opposite = (r"leans? negative|mostly negative|negative (?:reviews? )?(?:dominate|majority)"
+                        if expected == "positive" else
+                        r"leans? positive|mostly positive|positive (?:reviews? )?(?:dominate|majority)")
+            relevant = relevant.casefold()
+        else:
+            opposite = (r"偏负面|负面(?:评价|评论)?(?:占主导|为主|居多)|负向(?:占主导|为主|居多)"
+                        if expected == "positive" else
+                        r"偏正面|正面(?:评价|评论)?(?:占主导|为主|居多)|正向(?:占主导|为主|居多)")
+        if expected in {"positive", "negative"} and re.search(opposite, relevant):
+            reasons.append("contradicts_full_subtopic_aggregate:" + topic)
     if len(required_subtopics) > 1:
         used = set()
         assigned = []
@@ -358,6 +376,30 @@ def _comparison_subtopic_decision(result: dict, topic: str) -> dict:
             "winner": leader if decisive else None, "leader": leader, "runner_up": runner,
             "positive_share_difference": round(difference, 4), "summaries": summaries,
             "minimum_labeled_reviews": 10}
+
+
+def _single_subtopic_direction(result: dict, topic: str) -> dict:
+    """Decide direction from the full direct-match aggregate, never displayed examples."""
+    analysis = result.get("subtopic_analysis", {}).get(topic, {})
+    summary = analysis.get("polarity_summary") or {}
+    labeled = int(summary.get("labeled_review_count") or 0)
+    share = summary.get("positive_share")
+    if labeled < 10 or share is None:
+        return {"status": "insufficient_evidence", "summary": summary,
+                "direct_review_count": analysis.get("direct_review_count", 0)}
+    low, high = summary.get("positive_share_ci95_low"), summary.get("positive_share_ci95_high")
+    if low is not None and low > .5:
+        status = "positive"
+    elif high is not None and high < .5:
+        status = "negative"
+    elif low is None and share >= .6:
+        status = "positive"
+    elif high is None and share <= .4:
+        status = "negative"
+    else:
+        status = "mixed"
+    return {"status": status, "summary": summary,
+            "direct_review_count": analysis.get("direct_review_count", 0)}
 
 
 def _polarity_distribution_sentence(summaries: dict[str, dict], *, direct: bool = False) -> str:
@@ -472,14 +514,29 @@ def _fallback_answer_en(result: dict, rows: list[dict]) -> str:
                 else:
                     finding = "the direct evidence is insufficient to name a reliable winner"
             else:
-                chosen = matches[:2]
-                aggregate_data = result.get("subtopic_analysis", {}).get(topic, {}).get("polarity_summary")
+                decision = _single_subtopic_direction(result, topic)
+                topic_analysis = result.get("subtopic_analysis", {}).get(topic, {})
+                aggregate_data = ({"direct_review_count": topic_analysis.get("direct_review_count", 0),
+                                   **(topic_analysis.get("polarity_summary") or {})}
+                                  if topic_analysis.get("polarity_summary") else None)
                 airline = next(iter(by_airline), "Selected airline")
                 aggregate = _polarity_distribution_sentence_en({airline: aggregate_data}, direct=True) if aggregate_data else ""
-                polarities = {row.get("pred_polarity") for row in chosen}
-                finding = ("the directly relevant reviews lean positive" if polarities == {"positive"} else
-                           "the directly relevant reviews lean negative" if polarities == {"negative"} else
-                           "the directly relevant reviews include both positive and negative experiences")
+                preferred = decision.get("status") if decision.get("status") in {"positive", "negative"} else None
+                chosen = []
+                if preferred:
+                    primary = next((row for row in matches if row.get("pred_polarity") == preferred), None)
+                    counter = next((row for row in matches if row.get("pred_polarity") in {"positive", "negative"}
+                                    and row.get("pred_polarity") != preferred), None)
+                    chosen.extend(row for row in (primary, counter) if row is not None)
+                for row in matches:
+                    if row not in chosen:
+                        chosen.append(row)
+                    if len(chosen) == 2:
+                        break
+                finding = ("the full direct-match aggregate leans positive" if decision.get("status") == "positive" else
+                           "the full direct-match aggregate leans negative" if decision.get("status") == "negative" else
+                           "the full direct-match aggregate has no decisive positive or negative direction" if decision.get("status") == "mixed" else
+                           "the full direct-match aggregate is too small for a reliable direction")
             examples = "; ".join(
                 f'A {row.get("airline", "selected-airline")} passenger wrote, “{quote(row)}”[{row["citation_id"]}]'
                 for row in chosen)
@@ -619,7 +676,19 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                     used_airlines.add(airline)
                 missing_airlines = [airline for airline in by_airline if airline not in used_airlines]
             else:
-                chosen = matches[:2]
+                decision = _single_subtopic_direction(result, topic)
+                preferred = decision.get("status") if decision.get("status") in {"positive", "negative"} else None
+                chosen = []
+                if preferred:
+                    primary = next((row for row in matches if row.get("pred_polarity") == preferred), None)
+                    counter = next((row for row in matches if row.get("pred_polarity") in {"positive", "negative"}
+                                    and row.get("pred_polarity") != preferred), None)
+                    chosen.extend(row for row in (primary, counter) if row is not None)
+                for row in matches:
+                    if row not in chosen:
+                        chosen.append(row)
+                    if len(chosen) == 2:
+                        break
                 missing_airlines = []
             name = _SUBTOPIC_SUBJECTS.get(topic, SUBTOPIC_NAMES.get(topic, topic))
             if not chosen:
@@ -631,12 +700,20 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                 continue
             polarities = [row.get("pred_polarity") for row in chosen
                           if row.get("pred_polarity") in {"positive", "negative"}]
-            if polarities and all(value == "negative" for value in polarities):
-                direction = "检索到的直接评论偏负面"
+            if not comparison_query and decision.get("status") == "positive":
+                direction = "完整直接匹配评论的自动标签总体偏正面"
+            elif not comparison_query and decision.get("status") == "negative":
+                direction = "完整直接匹配评论的自动标签总体偏负面"
+            elif not comparison_query and decision.get("status") == "mixed":
+                direction = "完整直接匹配评论的自动标签正负接近，暂时没有明确方向"
+            elif not comparison_query and decision.get("status") == "insufficient_evidence":
+                direction = "完整直接匹配评论中可判定倾向的数量不足，暂时不能确定总体方向"
+            elif polarities and all(value == "negative" for value in polarities):
+                direction = "展示的直接评论例子偏负面"
             elif polarities and all(value == "positive" for value in polarities):
-                direction = "检索到的直接评论偏正面"
+                direction = "展示的直接评论例子偏正面"
             elif {"positive", "negative"}.issubset(set(polarities)):
-                direction = "检索到的直接评论看法不一"
+                direction = "展示的直接评论例子包含正反两种意见"
             else:
                 direction = "检索到的直接评论提供了一些具体信息"
             details = []
@@ -647,6 +724,10 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                 cabin_label = _CABIN_NAMES_ZH.get(cabin, cabin)
                 if comparison_query:
                     prefix = f"{airline_label}的旅客写道"
+                elif preferred and row.get("pred_polarity") == preferred:
+                    prefix = f"一条{'正向' if preferred == 'positive' else '负向'}代表性评论写道"
+                elif preferred and row.get("pred_polarity") in {"positive", "negative"}:
+                    prefix = f"一条{'负向' if preferred == 'positive' else '正向'}反例写道"
                 elif cabin_label:
                     prefix = f"{'一位' if row_index == 0 else '另一位'}{cabin_label}旅客写道"
                 else:
@@ -672,11 +753,13 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
                 else:
                     direction = f"现有直接原文仍不足以可靠判定哪家最好。{aggregate}"
             else:
-                polarity_summary = (result.get("subtopic_analysis", {}).get(topic, {})
-                                    .get("polarity_summary"))
+                topic_analysis = result.get("subtopic_analysis", {}).get(topic, {})
+                polarity_summary = topic_analysis.get("polarity_summary")
                 if polarity_summary:
                     direction += "。" + _polarity_distribution_sentence(
-                        {airline_label or "所选航司": polarity_summary}, direct=True)
+                        {airline_label or "所选航司": {
+                            "direct_review_count": topic_analysis.get("direct_review_count", 0),
+                            **polarity_summary}}, direct=True)
             sections.append(f"关于{subject}，{direction.rstrip('。')}。" + "；".join(details) + "。")
         return "\n\n".join(sections) + "\n\n这些评论记录的是具体旅客经历，不能代表所有航班。"
     if rating.get("available") and rating.get("comparison", {}).get("status") == "clear_difference":
@@ -854,6 +937,10 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     else:
         validation_rating = None if result.get("subtopics") else result.get("rating_summary")
     required_aspects = tuple(result.get("aspects", ())) if result.get("type") == "multi_aspect" else ()
+    expected_subtopic_directions = ({
+        topic: _single_subtopic_direction(result, topic).get("status", "insufficient_evidence")
+        for topic in result.get("subtopics", {})
+    } if result.get("subtopics") and result.get("type") != "comparison" else {})
     require_all_rating_values = bool(result.get("subtopics") and result.get("type") == "comparison"
                                      and (result.get("rating_summary") or {}).get("available"))
     evidence_numbers = {token.replace(",", "") for row in rows for token in
@@ -904,7 +991,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
                                         evidence_numbers=evidence_numbers,
                                         require_all_rating_values=require_all_rating_values,
                                         allow_aggregate_counts=allow_aggregate_counts,
-                                        language=language)
+                                        language=language,
+                                        expected_subtopic_directions=expected_subtopic_directions)
         if valid:
             if on_stream:
                 on_stream(text, "complete")
@@ -914,12 +1002,13 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         repair_instruction = (
             "The previous answer failed validation (" + "; ".join(errors) + "). Rewrite it in English only. "
             "Keep valid citations, remove unsupported numbers and scope claims, and put every requested subtopic "
-            "or aspect in its own paragraph. Output only the corrected answer."
+            "or aspect in its own paragraph. The overall subtopic direction must follow the full aggregate, not "
+            "the displayed examples. Output only the corrected answer."
             if language == "en" else
             "上一版未通过校验（" + "；".join(errors) + "）。请按原要求重写，只输出修正后的中文回答。"
             "保留有效引用，删除未经证实的数字和范围判断。每个 requested_subtopics 中文名称必须单独成段，"
             "段与段之间空一行，不要把多个细分项写在同一段。requested_aspects 也必须每方面单独成段，"
-            "显式写出该方面的原始平均分、满分和评分份数。"
+            "显式写出该方面的原始平均分、满分和评分份数。总体正负方向必须服从完整匹配池统计，不能根据展示例子判断。"
         )
         repair_messages = messages + [
             {"role": "assistant", "content": text},
@@ -938,7 +1027,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             evidence_numbers=evidence_numbers,
             require_all_rating_values=require_all_rating_values,
             allow_aggregate_counts=allow_aggregate_counts,
-            language=language)
+            language=language,
+            expected_subtopic_directions=expected_subtopic_directions)
         if repaired_valid:
             if on_stream:
                 on_stream(repaired, "complete")
