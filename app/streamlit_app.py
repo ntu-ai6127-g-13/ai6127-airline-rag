@@ -8,7 +8,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.config import CHUNKS, ROOT
-from src.query_service import query_reviews, compare_airlines, query_session
+from src.query_service import compare_airlines, query_aspects, query_reviews, query_session
 from src.question_parser import SUBTOPIC_NAMES, parse_question
 from src.grounded_qa import answer_question, model_health
 
@@ -78,6 +78,7 @@ if submitted:
         default_aspect=None if aspect_choice=="auto" else aspect_choice,
         default_polarity=polarity,default_filters=filters)
     aspect=parsed.aspect
+    aspects=parsed.aspects or ([aspect] if aspect else [])
     polarity=parsed.polarity
     filters=parsed.filters
     requested_comparison=list(comparison) or (parsed.airlines if len(parsed.airlines)>=2 else [])
@@ -87,6 +88,9 @@ if submitted:
         question=f"请根据评论说明{aspect_names[aspect]}的评价情况。"
     query_status=None
     try:
+        if len(requested_comparison)>=2 and len(aspects)>1:
+            st.error("当前一次查询可以比较多家航司的一个方面，或查询一家航司的多个方面；请先选择其中一种。")
+            st.stop()
         if use_labels and label_index.exists():
             spinner_text="正在检索、读取离线标签并生成有据回答；首次查询通常约 30–45 秒，后续约 10–15 秒……"
         elif use_labels:
@@ -100,13 +104,21 @@ if submitted:
                     label_index_path=label_index if use_labels and label_index.exists() else None,
                     subtopics=parsed.subtopics,
                     top_k=evidence_limit)
+            elif len(aspects)>1:
+                result=query_aspects(aspects,query=parsed.retrieval_keywords,polarity=polarity,filters=filters,
+                    classifier_manifest=manifest if use_labels and not label_index.exists() else None,
+                    label_index_path=label_index if use_labels and label_index.exists() else None,
+                    subtopics_by_aspect=parsed.subtopics_by_aspect,
+                    top_k=evidence_limit,candidate_k=max(60,evidence_limit))
             else:
                 result=query_reviews(parsed.retrieval_keywords,aspect=aspect,polarity=polarity,filters=filters,
                     classifier_manifest=manifest if use_labels and not label_index.exists() else None,
                     label_index_path=label_index if use_labels and label_index.exists() else None,
                     subtopics=parsed.subtopics,
                     top_k=evidence_limit,candidate_k=max(60,evidence_limit))
-            query_status.update(label=f"已找到 {sum(len(part['evidence']) for part in result['results'].values()) if result.get('type')=='comparison' else len(result['evidence'])} 条证据，正在生成并校验回答……",
+            evidence_count=(sum(len(part['evidence']) for part in result['results'].values())
+                            if result.get("results") else len(result["evidence"]))
+            query_status.update(label=f"已找到 {evidence_count} 条证据，正在生成并校验回答……",
                                 state="running",expanded=True)
             result["question"]=question
             result["parsed_question"]=parsed.to_dict()
@@ -154,34 +166,43 @@ def display_result(result,citation_prefix=""):
             st.caption(f"来源 {item['chunk_id']} · 日期 {item.get('date') or '未知'} · 航线 {item.get('route') or '未知'}")
 
 def display_rating_summary(result):
-    summary=result.get("rating_summary")
-    if not summary or not summary.get("available"):
+    if result.get("type")=="multi_aspect":
+        summaries=[(aspect,summary) for aspect,summary in result.get("rating_summaries",{}).items()]
+    else:
+        summaries=[(result.get("aspect"),result.get("rating_summary"))]
+    available=[(aspect,summary) for aspect,summary in summaries if summary and summary.get("available")]
+    if not available:
         st.info("原始评论表没有这个方面的独立评分列，本题只能依据评论原文回答。")
         return
-    st.subheader("原始评分汇总")
+    st.subheader("原始评分汇总（按评价方面）")
     if result.get("subtopics"):
         requested="、".join(SUBTOPIC_NAMES.get(topic,topic) for topic in result["subtopics"])
         st.info(f"原始表只有“{aspect_names.get(result.get('aspect'), result.get('aspect'))}”总体评分，没有“{requested}”的独立评分。"
                 "该分数只作背景，细分结论以下方对应原文为依据。")
-    scale=summary["scale"]
     rows=[]
-    for name,data in summary["airlines"].items():
-        rows.append({"航司":name,"平均分":f"{data['mean']:.2f} / {scale}" if data['mean'] is not None else "无数据",
-                     "评分数":data["n"],"中位数":data["median"],
-                     "高分占比":f"{data['high_share']*100:.1f}%" if data['high_share'] is not None else "—",
-                     "低分占比":f"{data['low_share']*100:.1f}%" if data['low_share'] is not None else "—"})
+    for aspect_key,summary in available:
+        scale=summary["scale"]
+        for name,data in summary["airlines"].items():
+            rows.append({"评价方面":aspect_names.get(aspect_key,aspect_key),
+                         "原始评分字段":summary.get("rating_field","—"),"航司":name,
+                         "平均分":f"{data['mean']:.2f} / {scale}" if data['mean'] is not None else "无数据",
+                         "评分数":data["n"],"中位数":data["median"],
+                         "高分占比":f"{data['high_share']*100:.1f}%" if data['high_share'] is not None else "—",
+                         "低分占比":f"{data['low_share']*100:.1f}%" if data['low_share'] is not None else "—"})
     st.dataframe(pd.DataFrame(rows),hide_index=True,width="stretch")
-    comparison_summary=summary.get("comparison",{})
-    if comparison_summary.get("status")=="clear_difference":
-        st.success(f"评分结论：{comparison_summary['winner']} 领先 {comparison_summary['runner_up']} "
-                   f"{comparison_summary['difference']:.2f} 分；差值超过预设的实际意义门槛，且 95% 差值区间不跨 0。")
-    elif comparison_summary.get("status")=="no_clear_difference":
-        st.warning(f"评分差为 {comparison_summary['difference']:.2f} 分，目前不足以判定两者存在有实际意义的差异。")
-    elif comparison_summary.get("status")=="insufficient_ratings":
-        st.warning("至少一家航司的同口径评分少于 30 份，暂不做评分优劣判断。")
-    threshold_note="总体高分为 8–10、低分为 1–4" if scale==10 else "方面高分为 4–5、低分为 1–2"
+    for aspect_key,summary in available:
+        comparison_summary=summary.get("comparison",{})
+        label=aspect_names.get(aspect_key,aspect_key)
+        if comparison_summary.get("status")=="clear_difference":
+            st.success(f"{label}评分结论：{comparison_summary['winner']} 领先 {comparison_summary['runner_up']} "
+                       f"{comparison_summary['difference']:.2f} 分；差值超过预设的实际意义门槛，且 95% 差值区间不跨 0。")
+        elif comparison_summary.get("status")=="no_clear_difference":
+            st.warning(f"{label}评分差为 {comparison_summary['difference']:.2f} 分，目前不足以判定两者存在有实际意义的差异。")
+        elif comparison_summary.get("status")=="insufficient_ratings":
+            st.warning(f"{label}方面至少一家航司的同口径评分少于 30 份，暂不做评分优劣判断。")
     st.caption(f"评分来自原始 review-level 汇总表，并应用当前航司、舱位、旅客类型、航线和日期条件；"
-               f"方面评分为 1–5 分，总体评分为 1–10 分；{threshold_note}。好评/差评选项只控制下方原文，"
+               "表中已显式列出评价方面和对应的原始评分字段。方面评分为 1–5 分，总体评分为 1–10 分；"
+               "方面高分为 4–5、低分为 1–2，总体高分为 8–10、低分为 1–4。好评/差评选项只控制下方原文，"
                "不会从评分汇总中删掉另一类评分。")
 
 if "result" in st.session_state:
@@ -204,6 +225,12 @@ if "result" in st.session_state:
         st.subheader("检索证据")
         st.write(result["text"])
         tabs=st.tabs(list(result["results"]))
+        for index,(tab,part) in enumerate(zip(tabs,result["results"].values())):
+            with tab: display_result(part,chr(ord("A")+index))
+    elif result.get("type")=="multi_aspect":
+        st.subheader("分方面检索证据")
+        tab_names=[aspect_names.get(aspect,aspect) for aspect in result["results"]]
+        tabs=st.tabs(tab_names)
         for index,(tab,part) in enumerate(zip(tabs,result["results"].values())):
             with tab: display_result(part,chr(ord("A")+index))
     else: display_result(result)

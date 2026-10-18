@@ -9,7 +9,7 @@ from src.quality import classification_metrics
 from src.evaluate import evaluate_queries, evaluate_query_modes
 from src.generate import evidence_answer
 from src.query_service import (_direct_subtopic_match, compare_airlines, merge_subtopic_rankings,
-                               query_reviews, rank_evidence)
+                               query_aspects, query_reviews, rank_evidence)
 
 
 class QueryQualityTests(unittest.TestCase):
@@ -136,6 +136,18 @@ class QueryQualityTests(unittest.TestCase):
             result=compare_airlines(["A","B"],aspect="seat",filters={"airline":"ignored","cabin":"Economy Class"})
         self.assertEqual(result["status"],"insufficient_evidence")
         self.assertIn("B",result["text"])
+
+    def test_multi_aspect_query_runs_each_aspect_with_shared_filters(self):
+        def fake(query, **kwargs):
+            aspect = kwargs["aspect"]
+            self.assertEqual(kwargs["filters"], {"airline": "A Air"})
+            return {"answer": {"status": "evidence_available"}, "evidence": [{"chunk_id": aspect}],
+                    "rating_summary": {"available": True, "aspect": aspect}}
+        with patch("src.query_service.query_reviews", side_effect=fake) as query_mock:
+            result = query_aspects(["food", "value", "ground"], filters={"airline": "A Air"})
+        self.assertEqual(query_mock.call_count, 3)
+        self.assertEqual(list(result["results"]), ["food", "value", "ground"])
+        self.assertEqual(set(result["rating_summaries"]), {"food", "value", "ground"})
 
 
 if __name__=="__main__": unittest.main()
