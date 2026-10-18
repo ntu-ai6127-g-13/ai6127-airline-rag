@@ -179,9 +179,12 @@ PYTHONPATH=experiments/no_gold_optimization \
 启动：
 
 ```bash
-.venv/bin/streamlit run app/streamlit_app.py --server.address 127.0.0.1 --server.port 8517
+.venv/bin/streamlit run app/streamlit_app.py \
+  --server.address 127.0.0.1 --server.port 8517 \
+  --server.fileWatcherType none
 ```
 
+关闭文件热监视是为了避免页面脚本已重载、`src.query_service` 仍保留旧函数签名的混合状态；代码变更后手动重启服务。
 大模型和历史实验清单是本地依赖；其他机器需先重建对应产物，缺失时分类开关禁用。
 
 ## 全量基础标签索引（2026-10-19）
