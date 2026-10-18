@@ -50,7 +50,9 @@ SUBTOPIC_ANCHORS = {
     "width": ("seat width", "wide seat", "narrow seat", "shoulder room"),
     "recline": ("recline", "reclined", "reclining", "backrest", "seat back", "lie flat", "lie-flat", "upright position"),
     "comfort": ("comfortable", "uncomfortable", "comfort", "seat cushion", "padding", "hard seat", "sore"),
-    "condition": ("broken seat", "damaged seat", "worn seat", "dirty seat", "seat was broken", "seat did not work"),
+    "condition": ("broken seat", "damaged seat", "worn seat", "seat was broken", "seat did not work"),
+    "seat_cleanliness": ("clean seat", "clean seats", "dirty seat", "dirty seats",
+                         "seat stain", "stained seat", "stain on the seat"),
     "power": ("power socket", "power outlet", "usb", "charging", "charger", "electrical outlet"),
     "attitude": ("friendly", "polite", "rude", "attitude", "courteous", "smile", "helpful"),
     "efficiency": ("efficient", "prompt", "quickly", "slow service", "response time", "responsive"),
@@ -71,9 +73,23 @@ SUBTOPIC_ANCHORS = {
     "cabin_temperature": ("cabin temperature", "too cold", "too hot", "air conditioning", "freezing cabin"),
 }
 
+SUBTOPIC_CONTEXT_PATTERNS = {
+    "seat_cleanliness": (
+        r"\b(?:seat|seats|seating area|seating areas|tray table|seat pocket)\b.{0,45}"
+        r"\b(?:clean|cleaning|dirty|filthy|stain|stained|stains|crumb|crumbs|mess|sticky|hygiene)\b",
+        r"\b(?:clean|cleaning|dirty|filthy|stain|stained|stains|crumb|crumbs|mess|sticky|hygiene)\b"
+        r".{0,45}\b(?:seat|seats|seating area|seating areas|tray table|seat pocket)\b",
+        r"\bdeep clean\b",
+    ),
+}
+
 
 def _direct_subtopic_match(text: str, topic: str) -> bool:
     folded = text.casefold()
+    if topic == "seat_cleanliness":
+        folded = re.sub(r"\b(?:toilet|lavatory|restroom) seat\b", "toilet_fixture", folded)
+    if any(re.search(pattern, folded) for pattern in SUBTOPIC_CONTEXT_PATTERNS.get(topic, ())):
+        return True
     return any(re.search(r"(?<![a-z0-9])" + re.escape(term) + r"(?![a-z0-9])", folded)
                for term in SUBTOPIC_ANCHORS.get(topic, ()))
 
@@ -210,6 +226,9 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             ranked = [{**row, "_direct_subtopic_match": _direct_subtopic_match(row.get("text", ""), topic)}
                       for row in ranked]
             ranked.sort(key=lambda row: not row["_direct_subtopic_match"])
+            direct = [row for row in ranked if row["_direct_subtopic_match"]]
+            if len(direct) >= 2:
+                ranked = direct
             rankings[topic] = ranked[:per_topic_limit]
         scored = merge_subtopic_rankings(rankings, limit=max(30, top_k))
         phrase = " | ".join("%s: %s" % (topic, expansion) for topic, expansion in subtopics.items())

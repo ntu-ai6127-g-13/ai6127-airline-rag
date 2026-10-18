@@ -56,6 +56,11 @@ class QuestionParserTests(unittest.TestCase):
         self.assertEqual(parsed.aspect, "ground")
         self.assertEqual(set(parsed.subtopics), {"gate_service", "delay_handling"})
 
+    def test_seat_cleanliness_is_not_reduced_to_seat_comfort(self):
+        parsed = parse_question("新航的座椅的干净程度怎么样？", known_airlines=self.airlines)
+        self.assertEqual(parsed.aspect, "seat")
+        self.assertEqual(set(parsed.subtopics), {"seat_cleanliness"})
+
 
 class GroundedAnswerTests(unittest.TestCase):
     rating_summary = {"available": True, "scale": 5, "airlines": {
@@ -158,6 +163,12 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertEqual(request.call_count, 2)
         self.assertEqual(answer["mode"], "local_qwen_repaired")
         self.assertIn("有评论", answer["text"])
+
+    def test_subtopic_validation_rejects_retrieval_sample_prevalence_claims(self):
+        ok, reasons = validate_answer("座椅清洁度方面，更多人认为很脏。[1]", {"1"},
+                                      required_subtopics=("seat_cleanliness",))
+        self.assertFalse(ok)
+        self.assertIn("unsupported_prevalence_claim", reasons)
 
 
 if __name__ == "__main__":

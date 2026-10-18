@@ -54,6 +54,11 @@ class QueryQualityTests(unittest.TestCase):
         self.assertFalse(_direct_subtopic_match("The seat was comfortable.", "drinks"))
         self.assertTrue(_direct_subtopic_match("Tea and coffee were available.", "drinks"))
         self.assertTrue(_direct_subtopic_match("We were rebooked after cancellation.", "delay_handling"))
+        self.assertTrue(_direct_subtopic_match("The dirty seat had crumbs in the pocket.", "seat_cleanliness"))
+        self.assertFalse(_direct_subtopic_match("The seat was comfortable and reclined.", "seat_cleanliness"))
+        self.assertFalse(_direct_subtopic_match("The tray table pressed into my stomach.", "seat_cleanliness"))
+        self.assertTrue(_direct_subtopic_match("The tray table was dirty and sticky.", "seat_cleanliness"))
+        self.assertFalse(_direct_subtopic_match("The toilet seat and basin were stained.", "seat_cleanliness"))
 
     def test_subtopic_queries_are_retrieved_and_reranked_separately(self):
         def search(phrase, **kwargs):

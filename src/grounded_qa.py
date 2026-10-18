@@ -28,7 +28,8 @@ _SUBTOPIC_SUBJECTS = {
     "content": "娱乐内容", "screen": "娱乐屏幕", "wifi": "机上 Wi-Fi",
     "audio": "耳机与音质", "usability": "娱乐系统操作", "legroom": "座位腿部空间",
     "width": "座位宽度", "recline": "座椅靠背调节与躺平", "comfort": "座椅舒适度",
-    "condition": "座椅状况", "power": "座位充电与电源", "attitude": "空乘服务态度",
+    "condition": "座椅机械状况", "seat_cleanliness": "座椅清洁度",
+    "power": "座位充电与电源", "attitude": "空乘服务态度",
     "efficiency": "空乘服务效率", "professionalism": "空乘专业程度",
     "availability": "空乘响应与在场服务", "punctuality": "航班准点表现",
     "delay_handling": "延误与取消处置", "baggage": "行李服务", "checkin": "值机服务",
@@ -112,7 +113,7 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
 2. 评分均值、评分人数和差值只能逐字使用 rating_summary 中给出的数值；不要统计检索证据的正负条数。
 3. 评分汇总是主要定量依据，评论原文用来解释具体优缺点。引用格式严格为 [1]、[2] 或比较查询中的 [A1]、[B2]，只能使用存在的编号。
 4. 自动分类标签仅供选证据参考，应按英文原文理解。不要把检索到的几句话当作总体好评率。
-5. requested_subtopics 非空时，必须使用它的中文值作为逐项小标题，并优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。不得用“多数、普遍、整体、总体”等范围词把少量检索证据说成全体旅客的意见，应写“有评论提到”并说明正反例。
+5. requested_subtopics 非空时，必须使用它的中文值作为逐项小标题，并优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。回答中不要使用“多数、普遍、更多人、较多、整体、总体”等范围词，应写“检索到的原文同时包含……”并说明正反例。
 6. 数据来自 2002–2019 年，只能描述这批历史评论，不能声称是当前服务。用自然、具体的中文，避免套话和“整体呈现某种倾向”。回答控制在 150–350 个中文字符。"""
     if subtopics:
         system = system.replace(
@@ -120,7 +121,7 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
             "1. 第一行直接回答用户，并按 requested_subtopics 给出具体发现。comparison 只是上位方面的评分比较，不能强制成为细分问题的结论。")
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
-               "rating_summary": _rating_payload(result.get("rating_summary")),
+               "rating_summary": None if subtopics else _rating_payload(result.get("rating_summary")),
                "evidence": evidence}
     return [{"role": "system", "content": system},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
@@ -153,7 +154,8 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
         name = SUBTOPIC_NAMES.get(topic, topic)
         if name not in clean:
             reasons.append("missing_subtopic:" + topic)
-    if required_subtopics and re.search(r"多数|普遍|大部分|整体(?:认为|反映|评价)|总体(?:认为|反映|评价)", clean):
+    if required_subtopics and re.search(
+            r"多数|普遍|大部分|更多(?:人|旅客|评论)|较多(?:人|旅客|评论)|整体|总体", clean):
         reasons.append("unsupported_prevalence_claim")
     # Each substantive paragraph must contain a citation.  A paragraph can open
     # with a short conclusion and immediately substantiate it in later cited
@@ -310,11 +312,12 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         return {"text": fallback, "mode": "program_fallback", "valid": True,
                 "validation_errors": [], "citations": sorted(_CITATION_RE.findall(fallback)), "model_seconds": 0.0}
     messages = _prompt(question, result, rows)
+    validation_rating = None if result.get("subtopics") else result.get("rating_summary")
     try:
         payload = _generate(messages, endpoint=endpoint, timeout=timeout)
         text = str(payload.get("text", "")).strip()
         model_seconds = float(payload.get("seconds", 0.0))
-        valid, errors = validate_answer(text, valid_ids, rating_summary=result.get("rating_summary"),
+        valid, errors = validate_answer(text, valid_ids, rating_summary=validation_rating,
                                         require_rating_winner=not bool(result.get("subtopics")),
                                         required_subtopics=tuple(result.get("subtopics", {})))
         if valid:
@@ -331,7 +334,7 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         repaired = str(repaired_payload.get("text", "")).strip()
         model_seconds += float(repaired_payload.get("seconds", 0.0))
         repaired_valid, repaired_errors = validate_answer(
-            repaired, valid_ids, rating_summary=result.get("rating_summary"),
+            repaired, valid_ids, rating_summary=validation_rating,
             require_rating_winner=not bool(result.get("subtopics")),
             required_subtopics=tuple(result.get("subtopics", {})))
         if repaired_valid:
