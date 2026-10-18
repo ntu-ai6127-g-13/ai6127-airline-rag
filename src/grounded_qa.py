@@ -8,6 +8,8 @@ import textwrap
 import urllib.error
 import urllib.request
 
+from src.question_parser import SUBTOPIC_NAMES
+
 
 DEFAULT_ENDPOINT = "http://127.0.0.1:8765"
 _CITATION_RE = re.compile(r"\[([A-Z]?\d+)\]")
@@ -81,23 +83,36 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
     evidence = [{
         "id": row["citation_id"], "airline": row.get("airline"), "cabin": row.get("cabin"),
         "date": row.get("date"), "route": row.get("route"), "text": row.get("text"),
+        "matched_subtopics": [SUBTOPIC_NAMES.get(topic, topic)
+                              for topic in row.get("matched_subtopics", [])],
+        "direct_subtopic_matches": [SUBTOPIC_NAMES.get(topic, topic)
+                                    for topic in row.get("direct_subtopic_matches", [])],
         "predicted_aspect": row.get("pred_aspect"), "predicted_polarity": row.get("pred_polarity"),
     } for row in rows]
+    subtopics = {topic: SUBTOPIC_NAMES.get(topic, topic) for topic in result.get("subtopics", {})}
     system = """你是航空评论分析助手。只能依据输入的原始评分汇总和评论证据作答，不能使用外部知识。
 要求：
 1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。
 2. 评分均值、评分人数和差值只能逐字使用 rating_summary 中给出的数值；不要统计检索证据的正负条数。
 3. 评分汇总是主要定量依据，评论原文用来解释具体优缺点。引用格式严格为 [1]、[2] 或比较查询中的 [A1]、[B2]，只能使用存在的编号。
 4. 自动分类标签仅供选证据参考，应按英文原文理解。不要把检索到的几句话当作总体好评率。
-5. 数据来自 2002–2019 年，只能描述这批历史评论，不能声称是当前服务。用自然、具体的中文，避免套话和“整体呈现某种倾向”。回答控制在 150–280 个中文字符。"""
+5. requested_subtopics 非空时，必须使用它的中文值作为逐项小标题，并优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。不得用“多数、普遍、整体、总体”等范围词把少量检索证据说成全体旅客的意见，应写“有评论提到”并说明正反例。
+6. 数据来自 2002–2019 年，只能描述这批历史评论，不能声称是当前服务。用自然、具体的中文，避免套话和“整体呈现某种倾向”。回答控制在 150–350 个中文字符。"""
+    if subtopics:
+        system = system.replace(
+            "1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。",
+            "1. 第一行直接回答用户，并按 requested_subtopics 给出具体发现。comparison 只是上位方面的评分比较，不能强制成为细分问题的结论。")
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
+               "requested_subtopics": subtopics,
                "rating_summary": _rating_payload(result.get("rating_summary")),
                "evidence": evidence}
     return [{"role": "system", "content": system},
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
 
 
-def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | None = None) -> tuple[bool, list[str]]:
+def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | None = None,
+                    require_rating_winner: bool = True,
+                    required_subtopics: tuple[str, ...] = ()) -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
     clean = text.strip()
@@ -115,8 +130,15 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if re.search(r"[零一二三四五六七八九十百]+\s*条", without_citations):
         reasons.append("retrieved_label_count_claim")
     comparison = (rating_summary or {}).get("comparison", {})
-    if comparison.get("status") == "clear_difference" and comparison.get("winner") not in clean:
+    if (require_rating_winner and comparison.get("status") == "clear_difference"
+            and comparison.get("winner") not in clean):
         reasons.append("missing_required_winner")
+    for topic in required_subtopics:
+        name = SUBTOPIC_NAMES.get(topic, topic)
+        if name not in clean:
+            reasons.append("missing_subtopic:" + topic)
+    if required_subtopics and re.search(r"多数|普遍|大部分|整体(?:认为|反映|评价)|总体(?:认为|反映|评价)", clean):
+        reasons.append("unsupported_prevalence_claim")
     # Each substantive paragraph must contain a citation.  A paragraph can open
     # with a short conclusion and immediately substantiate it in later cited
     # sentences, which is the normal answer form produced by the local model.
@@ -149,6 +171,37 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
         return candidates[0] if candidates else (by_airline.get(airline) or [None])[0]
     def quote(row: dict) -> str:
         return textwrap.shorten(str(row["text"]).strip(), width=145, placeholder="…")
+    subtopics = result.get("subtopics") or {}
+    if subtopics:
+        sections = []
+        comparison_query = result.get("type") == "comparison"
+        for topic in subtopics:
+            matches = [row for row in rows if topic in row.get("matched_subtopics", [])]
+            if comparison_query:
+                chosen = []
+                used_airlines = set()
+                for row in matches:
+                    airline = str(row.get("airline") or "所选航司")
+                    if airline not in used_airlines:
+                        chosen.append(row)
+                        used_airlines.add(airline)
+                    if len(chosen) == len(by_airline):
+                        break
+            else:
+                chosen = matches[:2]
+            name = SUBTOPIC_NAMES.get(topic, topic)
+            if not chosen:
+                sections.append(f"{name}：没有找到足够直接的原文")
+                continue
+            details = []
+            for row in chosen:
+                airline = str(row.get("airline") or "")
+                airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
+                prefix = f"{airline_label}有旅客提到" if comparison_query else "有旅客提到"
+                details.append(f"{prefix}“{quote(row)}”[{row['citation_id']}]")
+            sections.append(f"{name}：" + "；".join(details))
+        return ("这些细分问题需要分别看原文；现有的上位方面总体分不能拆成细分项分数。"
+                + "。".join(sections) + "。这些评论来自2002–2019年，不能直接代表当前服务。")
     if rating.get("available") and rating.get("comparison", {}).get("status") == "clear_difference":
         comparison = rating["comparison"]
         winner, runner = comparison["winner"], comparison["runner_up"]
@@ -202,8 +255,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     valid_ids = {row["citation_id"] for row in rows}
     fallback = fallback_answer(question, result, rows)
     rating_comparison = (result.get("rating_summary") or {}).get("comparison", {})
-    if result.get("type") == "comparison" and rating_comparison.get("status") in {
-            "clear_difference", "no_clear_difference"}:
+    if (not result.get("subtopics") and result.get("type") == "comparison"
+            and rating_comparison.get("status") in {"clear_difference", "no_clear_difference"}):
         return {"text": fallback, "mode": "rating_decision", "valid": True,
                 "validation_errors": [], "citations": sorted(_CITATION_RE.findall(fallback)),
                 "model_seconds": 0.0}
@@ -218,7 +271,9 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         with urllib.request.urlopen(request, timeout=timeout) as response:
             payload = json.loads(response.read().decode("utf-8"))
         text = str(payload.get("text", "")).strip()
-        valid, errors = validate_answer(text, valid_ids, rating_summary=result.get("rating_summary"))
+        valid, errors = validate_answer(text, valid_ids, rating_summary=result.get("rating_summary"),
+                                        require_rating_winner=not bool(result.get("subtopics")),
+                                        required_subtopics=tuple(result.get("subtopics", {})))
         if valid:
             return {"text": text, "mode": "local_qwen", "valid": True,
                     "validation_errors": [], "citations": sorted(_CITATION_RE.findall(text)),

@@ -38,6 +38,24 @@ class QuestionParserTests(unittest.TestCase):
         parsed = parse_question("新航总体怎么样？", known_airlines=self.airlines)
         self.assertEqual(parsed.aspect, "overall")
 
+    def test_food_subtopics_are_all_preserved(self):
+        parsed = parse_question("新加坡航空的食物质量、分量和品种怎么样？",
+                                known_airlines=self.airlines)
+        self.assertEqual(parsed.aspect, "food")
+        self.assertEqual(list(parsed.subtopics), ["quality", "portion", "variety"])
+
+    def test_seat_subtopics_work_without_parent_aspect_word(self):
+        parsed = parse_question("新航的靠背能否调整，是否舒服，腿部空间怎么样？",
+                                known_airlines=self.airlines)
+        self.assertEqual(parsed.aspect, "seat")
+        self.assertEqual(set(parsed.subtopics), {"recline", "comfort", "legroom"})
+
+    def test_ground_service_subtopics_are_distinct(self):
+        parsed = parse_question("新航的登机口服务和延误处理怎么样？",
+                                known_airlines=self.airlines)
+        self.assertEqual(parsed.aspect, "ground")
+        self.assertEqual(set(parsed.subtopics), {"gate_service", "delay_handling"})
+
 
 class GroundedAnswerTests(unittest.TestCase):
     rating_summary = {"available": True, "scale": 5, "airlines": {
@@ -100,6 +118,17 @@ class GroundedAnswerTests(unittest.TestCase):
             answer = answer_question("座位怎样", result)
         self.assertEqual(answer["mode"], "validation_fallback")
         self.assertIn("[", answer["text"])
+
+    def test_subtopic_comparison_does_not_use_broad_rating_as_winner(self):
+        a = {**evidence("1", "A Air", "positive"), "matched_subtopics": ["legroom"]}
+        b = {**evidence("2", "B Air", "negative"), "matched_subtopics": ["legroom"]}
+        result = {"type": "comparison", "aspect": "seat", "subtopics": {"legroom": "seat legroom"},
+                  "rating_summary": self.rating_summary,
+                  "results": {"A Air": {"evidence": [a]}, "B Air": {"evidence": [b]}}}
+        answer = answer_question("哪家腿部空间更好", result, use_model=False)
+        self.assertEqual(answer["mode"], "program_fallback")
+        self.assertIn("腿部空间", answer["text"])
+        self.assertNotIn("A Air明显更好", answer["text"])
 
 
 if __name__ == "__main__":

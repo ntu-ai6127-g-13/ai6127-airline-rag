@@ -9,7 +9,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.config import CHUNKS, ROOT
 from src.query_service import query_reviews, compare_airlines, query_session
-from src.question_parser import parse_question
+from src.question_parser import SUBTOPIC_NAMES, parse_question
 from src.grounded_qa import answer_question, model_health
 
 st.set_page_config(page_title="航空服务评价检索", layout="wide")
@@ -98,11 +98,13 @@ if submitted:
                 result=compare_airlines(requested_comparison,query=parsed.retrieval_keywords,aspect=aspect,polarity=polarity,
                     filters=filters,classifier_manifest=manifest if use_labels and not label_index.exists() else None,
                     label_index_path=label_index if use_labels and label_index.exists() else None,
+                    subtopics=parsed.subtopics,
                     top_k=evidence_limit)
             else:
                 result=query_reviews(parsed.retrieval_keywords,aspect=aspect,polarity=polarity,filters=filters,
                     classifier_manifest=manifest if use_labels and not label_index.exists() else None,
                     label_index_path=label_index if use_labels and label_index.exists() else None,
+                    subtopics=parsed.subtopics,
                     top_k=evidence_limit,candidate_k=max(60,evidence_limit))
             query_status.update(label=f"已找到 {sum(len(part['evidence']) for part in result['results'].values()) if result.get('type')=='comparison' else len(result['evidence'])} 条证据，正在生成并校验回答……",
                                 state="running",expanded=True)
@@ -123,15 +125,28 @@ def display_result(result,citation_prefix=""):
     if full:
         st.info(f"全库离线标签中，符合当前结构化条件的评价有 {full['sentence_count']:,} 句，"
                 f"来自 {full['review_count']:,} 条不同评论；当前展示相关性最高的 {len(result['evidence'])} 条。")
-        if result.get("query"):
+        if result.get("subtopics"):
+            st.caption("全量数按上位评价方面统计，不是各细分问题的匹配数；细分问题使用各自的检索式选取下方原文。")
+        elif result.get("query"):
             st.caption("全量数按航司、方面、正负、舱位、航线和日期计算，不代表全部都与补充关键词同等相关。")
     label_mode={"offline_index":"离线标签","realtime_classifier":"实时分类","none":"未使用标签"}.get(
         result.get("label_lookup_mode"),"未使用标签")
     st.caption(f"耗时 {result['total_seconds']:.1f} 秒 · {len(result['evidence'])} 条证据 · "
                f"{answer['review_count']} 条不同评论 · {label_mode}")
+    if result.get("subtopics"):
+        direct_counts=result.get("direct_subtopic_evidence_counts",{})
+        st.caption("细分证据覆盖："+" · ".join(
+            f"{SUBTOPIC_NAMES.get(topic,topic)} {direct_counts.get(topic,0)} 条直接原文"
+            for topic in result["subtopics"]))
     for i,item in enumerate(result["evidence"],1):
         st.markdown(f"**[{citation_prefix}{i}] {item['airline']} · {item.get('cabin') or '舱位未知'}**")
         st.write(item["text"])
+        matched=item.get("matched_subtopics",[])
+        direct=item.get("direct_subtopic_matches",[])
+        if direct:
+            st.caption("原文直接匹配："+"、".join(SUBTOPIC_NAMES.get(topic,topic) for topic in direct))
+        elif matched:
+            st.caption("语义检索匹配："+"、".join(SUBTOPIC_NAMES.get(topic,topic) for topic in matched))
         if "pred_aspect" in item:
             st.caption(f"模型标签：{aspect_names.get(item['pred_aspect'],item['pred_aspect'])} / {item['pred_polarity']}")
         with st.expander("查看完整评论与来源"):
@@ -144,6 +159,10 @@ def display_rating_summary(result):
         st.info("原始评论表没有这个方面的独立评分列，本题只能依据评论原文回答。")
         return
     st.subheader("原始评分汇总")
+    if result.get("subtopics"):
+        requested="、".join(SUBTOPIC_NAMES.get(topic,topic) for topic in result["subtopics"])
+        st.info(f"原始表只有“{aspect_names.get(result.get('aspect'), result.get('aspect'))}”总体评分，没有“{requested}”的独立评分。"
+                "该分数只作背景，细分结论以下方对应原文为依据。")
     scale=summary["scale"]
     rows=[]
     for name,data in summary["airlines"].items():
