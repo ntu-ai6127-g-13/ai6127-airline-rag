@@ -17,6 +17,7 @@ from src.rerank import rerank
 from src.classify import classify_texts
 from src.generate import evidence_answer
 from src.label_index import count_label_matches, labels_for_chunks
+from src.rating_summary import summarize_ratings
 
 ASPECT_QUERIES = {
     "seat": "passenger seat comfort legroom recline",
@@ -123,6 +124,7 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
     answer = evidence_answer(selected, aspect=aspect)
     corpus_label_matches = count_label_matches(label_index_path, aspect=aspect, polarity=polarity,
         filters=filters, chunks_path=chunks_path) if label_index_path and aspect is not None else None
+    rating_summary = summarize_ratings(aspect, filters=filters, chunks_path=chunks_path) if aspect else None
     result = {"query": query, "retrieval_query": phrase, "aspect": aspect, "polarity": polarity,
             "filters": filters or {}, "evidence": selected, "baseline_evidence": baseline,
             "answer": answer, "baseline_answer": evidence_answer(baseline, aspect=aspect),
@@ -131,6 +133,7 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             "classifier_is_experimental": predictions is not None, "hard_label_filter": False,
             "label_lookup_mode": label_lookup_mode,
             "corpus_label_matches": corpus_label_matches,
+            "rating_summary": rating_summary,
             "acceptance_evaluated": False}
     if include_candidates: result["candidate_evidence"] = baseline
     return result
@@ -149,8 +152,9 @@ def compare_airlines(airlines: list[str], *, aspect: str, query: str = "", polar
                label_index_path=label_index_path, top_k=top_k,
                candidate_k=max(60, top_k)) for airline in airlines}
     missing = [name for name,result in results.items() if result["answer"]["status"]=="insufficient_evidence"]
+    rating_summary = summarize_ratings(aspect, filters=common, airlines=airlines)
     return {"type":"comparison", "query":query, "aspect":aspect, "polarity":polarity,
-            "filters":common, "airlines":airlines, "results":results,
+            "filters":common, "airlines":airlines, "results":results, "rating_summary":rating_summary,
             "status":"insufficient_evidence" if missing else "evidence_available",
             "text":("部分航司的证据不足，暂时无法可靠比较："+"、".join(missing)) if missing else
                     "以下按同一方面和筛选条件展示各航司的评论证据。检索样本不代表全体旅客，不能据此直接给出总体航司排名。"}

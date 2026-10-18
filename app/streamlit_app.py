@@ -137,6 +137,34 @@ def display_result(result,citation_prefix=""):
         with st.expander("查看完整评论与来源"):
             st.write(item.get("review_text") or item["text"])
             st.caption(f"来源 {item['chunk_id']} · 日期 {item.get('date') or '未知'} · 航线 {item.get('route') or '未知'}")
+
+def display_rating_summary(result):
+    summary=result.get("rating_summary")
+    if not summary or not summary.get("available"):
+        st.info("原始评论表没有这个方面的独立评分列，本题只能依据评论原文回答。")
+        return
+    st.subheader("原始评分汇总")
+    scale=summary["scale"]
+    rows=[]
+    for name,data in summary["airlines"].items():
+        rows.append({"航司":name,"平均分":f"{data['mean']:.2f} / {scale}" if data['mean'] is not None else "无数据",
+                     "评分数":data["n"],"中位数":data["median"],
+                     "高分占比":f"{data['high_share']*100:.1f}%" if data['high_share'] is not None else "—",
+                     "低分占比":f"{data['low_share']*100:.1f}%" if data['low_share'] is not None else "—"})
+    st.dataframe(pd.DataFrame(rows),hide_index=True,width="stretch")
+    comparison_summary=summary.get("comparison",{})
+    if comparison_summary.get("status")=="clear_difference":
+        st.success(f"评分结论：{comparison_summary['winner']} 领先 {comparison_summary['runner_up']} "
+                   f"{comparison_summary['difference']:.2f} 分；差值超过预设的实际意义门槛，且 95% 差值区间不跨 0。")
+    elif comparison_summary.get("status")=="no_clear_difference":
+        st.warning(f"评分差为 {comparison_summary['difference']:.2f} 分，目前不足以判定两者存在有实际意义的差异。")
+    elif comparison_summary.get("status")=="insufficient_ratings":
+        st.warning("至少一家航司的同口径评分少于 30 份，暂不做评分优劣判断。")
+    threshold_note="总体高分为 8–10、低分为 1–4" if scale==10 else "方面高分为 4–5、低分为 1–2"
+    st.caption(f"评分来自原始 review-level 汇总表，并应用当前航司、舱位、旅客类型、航线和日期条件；"
+               f"方面评分为 1–5 分，总体评分为 1–10 分；{threshold_note}。好评/差评选项只控制下方原文，"
+               "不会从评分汇总中删掉另一类评分。")
+
 if "result" in st.session_state:
     result=st.session_state["result"]
     if result.get("grounded_answer"):
@@ -144,12 +172,14 @@ if "result" in st.session_state:
         st.subheader("回答")
         st.markdown(grounded["text"])
         mode={"local_qwen":"本地 Qwen3 4B · 引用校验通过",
+              "rating_decision":"原始评分汇总 + 评论原文",
               "validation_fallback":"模型回答未通过校验 · 已使用程序回答",
               "service_fallback":"本地模型未连接 · 已使用程序回答",
               "program_fallback":"程序回答"}.get(grounded.get("mode"),grounded.get("mode",""))
         timing=f" · 生成 {grounded['model_seconds']:.1f} 秒" if grounded.get("model_seconds") else ""
         st.caption(f"回答模式：{mode}{timing}")
         st.divider()
+    display_rating_summary(result)
     if result.get("type")=="comparison":
         st.subheader("检索证据")
         st.write(result["text"])

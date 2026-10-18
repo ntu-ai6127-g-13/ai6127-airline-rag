@@ -40,6 +40,14 @@ class QuestionParserTests(unittest.TestCase):
 
 
 class GroundedAnswerTests(unittest.TestCase):
+    rating_summary = {"available": True, "scale": 5, "airlines": {
+        "A Air": {"n": 100, "mean": 4.2, "median": 4.0, "std": .8,
+                  "high_share": .8, "low_share": .1},
+        "B Air": {"n": 120, "mean": 2.1, "median": 2.0, "std": 1.0,
+                  "high_share": .2, "low_share": .7}},
+        "comparison": {"status": "clear_difference", "winner": "A Air", "runner_up": "B Air",
+                       "difference": 2.1}}
+
     def test_second_concurrent_query_fails_fast(self):
         def contender():
             with query_session(wait_seconds=0.01):
@@ -62,6 +70,25 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertFalse(validate_answer("这家航空公司的客舱服务非常好。\n另一条有引用。[1]", {"1"})[0])
         self.assertFalse(validate_answer("本次有11条正面评价。[1]", {"1"})[0])
         self.assertTrue(validate_answer("结论在同一段落给出，随后说明原文依据。[1]", {"1"})[0])
+
+    def test_verified_rating_numbers_and_required_winner_are_enforced(self):
+        valid = "A Air更好，原始评分为4.20/5，共100份评分。[A1]"
+        self.assertTrue(validate_answer(valid, {"A1"}, rating_summary=self.rating_summary)[0])
+        invalid = "B Air更好，原始评分为9.99/5。[B1]"
+        ok, reasons = validate_answer(invalid, {"B1"}, rating_summary=self.rating_summary)
+        self.assertFalse(ok)
+        self.assertTrue(any("unverified_numeric_claim" in reason for reason in reasons))
+        self.assertIn("missing_required_winner", reasons)
+
+    def test_program_fallback_uses_rating_decision_instead_of_label_counts(self):
+        result = {"type": "comparison", "aspect": "seat", "rating_summary": self.rating_summary,
+                  "results": {"A Air": {"evidence": [evidence("1", "A Air", "positive")]},
+                              "B Air": {"evidence": [evidence("2", "B Air", "negative")]}}}
+        answer = answer_question("哪家更好", result, use_model=False)
+        self.assertIn("A Air明显更好", answer["text"])
+        self.assertIn("4.20/5", answer["text"])
+        self.assertNotIn("正向", answer["text"])
+        self.assertEqual(answer["mode"], "rating_decision")
 
     def test_invalid_model_answer_falls_back_to_program_answer(self):
         result = {"aspect": "seat", "evidence": [

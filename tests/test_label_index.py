@@ -71,6 +71,7 @@ class LabelIndexTests(unittest.TestCase):
                  patch("src.query_service.rerank", return_value=candidates), \
                  patch("src.query_service.pd.read_parquet", return_value=metadata), \
                  patch("src.query_service.labels_for_chunks", return_value=offline_predictions), \
+                 patch("src.query_service.summarize_ratings", return_value={"available": False}), \
                  patch("src.query_service.classify_texts") as realtime:
                 with patch("src.query_service.count_label_matches", return_value={"sentence_count": 2, "review_count": 2}):
                     result = query_reviews(aspect="seat", label_index_path=path, classifier_manifest="unused")
