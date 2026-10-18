@@ -25,7 +25,8 @@ def main():
     if platform.system()!="Darwin" or platform.machine()!="arm64":
         raise RuntimeError("This optional MLX runtime requires Apple Silicon; retrieval without labels remains available")
     if not MLX_PYTHON.exists(): venv.EnvBuilder(with_pip=True).create(MLX_PYTHON.parents[1])
-    subprocess.run([str(MLX_PYTHON),"-m","pip","install","mlx-lm==0.31.2"],check=True)
+    subprocess.run([str(MLX_PYTHON),"-m","pip","install","-r",
+                    str(ROOT/"experiments/query_quality/requirements-mlx.lock.txt")],check=True)
     from huggingface_hub import snapshot_download
     path=Path(snapshot_download(MODEL_ID,revision=MODEL_REVISION,
         allow_patterns=["*.json","*.safetensors","*.txt","*.model","*.jinja","README.md"]))
