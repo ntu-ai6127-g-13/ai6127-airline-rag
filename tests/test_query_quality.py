@@ -93,7 +93,8 @@ class QueryQualityTests(unittest.TestCase):
             self.assertEqual(kwargs["aspect"],"seat")
             status="evidence_available" if kwargs["filters"]["airline"]=="A" else "insufficient_evidence"
             return {"answer":{"status":status}}
-        with patch("src.query_service.query_reviews",side_effect=fake):
+        with patch("src.query_service.query_reviews",side_effect=fake), \
+             patch("src.query_service.summarize_ratings",return_value={"available":False}):
             result=compare_airlines(["A","B"],aspect="seat",filters={"airline":"ignored","cabin":"Economy Class"})
         self.assertEqual(result["status"],"insufficient_evidence")
         self.assertIn("B",result["text"])
