@@ -25,9 +25,7 @@ if not CHUNKS.exists():
 airlines,cabins,origins,destinations=filter_options()
 aspect_names={"seat":"座椅舒适度","staff":"空乘服务","food":"餐饮","entertainment":"娱乐与 Wi-Fi",
               "ground":"值机、行李与准点","value":"价格、退款与客服","overall":"总体体验","other":"清洁及其他"}
-manifest=ROOT/"outputs/query_quality_20261018/frozen_candidates.json"
-if not manifest.exists():
-    manifest=ROOT/"outputs/query_quality_standalone/frozen_candidates.json"
+manifest=ROOT/"outputs/query_r36_experiment_20261019/manifest.json"
 with st.sidebar:
     st.subheader("查询条件")
     airline=st.selectbox("航司",["全部"]+airlines)
@@ -35,8 +33,8 @@ with st.sidebar:
     cabin=st.selectbox("舱位",["全部"]+cabins)
     aspect=st.selectbox("评价方面",list(aspect_names),format_func=aspect_names.get)
     sentiment=st.radio("查看哪些评价",["好评和差评","好评","差评"])
-    use_labels=st.checkbox("启用实验分类器辅助排序",value=False,disabled=not manifest.exists(),
-                           help="标签只影响排序；不会因为被判为客观就删除证据。候选尚未通过完整查询验收。")
+    use_labels=st.checkbox("分类标签辅助排序",value=manifest.exists(),disabled=not manifest.exists(),
+                           help="自动标签用于辅助排序和展示，可能有误；可关闭以查看原检索顺序，原文证据始终保留。")
     with st.expander("航线与日期条件"):
         origin=st.selectbox("出发地",["不限"]+origins)
         destination=st.selectbox("目的地",["不限"]+destinations)
@@ -60,7 +58,7 @@ if submitted:
         filters["date"]=[value.isoformat() for value in dates]
     polarity={"好评和差评":None,"好评":"positive","差评":"negative"}[sentiment]
     try:
-        with st.spinner("正在检索并整理原文证据……"):
+        with st.spinner("正在检索并整理原文证据；启用分类时首次运行可能需要约一分钟……"):
             if len(comparison)>=2:
                 st.session_state["result"]=compare_airlines(comparison,query=query,aspect=aspect,polarity=polarity,
                     filters=filters,classifier_manifest=manifest if use_labels else None)
