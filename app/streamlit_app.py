@@ -45,16 +45,19 @@ aspect_names_en={"seat":"Seat comfort","staff":"Cabin crew service","food":"Food
                  "value":"Price, refunds and support","overall":"Overall experience","other":"Cleanliness and other services"}
 aspect_names=aspect_names_zh if language=="zh" else aspect_names_en
 subtopic_names_en={
-    "quality":"Food quality and taste","portion":"Meal portion size","variety":"Meal variety and choice",
-    "drinks":"Onboard drinks","special_meals":"Special meals","temperature":"Meal temperature",
+    "menu_items":"Specific meals and dishes","quality":"Food quality and taste","portion":"Meal portion size","variety":"Meal variety and choice",
+    "drinks":"Onboard drinks","special_meals":"Special meals","temperature":"Meal temperature","meal_service":"Meal-service process",
     "content":"Entertainment content","screen":"Entertainment screen","wifi":"Onboard Wi-Fi","audio":"Headphones and audio quality",
     "usability":"System usability","legroom":"Seat legroom","width":"Seat width","recline":"Seat recline and lie-flat capability",
     "comfort":"Seat comfort","condition":"Seat condition","seat_cleanliness":"Seat cleanliness","power":"Seat power and charging",
+    "privacy":"Seat privacy","storage":"Seat storage",
     "attitude":"Crew attitude","efficiency":"Crew efficiency","professionalism":"Crew professionalism",
-    "availability":"Crew availability","punctuality":"Punctuality","delay_handling":"Delay and cancellation handling",
+    "availability":"Crew availability","communication":"Crew communication and language","punctuality":"Punctuality","delay_handling":"Delay and cancellation handling",
     "baggage":"Baggage service","checkin":"Check-in service","gate_service":"Gate and boarding service","lounge":"Airport lounge",
-    "price":"Ticket price","refund":"Refunds and changes","support":"Customer support","booking":"Booking system",
-    "cleanliness":"Cabin cleanliness","toilet":"Onboard lavatory","cabin_temperature":"Cabin temperature"}
+    "transfer":"Flight connections","assistance":"Special assistance","price":"Ticket price","refund":"Refunds and changes",
+    "support":"Customer support","booking":"Booking system","fees":"Additional fees","cleanliness":"Cabin cleanliness",
+    "toilet":"Onboard lavatory","cabin_temperature":"Cabin temperature","amenities":"Onboard amenities",
+    "noise":"Cabin noise","aircraft_condition":"Aircraft and cabin condition"}
 def subtopic_name(topic): return SUBTOPIC_NAMES.get(topic,topic) if language=="zh" else subtopic_names_en.get(topic,topic)
 airline_names_zh={"Singapore Airlines":"新加坡航空","United Airlines":"美国联合航空","Qatar Airways":"卡塔尔航空",
                   "Cathay Pacific Airways":"国泰航空","British Airways":"英国航空","Emirates":"阿联酋航空"}
@@ -189,6 +192,7 @@ if submitted:
                                 state="running",expanded=True)
             result["question"]=question
             result["language"]=language
+            result["answer_intent"]=parsed.answer_intent
             result["parsed_question"]=parsed.to_dict()
             stream_state={"updated":0.0}
             def stream_answer(text,event):
@@ -276,6 +280,10 @@ def display_result(result,citation_prefix=""):
                        (f"Source {item['chunk_id']} · Date {item.get('date') or 'Unknown'} · Route {item.get('route') or 'Unknown'}"))
 
 def display_rating_summary(result):
+    if set(result.get("subtopics", {})) == {"menu_items"}:
+        st.info(tr("本题询问具体吃什么，因此不使用餐饮总体评分代替菜品答案。",
+                   "This question asks what was served, so the overall food rating is not used as a substitute for dish evidence."))
+        return
     if result.get("type")=="multi_aspect":
         summaries=[(aspect,summary) for aspect,summary in result.get("rating_summaries",{}).items()]
     else:
@@ -326,6 +334,8 @@ def display_sentiment_overview(result):
     groups=[]
     if result.get("subtopics"):
         for topic in result["subtopics"]:
+            if topic == "menu_items":
+                continue
             if result.get("type")=="comparison":
                 summaries={
                     airline:(part.get("subtopic_analysis",{}).get(topic,{})
@@ -368,9 +378,9 @@ def display_sentiment_overview(result):
             st.markdown(f"**{name}**")
         columns=st.columns(min(3,len(summaries)))
         for index,(airline,data) in enumerate(summaries.items()):
-            total=int(data.get("labeled_review_count") or 0)
             positive=int(data.get("positive_review_count") or 0)
             negative=int(data.get("negative_review_count") or 0)
+            total=positive+negative
             if not total:
                 continue
             positive_pct=positive/total*100
@@ -407,10 +417,12 @@ if "result" in st.session_state:
         st.markdown(grounded["text"])
         mode_zh={"local_qwen":"本地 Qwen3 4B · 引用校验通过","local_qwen_repaired":"本地 Qwen3 4B · 自动修正后校验通过",
                  "rating_decision":"原始评分汇总 + 评论证据","validation_fallback":"模型回答未通过校验 · 已使用程序回答",
-                 "service_fallback":"本地模型未连接 · 已使用程序回答","program_fallback":"程序回答"}
+                 "service_fallback":"本地模型未连接 · 已使用程序回答","program_fallback":"程序回答",
+                 "menu_item_evidence":"具体菜品证据汇总"}
         mode_en={"local_qwen":"Local Qwen3 4B · citations validated","local_qwen_repaired":"Local Qwen3 4B · corrected answer validated",
                  "rating_decision":"Original ratings + review evidence","validation_fallback":"Model answer failed validation · program answer used",
-                 "service_fallback":"Local model unavailable · program answer used","program_fallback":"Program-generated answer"}
+                 "service_fallback":"Local model unavailable · program answer used","program_fallback":"Program-generated answer",
+                 "menu_item_evidence":"Concrete dish evidence summary"}
         mode=(mode_zh if language=="zh" else mode_en).get(grounded.get("mode"),grounded.get("mode",""))
         timing=((f" · 生成 {grounded['model_seconds']:.1f} 秒" if language=="zh" else f" · generated in {grounded['model_seconds']:.1f}s")
                 if grounded.get("model_seconds") else "")

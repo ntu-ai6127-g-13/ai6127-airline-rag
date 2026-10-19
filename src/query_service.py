@@ -36,12 +36,20 @@ ASPECT_QUERIES = {
 # requested attribute. Semantic retrieval still supplies recall and can
 # backfill when reviewers describe the same idea with unexpected wording.
 SUBTOPIC_ANCHORS = {
+    "menu_items": ("beef rendang", "lobster thermidor", "nasi briyani", "nasi biryani",
+                   "assam fish", "satay", "chicken", "duck", "beef", "steak", "lamb", "pork",
+                   "fish", "salmon", "prawn", "shrimp", "scallop", "crab", "rice", "noodle",
+                   "pasta", "curry", "sandwich", "salad", "soup", "omelette", "omelet",
+                   "sausage", "frittata", "mushroom", "corn flakes", "potato chips", "ice cream",
+                   "gelato", "muffin", "fruit", "yogurt", "cheese board", "cheese platter", "dessert", "breakfast"),
     "quality": ("quality", "taste", "tasted", "tasty", "delicious", "bland", "inedible", "fresh", "flavour", "flavor"),
     "portion": ("portion", "quantity", "serving size", "amount of food", "amount of meal", "meal size", "enough food"),
     "variety": ("variety", "selection", "choice", "choices", "menu", "options"),
     "drinks": ("drink", "beverage", "wine", "coffee", "tea", "juice"),
     "special_meals": ("special meal", "vegetarian", "vegan", "child meal", "halal", "dietary", "allergy", "allergic", "allergies"),
     "temperature": ("served hot", "served cold", "cold meal", "hot meal", "meal temperature", "reheated"),
+    "meal_service": ("meal service", "food service", "book the cook", "pre-order", "preorder",
+                     "meal order", "meal delivery", "tray collection"),
     "content": ("movie", "film", "program", "programme", "selection", "content", "channel"),
     "screen": ("screen", "display", "touchscreen", "touch screen"),
     "wifi": ("wi-fi", "wifi", "internet", "connection", "connectivity"),
@@ -55,23 +63,34 @@ SUBTOPIC_ANCHORS = {
     "seat_cleanliness": ("clean seat", "clean seats", "dirty seat", "dirty seats",
                          "seat stain", "stained seat", "stain on the seat"),
     "power": ("power socket", "power outlet", "usb", "charging", "charger", "electrical outlet"),
+    "privacy": ("privacy", "privacy divider", "partition", "suite door", "enclosed suite"),
+    "storage": ("storage", "storage compartment", "stowage", "personal items"),
     "attitude": ("friendly", "polite", "rude", "attitude", "courteous", "smile", "helpful"),
     "efficiency": ("efficient", "prompt", "quickly", "slow service", "response time", "responsive"),
     "professionalism": ("professional", "competent", "trained", "knowledgeable", "inexperienced"),
     "availability": ("call button", "crew available", "crew disappeared", "nowhere to be seen", "attentive", "unattentive"),
+    "communication": ("communication", "language", "understand", "explanation", "announcement"),
     "punctuality": ("on time", "punctual", "arrived early", "departed late", "flight was delayed"),
     "delay_handling": ("rebook", "rebooked", "rebooking", "compensation", "hotel", "delay handling", "cancellation", "cancelled", "disruption", "missed connection"),
     "baggage": ("baggage", "luggage", "bag drop", "lost bag", "damaged bag", "suitcase"),
     "checkin": ("check-in", "check in", "checkin", "check-in desk", "check-in counter", "kiosk"),
     "gate_service": ("gate agent", "gate staff", "boarding", "boarding gate", "boarding call", "boarding group", "priority boarding"),
     "lounge": ("lounge", "club room"),
+    "transfer": ("transfer", "transit", "connection", "connecting flight", "missed connection"),
+    "assistance": ("wheelchair", "special assistance", "mobility assistance", "disabled passenger"),
     "price": ("price", "fare", "expensive", "cheap", "cost", "value for money"),
     "refund": ("refund", "reimburse", "money back", "cancellation fee", "change fee", "rebooking fee"),
     "support": ("customer service", "call centre", "call center", "hotline", "complaint", "complaints", "phone support"),
     "booking": ("booking", "reservation", "website", "mobile app", "online ticket"),
+    "fees": ("surcharge", "extra fee", "hidden fee", "hidden charge", "baggage fee", "seat fee",
+             "selection fee", "change fee"),
     "cleanliness": ("clean", "cleanliness", "dirty", "filthy", "stain", "stained", "stains", "hygiene"),
     "toilet": ("toilet", "lavatory", "washroom", "restroom"),
     "cabin_temperature": ("cabin temperature", "too cold", "too hot", "air conditioning", "freezing cabin"),
+    "amenities": ("amenity kit", "blanket", "pillow", "slippers", "pyjamas", "pajamas", "eye mask", "ear plugs"),
+    "noise": ("cabin noise", "noisy cabin", "engine noise", "engine sound", "quiet cabin"),
+    "aircraft_condition": ("old aircraft", "old plane", "dated cabin", "aircraft condition", "cabin condition",
+                           "worn cabin", "refurbished aircraft", "modern aircraft"),
 }
 
 SUBTOPIC_CONTEXT_PATTERNS = {
@@ -374,7 +393,7 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             all_direct_candidates = list(scan.get("all_direct_candidates", ()))
             scan_summary = {key: value for key, value in scan.items()
                             if key not in {"candidate_ids", "all_direct_candidates"}}
-            if label_index_path and all_direct_candidates:
+            if label_index_path and all_direct_candidates and topic != "menu_items":
                 aggregate_predictions = labels_for_chunks(
                     [chunk_id for chunk_id, _ in all_direct_candidates], label_index_path)
                 scan_summary["polarity_summary"] = _direct_review_polarity_summary(
@@ -399,7 +418,16 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
                       if combined else [])
             ranked = [{**row, "_direct_subtopic_match": _direct_subtopic_match(row.get("text", ""), topic)}
                       for row in ranked]
-            ranked.sort(key=lambda row: not row["_direct_subtopic_match"])
+            if topic == "menu_items":
+                anchors = SUBTOPIC_ANCHORS[topic]
+                ranked.sort(key=lambda row: (
+                    not row["_direct_subtopic_match"],
+                    -sum(bool(re.search(r"(?<![a-z0-9])" + re.escape(term) + r"(?![a-z0-9])",
+                                        str(row.get("text", "")).casefold())) for term in anchors),
+                    len(str(row.get("text", ""))),
+                ))
+            else:
+                ranked.sort(key=lambda row: not row["_direct_subtopic_match"])
             direct = [row for row in ranked if row["_direct_subtopic_match"]]
             if len(direct) >= 2:
                 ranked = direct
