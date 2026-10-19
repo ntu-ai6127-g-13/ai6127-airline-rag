@@ -1,0 +1,40 @@
+{
+  "scope": "local Qwen generation service only; fixed 120-token cap",
+  "service_design": "single-threaded HTTPServer with serialized MLX access",
+  "concurrency_1": {
+    "concurrency": 1,
+    "requests": 2,
+    "wall_seconds": 2.069714916869998,
+    "requests_per_second": 0.9663166572836868,
+    "calls": [
+      {
+        "wall_seconds": 1.0685043754056096,
+        "server_seconds": 1.06,
+        "characters": 71
+      },
+      {
+        "wall_seconds": 1.001202458050102,
+        "server_seconds": 0.999,
+        "characters": 71
+      }
+    ]
+  },
+  "concurrency_2": {
+    "concurrency": 2,
+    "requests": 2,
+    "wall_seconds": 1.9738340829499066,
+    "requests_per_second": 1.0132563913431814,
+    "calls": [
+      {
+        "wall_seconds": 0.9879507082514465,
+        "server_seconds": 0.985,
+        "characters": 71
+      },
+      {
+        "wall_seconds": 1.9728959579952061,
+        "server_seconds": 0.984,
+        "characters": 71
+      }
+    ]
+  }
+}

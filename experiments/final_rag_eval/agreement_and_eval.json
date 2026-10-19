@@ -1,0 +1,39 @@
+{
+  "generated_from": "data/eval/gold_human_frozen_1000_20261019_v1.csv",
+  "records": 1000,
+  "unique_normalized_texts": 1000,
+  "first_two_columns": [
+    "text",
+    "label"
+  ],
+  "label_distribution": {
+    "negative": 548,
+    "positive": 371,
+    "objective": 81
+  },
+  "agreement_scope": "three original annotators on the frozen 1,000-sentence subset",
+  "agreement": {
+    "subjectivity": {
+      "records": 1000,
+      "original_pairwise_agreement": 0.927667,
+      "fleiss_kappa": 0.57174
+    },
+    "polarity": {
+      "records": 1000,
+      "original_pairwise_agreement": 0.91,
+      "fleiss_kappa": 0.840635
+    },
+    "aspect": {
+      "records": 1000,
+      "original_pairwise_agreement": 0.808667,
+      "fleiss_kappa": 0.778013
+    },
+    "joint": {
+      "records": 1000,
+      "original_pairwise_agreement": 0.75,
+      "fleiss_kappa": 0.731906
+    }
+  },
+  "eval_xls": "data/eval/eval.xls",
+  "eval_xls_sha256": "fe0bcf0c6f379938959cf697524312b2bb20f0e20e3782c6fb90c2f86a477045"
+}
