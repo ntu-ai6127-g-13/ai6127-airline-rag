@@ -71,6 +71,9 @@ outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 
 > 📘 **新加入的同学从这里开始**：先读 [`docs/项目执行手册.md`](docs/项目执行手册.md)。
 > 里面每个技术名词都有解释，每一步都有可直接运行的代码。
+>
+> 👥 **把系统发给组员检查**：使用 [`docs/组员下载运行与验收指南.md`](docs/组员下载运行与验收指南.md)。
+> 其中说明了哪些文件会随 Git 下载、哪些本地产物需要重建，以及 macOS、Windows 的启动和验收步骤。
 
 ---
 
