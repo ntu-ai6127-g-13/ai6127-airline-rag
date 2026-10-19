@@ -1,0 +1,29 @@
+case_id,variant,reference_direction,answer_direction,direction_correct,evidence_count,total_claims,supported_claims,faithfulness,answer_relevance,relevant_evidence_ids,context_precision,unsupported_claim_count,judge_seconds
+Q01,A_top10_naive,positive,negative,False,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,3.781
+Q01,B_full_aggregate,positive,positive,True,4,5,3,0.6,0.75,"['1', '2', '3', '4']",1.0,2,2.76
+Q01,C_balanced_evidence,positive,positive,True,4,5,3,0.6,0.75,"['1', '2', '3', '4']",1.0,2,2.543
+Q01,D_consistency_filter,positive,positive,True,4,5,3,0.6,0.75,"['1', '2', '3', '4']",1.0,2,2.563
+Q02,A_top10_naive,negative,negative,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,3.814
+Q02,B_full_aggregate,negative,negative,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.775
+Q02,C_balanced_evidence,negative,negative,True,3,4,3,0.75,1.0,"['1', '2', '3']",1.0,1,2.388
+Q02,D_consistency_filter,negative,negative,True,3,4,3,0.75,1.0,"['1', '2', '3']",1.0,1,2.388
+Q03,A_top10_naive,negative,negative,True,4,4,4,1.0,1.0,"['1', '2', '3', '4']",1.0,0,3.696
+Q03,B_full_aggregate,negative,negative,True,4,4,4,1.0,1.0,"['1', '2', '3', '4']",1.0,0,2.771
+Q03,C_balanced_evidence,negative,negative,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.542
+Q03,D_consistency_filter,negative,negative,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.542
+Q04,A_top10_naive,negative,negative,True,4,5,4,0.8,1.0,"['1', '4']",0.5,1,3.891
+Q04,B_full_aggregate,negative,negative,True,4,5,4,0.8,1.0,"['1', '4']",0.5,1,2.872
+Q04,C_balanced_evidence,negative,negative,True,3,4,4,1.0,1.0,"['1', '2', '3']",1.0,0,2.525
+Q04,D_consistency_filter,negative,negative,True,3,4,4,1.0,1.0,"['1', '2', '3']",1.0,0,2.492
+Q05,A_top10_naive,negative,negative,True,4,4,4,1.0,1.0,"['1', '2', '3', '4']",1.0,0,3.998
+Q05,B_full_aggregate,negative,negative,True,4,4,4,1.0,1.0,"['1', '2', '3', '4']",1.0,0,3.263
+Q05,C_balanced_evidence,negative,negative,True,2,3,3,1.0,1.0,"['1', '2']",1.0,0,2.449
+Q05,D_consistency_filter,negative,negative,True,2,3,3,1.0,1.0,"['1', '2']",1.0,0,2.44
+Q06,A_top10_naive,positive,positive,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,4.065
+Q06,B_full_aggregate,positive,positive,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.945
+Q06,C_balanced_evidence,positive,positive,True,4,5,3,0.6,0.75,"['1', '2', '3', '4']",1.0,2,2.648
+Q06,D_consistency_filter,positive,positive,True,4,5,3,0.6,0.75,"['1', '2', '3', '4']",1.0,2,2.646
+Q12,A_top10_naive,positive,positive,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,3.608
+Q12,B_full_aggregate,positive,positive,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.645
+Q12,C_balanced_evidence,positive,positive,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.66
+Q12,D_consistency_filter,positive,positive,True,4,5,4,0.8,1.0,"['1', '2', '3', '4']",1.0,1,2.647
