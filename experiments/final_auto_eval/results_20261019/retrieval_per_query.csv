@@ -1,0 +1,121 @@
+unit_id,case_id,airline,aspect,topic,method,qrel_count,returned,seconds,precision_at_5,recall_at_50,mrr,ndcg_at_10,success_at_10
+Q01_Singapore Airlines_legroom,Q01,Singapore Airlines,seat,legroom,bm25,145,50,1.2777956249192357,1.0,0.30344827586206896,1.0,0.8532721558012798,1.0
+Q01_Singapore Airlines_legroom,Q01,Singapore Airlines,seat,legroom,dense,145,50,12.14110012492165,0.8,0.27586206896551724,1.0,0.7681290381596588,1.0
+Q01_Singapore Airlines_legroom,Q01,Singapore Airlines,seat,legroom,hybrid_rrf,145,50,13.419143584091216,1.0,0.2689655172413793,1.0,1.0,1.0
+Q01_Singapore Airlines_legroom,Q01,Singapore Airlines,seat,legroom,hybrid_rerank,145,50,22.979529834352434,1.0,0.3310344827586207,1.0,0.9537125187088151,1.0
+Q02_Air Canada rouge_legroom,Q02,Air Canada rouge,seat,legroom,bm25,319,50,0.6680917921476066,1.0,0.12852664576802508,1.0,0.796761066247299,1.0
+Q02_Air Canada rouge_legroom,Q02,Air Canada rouge,seat,legroom,dense,319,50,0.06081858277320862,0.8,0.12852664576802508,1.0,0.8088720434739952,1.0
+Q02_Air Canada rouge_legroom,Q02,Air Canada rouge,seat,legroom,hybrid_rrf,319,50,0.7289906251244247,0.8,0.14106583072100312,1.0,0.8318477135310891,1.0
+Q02_Air Canada rouge_legroom,Q02,Air Canada rouge,seat,legroom,hybrid_rerank,319,50,0.8564546671696007,1.0,0.14733542319749215,1.0,0.9074250374176303,1.0
+Q03_Spirit Airlines_baggage,Q03,Spirit Airlines,ground,baggage,bm25,831,50,0.4096965831704438,0.8,0.0421179302045728,1.0,0.8611375561264454,1.0
+Q03_Spirit Airlines_baggage,Q03,Spirit Airlines,ground,baggage,dense,831,50,0.07845499971881509,1.0,0.05174488567990373,1.0,1.0,1.0
+Q03_Spirit Airlines_baggage,Q03,Spirit Airlines,ground,baggage,hybrid_rrf,831,50,0.48822645796462893,1.0,0.05054151624548736,1.0,1.0,1.0
+Q03_Spirit Airlines_baggage,Q03,Spirit Airlines,ground,baggage,hybrid_rerank,831,50,0.6098602078855038,1.0,0.052948255114320095,1.0,0.92663607790064,1.0
+Q04_Alaska Airlines_delay_handling,Q04,Alaska Airlines,ground,delay_handling,bm25,110,50,0.58899095794186,0.6,0.2909090909090909,1.0,0.5412774174127957,1.0
+Q04_Alaska Airlines_delay_handling,Q04,Alaska Airlines,ground,delay_handling,dense,110,50,0.0570844579488039,0.6,0.18181818181818182,1.0,0.2353316429945534,1.0
+Q04_Alaska Airlines_delay_handling,Q04,Alaska Airlines,ground,delay_handling,hybrid_rrf,110,50,0.6461424990557134,0.8,0.24545454545454545,1.0,0.5440358293979773,1.0
+Q04_Alaska Airlines_delay_handling,Q04,Alaska Airlines,ground,delay_handling,hybrid_rerank,110,50,0.7829170823097229,0.8,0.22727272727272727,1.0,0.2067991448055616,1.0
+Q05_Emirates_refund,Q05,Emirates,value,refund,bm25,43,50,0.5307472082786262,0.8,0.8837209302325582,1.0,0.6506513100698701,1.0
+Q05_Emirates_refund,Q05,Emirates,value,refund,dense,43,50,0.05562454229220748,0.8,0.6511627906976745,0.5,0.6500332220485789,1.0
+Q05_Emirates_refund,Q05,Emirates,value,refund,hybrid_rrf,43,50,0.5864215833134949,1.0,0.8604651162790697,1.0,0.8913319177463098,1.0
+Q05_Emirates_refund,Q05,Emirates,value,refund,hybrid_rerank,43,50,0.742980167735368,0.8,0.7441860465116279,1.0,0.6864288767614031,1.0
+Q06_Singapore Airlines_variety,Q06,Singapore Airlines,food,variety,bm25,282,50,0.4593547908589244,1.0,0.1702127659574468,1.0,0.8176084868204423,1.0
+Q06_Singapore Airlines_variety,Q06,Singapore Airlines,food,variety,dense,282,50,0.0554492911323905,0.6,0.12056737588652482,0.3333333333333333,0.6410457898283652,1.0
+Q06_Singapore Airlines_variety,Q06,Singapore Airlines,food,variety,hybrid_rrf,282,50,0.5148796648718417,1.0,0.1453900709219858,1.0,1.0,1.0
+Q06_Singapore Airlines_variety,Q06,Singapore Airlines,food,variety,hybrid_rerank,282,50,0.6303412895649672,1.0,0.13829787234042554,1.0,1.0,1.0
+Q07_Singapore Airlines_portion,Q07,Singapore Airlines,food,portion,bm25,15,50,0.5308106667362154,0.4,0.6666666666666666,0.5,0.36602461869280256,1.0
+Q07_Singapore Airlines_portion,Q07,Singapore Airlines,food,portion,dense,15,50,0.0648024589754641,0.6,0.4,1.0,0.5271064966405455,1.0
+Q07_Singapore Airlines_portion,Q07,Singapore Airlines,food,portion,hybrid_rrf,15,50,0.595689625479281,0.6,0.6,1.0,0.5766882048947064,1.0
+Q07_Singapore Airlines_portion,Q07,Singapore Airlines,food,portion,hybrid_rerank,15,50,0.7067091255448759,0.6,0.6666666666666666,1.0,0.4440973278132556,1.0
+Q08_Singapore Airlines_seat_cleanliness,Q08,Singapore Airlines,seat,seat_cleanliness,bm25,18,50,0.5795836667530239,0.6,0.5555555555555556,1.0,0.3396171911767703,1.0
+Q08_Singapore Airlines_seat_cleanliness,Q08,Singapore Airlines,seat,seat_cleanliness,dense,18,50,0.063443707767874,0.8,0.6666666666666666,1.0,0.4713315292450448,1.0
+Q08_Singapore Airlines_seat_cleanliness,Q08,Singapore Airlines,seat,seat_cleanliness,hybrid_rrf,18,50,0.6430961666628718,0.8,0.6666666666666666,1.0,0.46660259525924136,1.0
+Q08_Singapore Airlines_seat_cleanliness,Q08,Singapore Airlines,seat,seat_cleanliness,hybrid_rerank,18,50,0.7697895006276667,1.0,0.7777777777777778,1.0,0.5207843174079245,1.0
+Q09_Emirates_wifi,Q09,Emirates,entertainment,wifi,bm25,178,50,0.5438907919451594,1.0,0.14606741573033707,1.0,0.8545365814817667,1.0
+Q09_Emirates_wifi,Q09,Emirates,entertainment,wifi,dense,178,50,0.10975045803934336,1.0,0.2303370786516854,1.0,0.9510907186004267,1.0
+Q09_Emirates_wifi,Q09,Emirates,entertainment,wifi,hybrid_rrf,178,50,0.6537419580854475,0.8,0.25280898876404495,1.0,0.8563023542308759,1.0
+Q09_Emirates_wifi,Q09,Emirates,entertainment,wifi,hybrid_rerank,178,50,0.7735971249639988,1.0,0.19101123595505617,1.0,0.8066817565598586,1.0
+Q10_Qatar Airways_content,Q10,Qatar Airways,entertainment,content,bm25,95,50,0.44226087536662817,0.8,0.4421052631578947,1.0,0.7520145622473255,1.0
+Q10_Qatar Airways_content,Q10,Qatar Airways,entertainment,content,dense,95,50,0.05925937509164214,1.0,0.2,1.0,0.5188055748047391,1.0
+Q10_Qatar Airways_content,Q10,Qatar Airways,entertainment,content,hybrid_rrf,95,50,0.5015950417146087,0.8,0.30526315789473685,1.0,0.7009441593132139,1.0
+Q10_Qatar Airways_content,Q10,Qatar Airways,entertainment,content,hybrid_rerank,95,50,0.6038872078061104,1.0,0.24210526315789474,1.0,0.7682005979231403,1.0
+Q11_British Airways_recline,Q11,British Airways,seat,recline,bm25,34,50,0.6046937918290496,0.6,0.6470588235294118,1.0,0.6848374495230163,1.0
+Q11_British Airways_recline,Q11,British Airways,seat,recline,dense,34,50,0.062428958248347044,1.0,0.6176470588235294,1.0,1.0,1.0
+Q11_British Airways_recline,Q11,British Airways,seat,recline,hybrid_rrf,34,50,0.6671887077391148,1.0,0.7352941176470589,1.0,0.8482378089219647,1.0
+Q11_British Airways_recline,Q11,British Airways,seat,recline,hybrid_rerank,34,50,0.811948707792908,0.6,0.8235294117647058,1.0,0.8200685179888281,1.0
+Q12_Cathay Pacific Airways_attitude,Q12,Cathay Pacific Airways,staff,attitude,bm25,120,50,0.5506034581921995,1.0,0.35,1.0,0.9510907186004267,1.0
+Q12_Cathay Pacific Airways_attitude,Q12,Cathay Pacific Airways,staff,attitude,dense,120,50,0.054337790701538324,1.0,0.25833333333333336,1.0,0.789651367602328,1.0
+Q12_Cathay Pacific Airways_attitude,Q12,Cathay Pacific Airways,staff,attitude,hybrid_rrf,120,50,0.6049973326735198,1.0,0.30833333333333335,1.0,0.9432379215722527,1.0
+Q12_Cathay Pacific Airways_attitude,Q12,Cathay Pacific Airways,staff,attitude,hybrid_rerank,120,50,0.7195847905240953,1.0,0.3333333333333333,1.0,0.9074250374176303,1.0
+Q13_United Airlines_width,Q13,United Airlines,seat,width,bm25,3,50,0.38988674990832806,0.6,1.0,1.0,0.8854598815714875,1.0
+Q13_United Airlines_width,Q13,United Airlines,seat,width,dense,3,50,0.07195449993014336,0.2,0.6666666666666666,0.5,0.431733884398313,1.0
+Q13_United Airlines_width,Q13,United Airlines,seat,width,hybrid_rrf,3,50,0.46192762488499284,0.2,1.0,1.0,0.6364391809889588,1.0
+Q13_United Airlines_width,Q13,United Airlines,seat,width,hybrid_rerank,3,50,0.5965247079730034,0.2,1.0,0.3333333333333333,0.23463936301137825,1.0
+Q14_Turkish Airlines_quality,Q14,Turkish Airlines,food,quality,bm25,236,50,0.48605425003916025,1.0,0.19491525423728814,1.0,0.955830517697074,1.0
+Q14_Turkish Airlines_quality,Q14,Turkish Airlines,food,quality,dense,236,50,0.054863540921360254,0.4,0.13135593220338984,0.3333333333333333,0.5559026721867443,1.0
+Q14_Turkish Airlines_quality,Q14,Turkish Airlines,food,quality,hybrid_rrf,236,50,0.5409919992089272,1.0,0.17372881355932204,1.0,1.0,1.0
+Q14_Turkish Airlines_quality,Q14,Turkish Airlines,food,quality,hybrid_rerank,236,50,0.6533968742005527,1.0,0.16101694915254236,1.0,0.955830517697074,1.0
+Q15_AirAsia_support,Q15,AirAsia,value,support,bm25,71,50,0.4718827083706856,1.0,0.5915492957746479,1.0,0.9368077570869661,1.0
+Q15_AirAsia_support,Q15,AirAsia,value,support,dense,71,50,0.06863291608169675,1.0,0.4225352112676056,1.0,0.8800456786592187,1.0
+Q15_AirAsia_support,Q15,AirAsia,value,support,hybrid_rrf,71,50,0.5405756663531065,1.0,0.5492957746478874,1.0,0.8900917305098635,1.0
+Q15_AirAsia_support,Q15,AirAsia,value,support,hybrid_rerank,71,50,0.6877031242474914,1.0,0.5211267605633803,1.0,0.7666888146990526,1.0
+Q16_Etihad Airways_recline,Q16,Etihad Airways,seat,recline,bm25,25,50,0.603555291891098,1.0,0.84,1.0,0.7329429121425177,1.0
+Q16_Etihad Airways_recline,Q16,Etihad Airways,seat,recline,dense,25,50,0.05523158283904195,0.8,0.6,1.0,0.7431463734406032,1.0
+Q16_Etihad Airways_recline,Q16,Etihad Airways,seat,recline,hybrid_rrf,25,50,0.658849457744509,1.0,0.76,1.0,0.5574582594662094,1.0
+Q16_Etihad Airways_recline,Q16,Etihad Airways,seat,recline,hybrid_rerank,25,50,0.8125126236118376,0.8,0.8,1.0,0.6948957534944793,1.0
+Q17_Frontier Airlines_baggage,Q17,Frontier Airlines,ground,baggage,bm25,588,50,0.4115550839342177,1.0,0.06802721088435375,1.0,1.0,1.0
+Q17_Frontier Airlines_baggage,Q17,Frontier Airlines,ground,baggage,dense,588,50,0.06428304174914956,1.0,0.07142857142857142,1.0,0.7748738868226045,1.0
+Q17_Frontier Airlines_baggage,Q17,Frontier Airlines,ground,baggage,hybrid_rrf,588,50,0.4759125420823693,1.0,0.07993197278911565,1.0,0.933745776545611,1.0
+Q17_Frontier Airlines_baggage,Q17,Frontier Airlines,ground,baggage,hybrid_rerank,588,50,0.5919336671940982,1.0,0.07653061224489796,1.0,1.0,1.0
+Q18_American Airlines_checkin,Q18,American Airlines,ground,checkin,bm25,439,50,0.5720482091419399,1.0,0.09339407744874716,1.0,0.9368077570869661,1.0
+Q18_American Airlines_checkin,Q18,American Airlines,ground,checkin,dense,439,50,0.055895499885082245,0.8,0.07517084282460136,1.0,0.5451246712065498,1.0
+Q18_American Airlines_checkin,Q18,American Airlines,ground,checkin,hybrid_rrf,439,50,0.6280327918939292,1.0,0.09339407744874716,1.0,0.8863992957602966,1.0
+Q18_American Airlines_checkin,Q18,American Airlines,ground,checkin,hybrid_rerank,439,50,0.7794968751259148,1.0,0.07972665148063782,1.0,0.8698739994728927,1.0
+Q19_Lufthansa_punctuality,Q19,Lufthansa,ground,punctuality,bm25,216,50,0.5160465836524963,1.0,0.10185185185185185,1.0,0.8032612276849741,1.0
+Q19_Lufthansa_punctuality,Q19,Lufthansa,ground,punctuality,dense,216,50,0.06044445792213082,0.2,0.10648148148148148,0.5,0.3529461582433961,1.0
+Q19_Lufthansa_punctuality,Q19,Lufthansa,ground,punctuality,hybrid_rrf,216,50,0.5765659166499972,0.4,0.12962962962962962,0.3333333333333333,0.41320541532308547,1.0
+Q19_Lufthansa_punctuality,Q19,Lufthansa,ground,punctuality,hybrid_rerank,216,50,0.6903600413352251,0.0,0.11574074074074074,0.14285714285714285,0.07336392209936005,1.0
+Q20_Qantas Airways_drinks,Q20,Qantas Airways,food,drinks,bm25,185,50,0.5415492919273674,1.0,0.22162162162162163,1.0,0.955830517697074,1.0
+Q20_Qantas Airways_drinks,Q20,Qantas Airways,food,drinks,dense,185,50,0.05689162528142333,0.6,0.17297297297297298,0.5,0.5920411056298696,1.0
+Q20_Qantas Airways_drinks,Q20,Qantas Airways,food,drinks,hybrid_rrf,185,50,0.598513625562191,0.8,0.1945945945945946,1.0,0.7979453132134116,1.0
+Q20_Qantas Airways_drinks,Q20,Qantas Airways,food,drinks,hybrid_rerank,185,50,0.7085672086104751,0.8,0.1837837837837838,1.0,0.5579780239524,1.0
+Q21_Singapore Airlines_variety,Q21,Singapore Airlines,food,variety,bm25,282,50,0.4593200422823429,1.0,0.1702127659574468,1.0,0.8176084868204423,1.0
+Q21_Singapore Airlines_variety,Q21,Singapore Airlines,food,variety,dense,282,50,0.05443354183807969,0.6,0.12056737588652482,0.3333333333333333,0.6410457898283652,1.0
+Q21_Singapore Airlines_variety,Q21,Singapore Airlines,food,variety,hybrid_rrf,282,50,0.5138567918911576,1.0,0.1453900709219858,1.0,1.0,1.0
+Q21_Singapore Airlines_variety,Q21,Singapore Airlines,food,variety,hybrid_rerank,282,50,0.6285181255079806,1.0,0.13829787234042554,1.0,1.0,1.0
+Q21_Emirates_variety,Q21,Emirates,food,variety,bm25,336,50,0.5113478749990463,1.0,0.13988095238095238,1.0,0.7606971932189102,1.0
+Q21_Emirates_variety,Q21,Emirates,food,variety,dense,336,50,0.06847966695204377,0.8,0.10119047619047619,1.0,0.8899541168509598,1.0
+Q21_Emirates_variety,Q21,Emirates,food,variety,hybrid_rrf,336,50,0.579905416816473,1.0,0.13392857142857142,1.0,1.0,1.0
+Q21_Emirates_variety,Q21,Emirates,food,variety,hybrid_rerank,336,50,0.6899584168568254,1.0,0.12202380952380952,1.0,0.9305687780632227,1.0
+Q22_Singapore Airlines_content,Q22,Singapore Airlines,entertainment,content,bm25,103,50,0.40682766679674387,0.6,0.36893203883495146,0.5,0.5527460588826717,1.0
+Q22_Singapore Airlines_content,Q22,Singapore Airlines,entertainment,content,dense,103,50,0.05529775004833937,0.6,0.1650485436893204,1.0,0.5156348779708467,1.0
+Q22_Singapore Airlines_content,Q22,Singapore Airlines,entertainment,content,hybrid_rrf,103,50,0.46219687489792705,0.6,0.30097087378640774,1.0,0.746704595889468,1.0
+Q22_Singapore Airlines_content,Q22,Singapore Airlines,entertainment,content,hybrid_rerank,103,50,0.5739045832306147,0.8,0.27184466019417475,1.0,0.7573821447149964,1.0
+Q22_United Airlines_content,Q22,United Airlines,entertainment,content,bm25,117,50,0.40551354084163904,1.0,0.3076923076923077,1.0,0.8579809428223729,1.0
+Q22_United Airlines_content,Q22,United Airlines,entertainment,content,dense,117,50,0.05586000019684434,1.0,0.18803418803418803,1.0,0.793584067764911,1.0
+Q22_United Airlines_content,Q22,United Airlines,entertainment,content,hybrid_rrf,117,50,0.4614491662941873,1.0,0.23931623931623933,1.0,0.9363792118010483,1.0
+Q22_United Airlines_content,Q22,United Airlines,entertainment,content,hybrid_rerank,117,50,0.5720556252636015,0.6,0.23076923076923078,1.0,0.7759944384848244,1.0
+Q23_Qatar Airways_recline,Q23,Qatar Airways,seat,recline,bm25,71,50,0.5974384169094265,0.8,0.647887323943662,0.5,0.7309989523023463,1.0
+Q23_Qatar Airways_recline,Q23,Qatar Airways,seat,recline,dense,71,50,0.05506662465631962,0.6,0.36619718309859156,1.0,0.6110191504983017,1.0
+Q23_Qatar Airways_recline,Q23,Qatar Airways,seat,recline,hybrid_rrf,71,50,0.6525756665505469,0.8,0.4507042253521127,0.5,0.7065443116025597,1.0
+Q23_Qatar Airways_recline,Q23,Qatar Airways,seat,recline,hybrid_rerank,71,50,0.7880254168994725,0.8,0.49295774647887325,0.5,0.7799082337019198,1.0
+Q23_British Airways_recline,Q23,British Airways,seat,recline,bm25,52,50,0.5946130841039121,0.8,0.5384615384615384,1.0,0.7703027134604149,1.0
+Q23_British Airways_recline,Q23,British Airways,seat,recline,dense,52,50,0.05654941685497761,0.8,0.46153846153846156,1.0,0.841492960259019,1.0
+Q23_British Airways_recline,Q23,British Airways,seat,recline,hybrid_rrf,52,50,0.6512391669675708,1.0,0.5576923076923077,1.0,0.7631397605568102,1.0
+Q23_British Airways_recline,Q23,British Airways,seat,recline,hybrid_rerank,52,50,0.7847175011411309,0.6,0.5384615384615384,1.0,0.7114004357351379,1.0
+Q24_Cathay Pacific Airways_legroom,Q24,Cathay Pacific Airways,seat,legroom,bm25,95,50,0.5330869588069618,1.0,0.43157894736842106,1.0,1.0,1.0
+Q24_Cathay Pacific Airways_legroom,Q24,Cathay Pacific Airways,seat,legroom,dense,95,50,0.05275958310812712,1.0,0.42105263157894735,1.0,0.8439854369609956,1.0
+Q24_Cathay Pacific Airways_legroom,Q24,Cathay Pacific Airways,seat,legroom,hybrid_rrf,95,50,0.5859181247651577,1.0,0.4631578947368421,1.0,0.92663607790064,1.0
+Q24_Cathay Pacific Airways_legroom,Q24,Cathay Pacific Airways,seat,legroom,hybrid_rerank,95,50,0.705470665358007,1.0,0.49473684210526314,1.0,0.8572048559638625,1.0
+Q24_Singapore Airlines_legroom,Q24,Singapore Airlines,seat,legroom,bm25,145,50,0.5343243749812245,1.0,0.30344827586206896,1.0,0.8532721558012798,1.0
+Q24_Singapore Airlines_legroom,Q24,Singapore Airlines,seat,legroom,dense,145,50,0.0529300831258297,0.8,0.27586206896551724,1.0,0.7681290381596588,1.0
+Q24_Singapore Airlines_legroom,Q24,Singapore Airlines,seat,legroom,hybrid_rrf,145,50,0.587324374821037,1.0,0.2689655172413793,1.0,1.0,1.0
+Q24_Singapore Airlines_legroom,Q24,Singapore Airlines,seat,legroom,hybrid_rerank,145,50,0.7272753329016268,1.0,0.3310344827586207,1.0,0.9537125187088151,1.0
+Q25_Emirates_recline,Q25,Emirates,seat,recline,bm25,57,50,0.6058958331122994,1.0,0.6140350877192983,1.0,0.9368077570869661,1.0
+Q25_Emirates_recline,Q25,Emirates,seat,recline,dense,57,50,0.053287832997739315,0.6,0.47368421052631576,1.0,0.707538448390303,1.0
+Q25_Emirates_recline,Q25,Emirates,seat,recline,hybrid_rrf,57,50,0.6592499162070453,1.0,0.543859649122807,1.0,0.8743705652481897,1.0
+Q25_Emirates_recline,Q25,Emirates,seat,recline,hybrid_rerank,57,50,0.7896274994127452,0.6,0.5614035087719298,1.0,0.7559017178097654,1.0
+Q25_Etihad Airways_recline,Q25,Etihad Airways,seat,recline,bm25,25,50,0.5927970828488469,1.0,0.84,1.0,0.7329429121425177,1.0
+Q25_Etihad Airways_recline,Q25,Etihad Airways,seat,recline,dense,25,50,0.052976792212575674,0.8,0.6,1.0,0.7431463734406032,1.0
+Q25_Etihad Airways_recline,Q25,Etihad Airways,seat,recline,hybrid_rrf,25,50,0.6458336249925196,1.0,0.76,1.0,0.5574582594662094,1.0
+Q25_Etihad Airways_recline,Q25,Etihad Airways,seat,recline,hybrid_rerank,25,50,0.7907114578410983,0.8,0.8,1.0,0.6948957534944793,1.0
