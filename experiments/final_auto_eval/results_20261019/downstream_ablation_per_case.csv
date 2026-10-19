@@ -1,0 +1,19 @@
+case_id,airline,topic,reference_direction,displayed_vote,displayed_vote_correct,full_aggregate_correct,two_sided_possible,naive_two_sided,balanced_two_sided,naive_cue_conflicts,selected_cue_conflicts,baseline_rejected_adversarial,guarded_rejected_adversarial
+Q01,Singapore Airlines,legroom,positive,negative,False,True,True,True,True,1,0,False,True
+Q02,Air Canada rouge,legroom,negative,negative,True,True,True,False,True,1,0,False,True
+Q03,Spirit Airlines,baggage,negative,negative,True,True,True,False,True,0,0,False,True
+Q04,Alaska Airlines,delay_handling,negative,negative,True,True,True,False,True,0,0,False,True
+Q05,Emirates,refund,negative,negative,True,True,False,False,False,0,0,False,True
+Q06,Singapore Airlines,variety,positive,positive,True,True,True,True,True,0,0,False,True
+Q12,Cathay Pacific Airways,attitude,positive,positive,True,True,True,True,True,1,0,False,True
+Q14,Turkish Airlines,quality,positive,negative,False,True,True,False,True,0,0,False,True
+Q15,AirAsia,support,negative,negative,True,True,True,True,True,3,0,False,True
+Q17,Frontier Airlines,baggage,negative,negative,True,True,True,False,True,0,0,False,True
+Q18,American Airlines,checkin,negative,negative,True,True,True,True,True,0,0,False,True
+Q19,Lufthansa,punctuality,positive,mixed,False,True,True,True,True,2,0,False,True
+Q20,Qantas Airways,drinks,positive,positive,True,True,True,True,True,0,0,False,True
+Q21,Singapore Airlines,variety,positive,positive,True,True,True,True,True,0,0,False,True
+Q22,Singapore Airlines,content,positive,positive,True,True,True,False,True,0,0,False,True
+Q23,Qatar Airways,recline,positive,mixed,False,True,True,True,True,1,0,False,True
+Q24,Cathay Pacific Airways,legroom,positive,mixed,False,True,True,True,True,3,0,False,True
+Q24,Singapore Airlines,legroom,positive,negative,False,True,True,True,True,1,0,False,True
