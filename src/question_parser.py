@@ -110,7 +110,7 @@ SUBTOPIC_RULES = {
                     "seat comfort comfortable uncomfortable padding cushion hard sore sleeping"),
         "condition": (("破损", "故障", "坏了", "broken seat", "damaged seat", "worn seat"),
                       "seat condition broken damaged worn functioning"),
-        "seat_cleanliness": (("干净", "干净程度", "清洁", "卫生", "污渍", "脏座椅", "座椅脏", "seat cleanliness", "clean seat", "dirty seat", "seat stain", "crumbs"),
+        "seat_cleanliness": (("干净", "干净程度", "清洁", "卫生", "污渍", "脏座椅", "座椅脏", "seat cleanliness", "clean seat", "clean seats", "dirty seat", "dirty seats", "seat stain", "crumbs"),
                              "seat cleanliness clean dirty stains crumbs tray table hygiene"),
         "power": (("插座", "充电", "电源", "usb", "power socket", "charging", "outlet"),
                   "seat power socket USB charging outlet working"),
@@ -128,7 +128,7 @@ SUBTOPIC_RULES = {
     "ground": {
         "punctuality": (("准点", "是否延误", "准时", "punctual", "on time", "delayed flight"),
                         "flight punctuality delay arrival departure on time"),
-        "delay_handling": (("延误处理", "取消处理", "延误后", "取消后", "改签安排", "补偿", "delay handling", "cancellation handling", "disruption", "compensation", "rebooked"),
+        "delay_handling": (("延误处理", "取消处理", "延误或取消", "延误和取消", "延误后", "取消后", "改签安排", "补偿", "delay handling", "cancellation handling", "disruption", "compensation", "rebooked"),
                            "airline delay cancellation disruption handling rebooking compensation hotel communication"),
         "baggage": (("行李", "丢失", "baggage", "luggage", "lost bag"),
                     "baggage luggage handling lost damaged delayed"),
@@ -196,7 +196,11 @@ def _contains(text: str, phrase: str) -> bool:
     phrase_folded = phrase.casefold()
     if any("\u4e00" <= char <= "\u9fff" for char in phrase):
         return phrase_folded in text
-    return re.search(r"(?<![\w])" + re.escape(phrase_folded) + r"(?![\w])", text) is not None
+    # ``\w`` also includes CJK characters, so it incorrectly rejects names in
+    # mixed-language questions such as ``Spirit Airlines经济舱``.  Only Latin
+    # letters and digits are meaningful token continuations for these aliases.
+    return re.search(r"(?<![a-z0-9])" + re.escape(phrase_folded)
+                     + r"(?![a-z0-9])", text) is not None
 
 
 def _first_alias(text: str, mapping: dict[str, Iterable[str]]) -> str | None:
@@ -224,15 +228,26 @@ def _all_aliases(text: str, mapping: dict[str, Iterable[str]]) -> list[str]:
 def _airlines(text: str, known_airlines: Iterable[str]) -> list[str]:
     found: list[tuple[int, int, str]] = []
     for alias, canonical in AIRLINE_ALIASES.items():
-        if alias.casefold() in text:
-            found.append((text.find(alias.casefold()), -len(alias), canonical))
+        if _contains(text, alias):
+            start = text.find(alias.casefold())
+            found.append((start, start + len(alias), canonical))
     for canonical in known_airlines:
         if _contains(text, canonical):
-            found.append((text.find(canonical.casefold()), -len(canonical), canonical))
+            start = text.find(canonical.casefold())
+            found.append((start, start + len(canonical), canonical))
+    # Prefer the longest name at a location.  This prevents ``国泰航空`` from
+    # also matching the nested abbreviation ``泰航`` and prevents
+    # ``Air Canada rouge`` from being shortened to ``Air Canada``.
+    found.sort(key=lambda item: (item[0], -(item[1] - item[0])))
     answer = []
-    for _, _, canonical in sorted(found):
+    accepted_spans: list[tuple[int, int]] = []
+    for start, end, canonical in found:
+        if any(existing_start <= start and end <= existing_end
+               for existing_start, existing_end in accepted_spans):
+            continue
         if canonical not in answer and canonical in known_airlines:
             answer.append(canonical)
+            accepted_spans.append((start, end))
     return answer[:3]
 
 
@@ -312,6 +327,14 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
         aspect = "overall"
         aspects = [aspect]
     polarity = _first_alias(folded, POLARITY_ALIASES) or default_polarity
+    # Balanced evaluative questions ask for both sides.  In particular, the
+    # substring “不好” inside “好不好” must not silently become a negative-only
+    # evidence filter.
+    balanced_sentiment_question = any(term in folded for term in (
+        "好不好", "是好是坏", "正面还是负面", "good or bad", "positive or negative",
+    ))
+    if balanced_sentiment_question:
+        polarity = None
     # “哪家最好 / which is best” asks for a comparison over both positive and
     # negative evidence; “最好” must not silently become a positive-only filter.
     if ("哪家" in folded or "which" in folded) and ("最好" in folded or "best" in folded):
@@ -331,12 +354,23 @@ def parse_question(question: str, *, known_airlines: Iterable[str], origins: Ite
     # the English aspect expansion in query_service.ASPECT_QUERIES.
     subtopics_by_aspect = {}
     for requested_aspect in aspects:
-        requested = {}
+        matches = []
         for key, (aliases, expansion) in SUBTOPIC_RULES.get(requested_aspect, {}).items():
-            if any(_contains(folded, alias) for alias in aliases):
-                requested[key] = expansion
+            positions = [folded.find(alias.casefold()) for alias in aliases
+                         if _contains(folded, alias)]
+            if positions:
+                matches.append((min(positions), key, expansion))
+        requested = {key: expansion for _, key, expansion in sorted(matches)}
         if requested:
             subtopics_by_aspect[requested_aspect] = requested
+    # “座椅清洁度” is a seat subtopic.  The generic word “清洁” also matches
+    # the top-level cabin-cleanliness aspect, which used to turn this into an
+    # unintended multi-aspect query.
+    if ("seat" in aspects and "other" in aspects
+            and "seat_cleanliness" in subtopics_by_aspect.get("seat", {})
+            and not any(_contains(folded, term) for term in (
+                "客舱清洁", "机舱清洁", "cabin cleanliness", "toilet", "厕所", "洗手间"))):
+        aspects = [value for value in aspects if value != "other"]
     subtopics = subtopics_by_aspect.get(aspect, {})
     words = re.findall(r"[a-z][a-z0-9'-]{2,}", folded)
     stop = {"which", "what", "how", "does", "have", "with", "from", "that", "this",
