@@ -25,38 +25,86 @@ _AIRLINE_NAMES_ZH = {"Singapore Airlines": "新加坡航空", "United Airlines":
 _CABIN_NAMES_ZH = {"Economy Class": "经济舱", "Premium Economy": "超级经济舱",
                    "Business Class": "商务舱", "First Class": "头等舱"}
 _SUBTOPIC_SUBJECTS = {
-    "quality": "餐食质量与口味", "portion": "餐食分量", "variety": "餐食品种与选择",
-    "drinks": "机上饮品", "special_meals": "特殊餐食", "temperature": "餐食温度",
+    "menu_items": "具体餐食与菜品", "quality": "餐食质量与口味", "portion": "餐食分量", "variety": "餐食品种与选择",
+    "drinks": "机上饮品", "special_meals": "特殊餐食", "temperature": "餐食温度", "meal_service": "餐食服务流程",
     "content": "娱乐内容", "screen": "娱乐屏幕", "wifi": "机上 Wi-Fi",
     "audio": "耳机与音质", "usability": "娱乐系统操作", "legroom": "座位腿部空间",
     "width": "座位宽度", "recline": "座椅靠背调节与躺平", "comfort": "座椅舒适度",
     "condition": "座椅机械状况", "seat_cleanliness": "座椅清洁度",
-    "power": "座位充电与电源", "attitude": "空乘服务态度",
+    "power": "座位充电与电源", "privacy": "座位隐私", "storage": "座位储物", "attitude": "空乘服务态度",
     "efficiency": "空乘服务效率", "professionalism": "空乘专业程度",
-    "availability": "空乘响应与在场服务", "punctuality": "航班准点表现",
+    "availability": "空乘响应与在场服务", "communication": "空乘沟通与语言", "punctuality": "航班准点表现",
     "delay_handling": "延误与取消处置", "baggage": "行李服务", "checkin": "值机服务",
-    "gate_service": "登机口与登机服务", "lounge": "机场休息室", "price": "票价",
-    "refund": "退款与改签", "support": "客服", "booking": "预订系统",
+    "gate_service": "登机口与登机服务", "lounge": "机场休息室", "transfer": "转机衔接", "assistance": "特殊协助",
+    "price": "票价", "refund": "退款与改签", "support": "客服", "booking": "预订系统", "fees": "附加费用",
     "cleanliness": "客舱清洁", "toilet": "机上洗手间", "cabin_temperature": "客舱温度",
+    "amenities": "机上用品", "noise": "客舱噪音", "aircraft_condition": "飞机与客舱状况",
 }
 _ASPECT_NAMES_EN = {"seat": "seat comfort", "staff": "cabin crew service", "food": "food and beverages",
                     "entertainment": "inflight entertainment and Wi-Fi", "ground": "ground service",
                     "value": "value for money", "overall": "overall experience", "other": "other services"}
 _SUBTOPIC_NAMES_EN = {
-    "quality": "food quality and taste", "portion": "meal portion size", "variety": "meal variety and choice",
-    "drinks": "onboard drinks", "special_meals": "special meals", "temperature": "meal temperature",
+    "menu_items": "specific meals and dishes", "quality": "food quality and taste", "portion": "meal portion size", "variety": "meal variety and choice",
+    "drinks": "onboard drinks", "special_meals": "special meals", "temperature": "meal temperature", "meal_service": "meal-service process",
     "content": "entertainment content", "screen": "entertainment screen", "wifi": "onboard Wi-Fi",
     "audio": "headphones and audio quality", "usability": "entertainment system usability",
     "legroom": "seat legroom", "width": "seat width", "recline": "seat recline and lie-flat capability",
     "comfort": "seat comfort", "condition": "seat condition", "seat_cleanliness": "seat cleanliness",
-    "power": "seat power and charging", "attitude": "crew attitude", "efficiency": "crew efficiency",
-    "professionalism": "crew professionalism", "availability": "crew availability and responsiveness",
+    "power": "seat power and charging", "privacy": "seat privacy", "storage": "seat storage",
+    "attitude": "crew attitude", "efficiency": "crew efficiency",
+    "professionalism": "crew professionalism", "availability": "crew availability and responsiveness", "communication": "crew communication and language",
     "punctuality": "punctuality", "delay_handling": "delay and cancellation handling",
     "baggage": "baggage service", "checkin": "check-in service", "gate_service": "gate and boarding service",
-    "lounge": "airport lounge", "price": "ticket price", "refund": "refunds and changes",
-    "support": "customer support", "booking": "booking system", "cleanliness": "cabin cleanliness",
-    "toilet": "onboard lavatory", "cabin_temperature": "cabin temperature",
+    "lounge": "airport lounge", "transfer": "flight connections", "assistance": "special assistance",
+    "price": "ticket price", "refund": "refunds and changes", "support": "customer support",
+    "booking": "booking system", "fees": "additional fees", "cleanliness": "cabin cleanliness",
+    "toilet": "onboard lavatory", "cabin_temperature": "cabin temperature", "amenities": "onboard amenities",
+    "noise": "cabin noise", "aircraft_condition": "aircraft and cabin condition",
 }
+
+_MENU_ITEM_PATTERNS = (
+    (r"\bbeef rendang\b", "牛肉仁当", "beef rendang"),
+    (r"\blobster thermidor\b", "焗龙虾（Lobster Thermidor）", "lobster thermidor"),
+    (r"\bnasi (?:briyani|biryani)\b", "印度香饭（Nasi Briyani）", "nasi briyani"),
+    (r"\bassam fish\b", "亚参鱼", "assam fish"),
+    (r"\bchicken(?: with)? rice\b", "鸡肉饭", "chicken with rice"),
+    (r"\bmashed potato(?:es)?\b", "土豆泥", "mashed potatoes"),
+    (r"\bcheese board\b", "奶酪拼盘", "cheese board"),
+    (r"\bcorn flakes?\b", "玉米片", "corn flakes"),
+    (r"\bpotato chips?\b", "薯片", "potato chips"),
+    (r"\bice[ -]?cream\b", "冰淇淋", "ice cream"),
+    (r"\bsatay\b", "沙嗲", "satay"),
+    (r"\bchicken\b", "鸡肉餐", "chicken"),
+    (r"\bduck\b", "鸭肉餐", "duck"),
+    (r"\bbeef\b", "牛肉餐", "beef"),
+    (r"\bsteak\b", "牛排", "steak"),
+    (r"\blamb\b", "羊肉餐", "lamb"),
+    (r"\bpork\b", "猪肉餐", "pork"),
+    (r"\bfish\b", "鱼类餐食", "fish"),
+    (r"\bsalmon\b", "三文鱼", "salmon"),
+    (r"\bprawns?\b|\bshrimp\b", "虾", "prawns or shrimp"),
+    (r"\bscallops?\b", "扇贝", "scallops"),
+    (r"\bcrab\b", "蟹肉", "crab"),
+    (r"\brice\b", "米饭", "rice"),
+    (r"\bnoodles?\b", "面条", "noodles"),
+    (r"\bpasta\b", "意面", "pasta"),
+    (r"\bcurry\b", "咖喱", "curry"),
+    (r"\bsandwich(?:es)?\b", "三明治", "sandwiches"),
+    (r"\bsalad\b", "沙拉", "salad"),
+    (r"\bsoup\b", "汤", "soup"),
+    (r"\bomelett?e\b", "煎蛋卷", "omelette"),
+    (r"\bfrittata\b", "意式烘蛋", "frittata"),
+    (r"\beggs?\b", "鸡蛋", "eggs"),
+    (r"\bsausages?\b", "香肠", "sausages"),
+    (r"\bmushrooms?\b", "蘑菇", "mushrooms"),
+    (r"\bfruits?\b", "水果", "fruit"),
+    (r"\byog(?:h)?urt\b", "酸奶", "yogurt"),
+    (r"\bgelato\b", "意式冰淇淋", "gelato"),
+    (r"\bmuffins?\b", "松饼", "muffins"),
+    (r"\bcheese platter\b", "奶酪拼盘", "cheese platter"),
+    (r"\bdessert\b", "甜点", "dessert"),
+    (r"\bbreakfast\b", "早餐", "breakfast"),
+)
 
 
 def _citation_id(prefix: str, number: int) -> str:
@@ -127,9 +175,9 @@ def _allowed_numbers(summary: dict | None) -> set[str]:
 def _model_polarity_summary(summary: dict | None) -> dict:
     """Give the generator exact display values instead of raw decimal shares."""
     summary = summary or {}
-    labeled = int(summary.get("labeled_review_count") or 0)
     positive = int(summary.get("positive_review_count") or 0)
     negative = int(summary.get("negative_review_count") or 0)
+    labeled = positive + negative
     return {
         "labeled_review_count": labeled,
         "positive_review_count": positive,
@@ -138,6 +186,14 @@ def _model_polarity_summary(summary: dict | None) -> dict:
         "negative_percentage": f"{negative / labeled * 100:.1f}%" if labeled else None,
         "ambiguous_review_count": int(summary.get("ambiguous_review_count") or 0),
     }
+
+
+def _model_full_label_distribution(summary: dict | None) -> dict:
+    """Expose one coherent review-level denominator to the generator."""
+    summary = summary or {}
+    normalized = _model_polarity_summary(summary)
+    normalized["review_count"] = int(summary.get("review_count") or normalized["labeled_review_count"])
+    return normalized
 
 
 def _model_subtopic_coverage(coverage: dict) -> dict:
@@ -163,6 +219,7 @@ def _model_comparison_decision(decision: dict) -> dict:
 
 def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
     language = result.get("language", "zh")
+    answer_intent = result.get("answer_intent", "evaluation")
     aspect_names = _ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES
     subtopic_names = _SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES
     aspect = result.get("aspect")
@@ -189,6 +246,12 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
         if not airline and rows:
             airline = rows[0].get("airline")
         full_label_distributions[str(airline or "所选航司")] = result["corpus_label_matches"]
+    full_label_distributions = {
+        airline: _model_full_label_distribution(summary)
+        for airline, summary in full_label_distributions.items()
+    }
+    if answer_intent != "evaluation":
+        full_label_distributions = {}
     system = """你是航空评论分析助手。只能依据输入的原始评分汇总和评论证据作答，不能使用外部知识。
 要求：
 1. 第一行直接回答用户。若 comparison.status 是 clear_difference，必须明确说 winner 在这批历史评分中更好，不准用“褒贬不一”“各有优劣”回避结论。若是 no_clear_difference，说明评分差和为何不足以区分。
@@ -207,15 +270,21 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
         else:
             system += """
 7. subtopic_coverage 包含每个细分项完整直接命中原文的统计，single_subtopic_directions 是基于完整匹配池计算的总体方向。每个细分项的“偏正面/偏负面/正负接近”结论必须严格服从 single_subtopic_directions，绝不能根据页面展示的几条 evidence 决定。若 polarity_summary 可用，在对应细分项段落里用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。展示引用只用于举例：单个细分项优先引用1–2条主流方向评论和1–2条反例；多个细分项时每个方向各引用1条，避免回答过长。"""
+        if "menu_items" in subtopics:
+            system += """
+8. “具体餐食与菜品”是在问吃什么，不是在问好不好。该段只列 evidence 中明确出现的菜名、食材、餐型或饮品，并逐项引用；不要输出餐饮总体评分、正负面比例、质量评价或“总体偏正面/负面”。明确说明评论只证明历史航班上曾出现这些内容，并不构成当前固定菜单或完整菜单。"""
     elif result.get("type") == "comparison":
         system += """
 7. full_label_distributions 是各航司在当前结构化条件下、该上位方面的全量离线标签统计。用一句话分别写出每家航司的总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
     elif full_label_distributions:
         system += """
 7. full_label_distributions 是当前结构化条件下、该方面的全量离线标签统计。用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
-    if requested_aspects:
+    if requested_aspects and answer_intent == "evaluation":
         system += """
 7. requested_aspects 非空时，必须严格按照 requested_aspects 的顺序回答；每个评价方面单独成段，段与段之间空一行。每段必须明确写出方面名称、该方面的原始平均分、满分和评分份数，例如“原始餐饮评分为 3.80/5（900 份）”，再用属于该 query_aspect 的原文解释。不得用一个方面的评分回答另一个方面。回答控制在 220–550 个中文字符。"""
+    if answer_intent != "evaluation":
+        system += f"""
+9. 本题的信息需求类型是 {answer_intent}。enumeration 应列出证据中明确出现的具体项目；availability 应回答证据是否明确显示提供或可用；procedure 应概括证据中的处理过程和结果；measurement 只能复述证据中出现的尺寸、数量或范围。不要用总体评分、正负比例或泛泛的好坏评价替代用户所问事实；没有直接证据就明确说无法确认。"""
     if language == "en":
         system = """You are an airline review analysis assistant. Answer entirely in English and use only the supplied rating summaries, aggregate label statistics, and review evidence.
 Rules:
@@ -226,9 +295,17 @@ Rules:
 5. When requested_subtopics is nonempty, give each requested subtopic its own paragraph in the requested order. Parent-aspect ratings are context and cannot decide a subtopic winner. Follow comparison_subtopic_decisions: declare a subtopic winner only for clear_difference; describe direction without a winner for no_clear_difference; abstain only for insufficient_evidence.
 6. For a single-airline subtopic, the positive/negative/mixed conclusion must follow single_subtopic_directions, which was computed from the full direct-match pool. Never infer the overall direction from the few displayed evidence excerpts. When aggregate statistics are available, include total matched reviews and the positive and negative counts and percentages in one compact sentence. Displayed quotations are examples only: for one subtopic, prefer one or two majority-direction examples and one or two counterexamples; for multiple subtopics, use one from each direction per subtopic.
 7. Translate nothing into Chinese and do not output Chinese characters. Write natural, specific English and avoid boilerplate. Keep the answer concise."""
-    payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
+        if "menu_items" in subtopics:
+            system += """
+8. For the “specific meals and dishes” subtopic, answer what was served. List only concrete dishes, ingredients, meal types, or drinks explicitly present in evidence and cite them. Do not replace the answer with ratings, sentiment percentages, or food-quality judgments. Say that these are historical examples rather than a current or exhaustive menu."""
+        if answer_intent != "evaluation":
+            system += f"""
+9. The information-need type is {answer_intent}. For enumeration, list concrete items explicitly present in evidence. For availability, state only what the evidence confirms was provided or usable. For procedure, summarize the documented process and outcome. For measurement, repeat only dimensions, counts, or ranges stated in evidence. Do not substitute ratings or sentiment for the requested fact, and say when direct evidence is absent."""
+    payload = {"question": question, "answer_intent": answer_intent,
+               "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
-               "rating_summary": None if subtopics else _rating_payload(result.get("rating_summary")),
+               "rating_summary": (None if subtopics or answer_intent != "evaluation"
+                                  else _rating_payload(result.get("rating_summary"))),
                "parent_aspect_rating_summary": (_rating_payload(result.get("rating_summary"))
                                                 if subtopics and result.get("type") == "comparison" else None),
                "comparison_subtopic_coverage": {
@@ -279,6 +356,16 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if language == "en" and re.search(r"[\u3400-\u9fff]", clean):
         reasons.append("wrong_output_language")
     without_citations = _CITATION_RE.sub("", clean)
+    count_patterns = (
+        r"([\d,]+)\s*条(?:不同)?评论(?:里|中).*?正向(?:评论)?\s*([\d,]+)\s*条.*?负向(?:评论)?\s*([\d,]+)\s*条",
+        r"([\d,]+)\s*(?:matched |clearly classified )?reviews?.*?([\d,]+)\s*(?:were )?positive.*?([\d,]+)\s*(?:were )?negative",
+    )
+    for pattern in count_patterns:
+        for total, positive, negative in re.findall(pattern, without_citations, re.IGNORECASE | re.DOTALL):
+            values = [int(value.replace(",", "")) for value in (total, positive, negative)]
+            if values[1] + values[2] > values[0]:
+                reasons.append("incoherent_review_level_counts")
+                break
     numeric_tokens = [token.replace(",", "") for token in
                       re.findall(r"\d[\d,]*(?:\.\d+)?", without_citations)]
     unexpected = set(numeric_tokens) - (_allowed_numbers(rating_summary) | set(evidence_numbers or ()))
@@ -508,9 +595,9 @@ def _polarity_distribution_sentence(summaries: dict[str, dict], *, direct: bool 
     """Format one compact sentence from full-corpus, review-level label totals."""
     parts = []
     for airline, data in summaries.items():
-        labeled = int(data.get("labeled_review_count") or 0)
         positive = int(data.get("positive_review_count") or 0)
         negative = int(data.get("negative_review_count") or 0)
+        labeled = positive + negative
         if not labeled:
             continue
         positive_share = positive / labeled * 100
@@ -531,9 +618,9 @@ def _polarity_distribution_sentence(summaries: dict[str, dict], *, direct: bool 
 def _polarity_distribution_sentence_en(summaries: dict[str, dict], *, direct: bool = False) -> str:
     parts = []
     for airline, data in summaries.items():
-        labeled = int(data.get("labeled_review_count") or 0)
         positive = int(data.get("positive_review_count") or 0)
         negative = int(data.get("negative_review_count") or 0)
+        labeled = positive + negative
         if not labeled:
             continue
         matched = int(data.get("direct_review_count") or data.get("review_count") or labeled)
@@ -546,6 +633,68 @@ def _polarity_distribution_sentence_en(summaries: dict[str, dict], *, direct: bo
         return ""
     scope = "Directly relevant review-level automatic-label summary" if direct else "Aspect-level automatic-label summary"
     return scope + ": " + "; ".join(parts) + "."
+
+
+def _menu_item_answer(result: dict, rows: list[dict]) -> str:
+    """List concrete foods from cited evidence instead of rating the food."""
+    language = result.get("language", "zh")
+    candidates = [row for row in rows
+                  if "menu_items" in row.get("direct_subtopic_matches", [])]
+    if not candidates:
+        candidates = [row for row in rows
+                      if "menu_items" in row.get("matched_subtopics", [])]
+    groups = []
+    seen = set()
+    for row in candidates:
+        labels = []
+        source = str(row.get("text", ""))
+        for pattern, zh_label, en_label in _MENU_ITEM_PATTERNS:
+            label = en_label if language == "en" else zh_label
+            if label not in seen and re.search(pattern, source, re.IGNORECASE):
+                labels.append(label)
+                seen.add(label)
+        if labels:
+            groups.append((labels, row["citation_id"]))
+        if len(groups) >= 6 or len(seen) >= 14:
+            break
+    airline = str((candidates[0].get("airline") if candidates else "") or "")
+    if language == "en":
+        if not groups:
+            examples = "; ".join(
+                f'“{textwrap.shorten(str(row.get("text", "")).strip(), width=150, placeholder="…")}”[{row["citation_id"]}]'
+                for row in candidates[:2])
+            return ("The retrieved historical reviews mention food but do not name a concrete dish clearly enough "
+                    f"to answer what was served. Available excerpts: {examples}.")
+        details = "; ".join(f'{", ".join(labels)} [{citation}]' for labels, citation in groups)
+        return (f"Historical {airline or 'airline'} reviews explicitly mention: {details}. "
+                "These are examples reported on particular flights from 2002–2019, not a current or exhaustive menu.")
+    airline_label = _AIRLINE_NAMES_ZH.get(airline, airline or "所选航司")
+    if not groups:
+        examples = "；".join(
+            f'“{textwrap.shorten(str(row.get("text_zh") or row.get("text", "")).strip(), width=120, placeholder="…")}”[{row["citation_id"]}]'
+            for row in candidates[:2])
+        return (f"目前找到的{airline_label}评论虽然提到餐食，但没有清楚写出具体菜品，"
+                f"因此不能可靠回答有什么吃。可核对的原文为：{examples}。")
+    details = "；".join(f'{"、".join(labels)}[{citation}]' for labels, citation in groups)
+    return (f"从{airline_label}的历史评论中，能明确确认曾提供过这些具体餐食：{details}。"
+            "这些只是2002–2019年个别航班评论中出现过的例子，不是当前菜单，也不是完整菜单。")
+
+
+def _fact_evidence_answer(result: dict, rows: list[dict]) -> str:
+    """Fallback for factual detail questions: expose evidence without inventing a verdict."""
+    language = result.get("language", "zh")
+    selected = rows[:3]
+    if language == "en":
+        details = "; ".join(
+            f'“{textwrap.shorten(str(row.get("text", "")).strip(), width=170, placeholder="…")}”[{row["citation_id"]}]'
+            for row in selected)
+        return ("The retrieved historical reviews directly report the following details: " + details + ". "
+                "They document particular flights rather than a guaranteed current product.")
+    details = "；".join(
+        f'“{textwrap.shorten(str(row.get("text_zh") or row.get("display_text") or row.get("text", "")).strip(), width=135, placeholder="…")}”[{row["citation_id"]}]'
+        for row in selected)
+    return ("与所问细节直接相关的历史评论提到：" + details + "。"
+            "这些是具体航班经历，只能说明评论中出现过的情况，不能推断为当前固定服务。")
 
 
 def _fallback_answer_en(result: dict, rows: list[dict]) -> str:
@@ -668,6 +817,8 @@ def _fallback_answer_en(result: dict, rows: list[dict]) -> str:
 def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
     """Produce a useful answer without an LLM, grounded in visible evidence."""
     del question
+    if result.get("answer_intent", "evaluation") != "evaluation" and rows:
+        return _fact_evidence_answer(result, rows)
     if result.get("language") == "en":
         return _fallback_answer_en(result, rows)
     if result.get("type") == "multi_aspect":
@@ -1020,6 +1171,11 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     rows = collect_evidence(result)
     valid_ids = {row["citation_id"] for row in rows}
     fallback = fallback_answer(question, result, rows)
+    if set(result.get("subtopics", {})) == {"menu_items"} and rows:
+        menu_answer = _menu_item_answer(result, rows)
+        return {"text": menu_answer, "mode": "menu_item_evidence", "valid": True,
+                "validation_errors": [], "citations": sorted(_CITATION_RE.findall(menu_answer)),
+                "model_seconds": 0.0}
     rating_comparison = (result.get("rating_summary") or {}).get("comparison", {})
     if (not result.get("subtopics") and result.get("type") == "comparison"
             and rating_comparison.get("status") in {"clear_difference", "no_clear_difference"}):
@@ -1054,12 +1210,13 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         aggregate_parts.append(result)
         for part in aggregate_parts:
             full = part.get("corpus_label_matches") or {}
-            for value in full.values():
+            for key in ("review_count", "labeled_review_count", "positive_review_count",
+                        "negative_review_count", "ambiguous_review_count"):
+                value = full.get(key)
                 if isinstance(value, int) and not isinstance(value, bool):
                     evidence_numbers.add(str(value))
-                elif isinstance(value, float):
-                    evidence_numbers.update({f"{value:.4f}", f"{value*100:.1f}"})
-            full_total = int(full.get("labeled_review_count") or 0)
+            full_total = (int(full.get("positive_review_count") or 0)
+                          + int(full.get("negative_review_count") or 0))
             if full_total:
                 for key in ("positive_review_count", "negative_review_count"):
                     evidence_numbers.add(f"{int(full.get(key) or 0) / full_total * 100:.1f}")
@@ -1085,7 +1242,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         text = str(payload.get("text", "")).strip()
         model_seconds = float(payload.get("seconds", 0.0))
         valid, errors = validate_answer(text, valid_ids, rating_summary=validation_rating,
-                                        require_rating_winner=not bool(result.get("subtopics")),
+                                        require_rating_winner=(not bool(result.get("subtopics"))
+                                                               and result.get("answer_intent", "evaluation") == "evaluation"),
                                         required_subtopics=tuple(result.get("subtopics", {})),
                                         required_aspects=required_aspects,
                                         evidence_numbers=evidence_numbers,
@@ -1122,7 +1280,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         model_seconds += float(repaired_payload.get("seconds", 0.0))
         repaired_valid, repaired_errors = validate_answer(
             repaired, valid_ids, rating_summary=validation_rating,
-            require_rating_winner=not bool(result.get("subtopics")),
+            require_rating_winner=(not bool(result.get("subtopics"))
+                                   and result.get("answer_intent", "evaluation") == "evaluation"),
             required_subtopics=tuple(result.get("subtopics", {})), required_aspects=required_aspects,
             evidence_numbers=evidence_numbers,
             require_all_rating_values=require_all_rating_values,

@@ -61,6 +61,25 @@ class QueryQualityTests(unittest.TestCase):
         self.assertFalse(_direct_subtopic_match("The tray table pressed into my stomach.", "seat_cleanliness"))
         self.assertTrue(_direct_subtopic_match("The tray table was dirty and sticky.", "seat_cleanliness"))
         self.assertFalse(_direct_subtopic_match("The toilet seat and basin were stained.", "seat_cleanliness"))
+        self.assertTrue(_direct_subtopic_match("Breakfast included beef rendang and rice.", "menu_items"))
+        self.assertFalse(_direct_subtopic_match("The meal quality was excellent.", "menu_items"))
+
+    def test_new_cross_aspect_subtopics_have_direct_evidence_routes(self):
+        cases = {
+            "meal_service": "Book the Cook was pre-ordered before the meal service.",
+            "privacy": "The suite door provided excellent privacy.",
+            "storage": "There was a useful storage compartment beside the seat.",
+            "communication": "Crew communication and language skills were clear.",
+            "transfer": "Staff helped after a missed connection during transit.",
+            "assistance": "Wheelchair special assistance was arranged.",
+            "fees": "A hidden baggage fee was added to the fare.",
+            "amenities": "The amenity kit included a blanket and pillow.",
+            "noise": "Engine noise made the cabin noisy.",
+            "aircraft_condition": "The old aircraft had a dated cabin.",
+        }
+        for topic, text in cases.items():
+            with self.subTest(topic=topic):
+                self.assertTrue(_direct_subtopic_match(text, topic))
 
     def test_full_slice_subtopic_scan_finds_direct_matches_before_retrieval(self):
         frame = pd.DataFrame([

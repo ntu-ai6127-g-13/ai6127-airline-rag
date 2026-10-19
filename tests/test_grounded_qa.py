@@ -91,6 +91,31 @@ class QuestionParserTests(unittest.TestCase):
         self.assertEqual(parsed.aspect, "food")
         self.assertEqual(list(parsed.subtopics), ["quality", "portion", "variety"])
 
+    def test_what_food_question_is_concrete_menu_intent(self):
+        parsed = parse_question("新航的餐食有什么吃？", known_airlines=self.airlines)
+        self.assertEqual(parsed.aspect, "food")
+        self.assertEqual(list(parsed.subtopics), ["menu_items"])
+        self.assertEqual(parsed.answer_intent, "enumeration")
+
+    def test_information_need_and_subtopic_routing_across_aspects(self):
+        cases = {
+            "新航有什么电影可以看？": ("entertainment", "content", "enumeration"),
+            "新航有没有机上WiFi？": ("entertainment", "wifi", "availability"),
+            "新航延误怎么处理？": ("ground", "delay_handling", "procedure"),
+            "新航经济舱座位多宽？": ("seat", "width", "measurement"),
+            "新航商务舱隐私怎么样？": ("seat", "privacy", "evaluation"),
+            "新航转机衔接怎么样？": ("ground", "transfer", "evaluation"),
+            "新航空乘的语言沟通怎么样？": ("staff", "communication", "evaluation"),
+            "新航有没有毛毯和枕头？": ("other", "amenities", "availability"),
+            "新航座位有储物空间吗？": ("seat", "storage", "availability"),
+        }
+        for question, (aspect, subtopic, intent) in cases.items():
+            with self.subTest(question=question):
+                parsed = parse_question(question, known_airlines=self.airlines)
+                self.assertEqual(parsed.aspect, aspect)
+                self.assertIn(subtopic, parsed.subtopics)
+                self.assertEqual(parsed.answer_intent, intent)
+
     def test_seat_subtopics_work_without_parent_aspect_word(self):
         parsed = parse_question("新航的靠背能否调整，是否舒服，腿部空间怎么样？",
                                 known_airlines=self.airlines)
@@ -346,6 +371,50 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertIn("关于新加坡航空的餐食分量", answer["text"])
         self.assertIn("完整直接匹配评论的自动标签总体偏负面", answer["text"])
         self.assertNotIn("这些细分问题需要分别看原文", answer["text"])
+
+    def test_menu_question_lists_dishes_instead_of_rating_food(self):
+        rows = [
+            {**evidence("1", "Singapore Airlines", "positive"), "pred_aspect": "food",
+             "text": "The beef rendang choice was served with rice.",
+             "matched_subtopics": ["menu_items"], "direct_subtopic_matches": ["menu_items"]},
+            {**evidence("2", "Singapore Airlines", "negative"), "pred_aspect": "food",
+             "text": "Breakfast included sausage, mushrooms and omelette with fruit.",
+             "matched_subtopics": ["menu_items"], "direct_subtopic_matches": ["menu_items"]},
+        ]
+        result = {"language": "zh", "aspect": "food",
+                  "subtopics": {"menu_items": "specific dishes"}, "evidence": rows,
+                  "rating_summary": {"available": True, "scale": 5, "airlines": {
+                      "Singapore Airlines": {"mean": 3.87, "n": 1003}}}}
+        with patch("src.grounded_qa.localize_evidence", return_value=result):
+            answer = answer_question("新航的餐食有什么吃", result, use_model=True)
+        self.assertEqual(answer["mode"], "menu_item_evidence")
+        self.assertIn("牛肉仁当", answer["text"])
+        self.assertIn("香肠", answer["text"])
+        self.assertIn("煎蛋卷", answer["text"])
+        self.assertNotIn("3.87", answer["text"])
+        self.assertNotIn("正向", answer["text"])
+        self.assertEqual(answer["citations"], ["1", "2"])
+
+    def test_non_evaluative_fallback_does_not_substitute_parent_rating(self):
+        row = {**evidence("1", "Singapore Airlines", "positive"),
+               "text": "A power socket and USB charging port were available.",
+               "matched_subtopics": ["power"], "direct_subtopic_matches": ["power"]}
+        result = {"language": "en", "answer_intent": "availability", "aspect": "seat",
+                  "subtopics": {"power": "seat charging"}, "evidence": [row],
+                  "rating_summary": {"available": True, "scale": 5, "airlines": {
+                      "Singapore Airlines": {"mean": 3.83, "n": 1015}}}}
+        answer = answer_question("Does the seat have charging?", result, use_model=False)
+        self.assertIn("power socket and USB charging", answer["text"])
+        self.assertNotIn("3.83", answer["text"])
+        self.assertNotIn("positive", answer["text"].lower())
+
+    def test_validation_rejects_mixed_sentence_and_review_counts(self):
+        text = ("自动标签汇总显示，749条评论中，正向评论884条，负向评论661条。"
+                "一条评论提到餐食。[1]")
+        ok, reasons = validate_answer(text, {"1"}, allow_aggregate_counts=True,
+                                      evidence_numbers={"749", "884", "661"})
+        self.assertFalse(ok)
+        self.assertIn("incoherent_review_level_counts", reasons)
 
     def test_single_subtopic_direction_uses_full_aggregate_not_top_examples(self):
         negative_one = {**evidence("1", "Singapore Airlines", "negative"),
