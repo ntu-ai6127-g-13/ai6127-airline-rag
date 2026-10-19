@@ -124,6 +124,43 @@ def _allowed_numbers(summary: dict | None) -> set[str]:
     return allowed
 
 
+def _model_polarity_summary(summary: dict | None) -> dict:
+    """Give the generator exact display values instead of raw decimal shares."""
+    summary = summary or {}
+    labeled = int(summary.get("labeled_review_count") or 0)
+    positive = int(summary.get("positive_review_count") or 0)
+    negative = int(summary.get("negative_review_count") or 0)
+    return {
+        "labeled_review_count": labeled,
+        "positive_review_count": positive,
+        "positive_percentage": f"{positive / labeled * 100:.1f}%" if labeled else None,
+        "negative_review_count": negative,
+        "negative_percentage": f"{negative / labeled * 100:.1f}%" if labeled else None,
+        "ambiguous_review_count": int(summary.get("ambiguous_review_count") or 0),
+    }
+
+
+def _model_subtopic_coverage(coverage: dict) -> dict:
+    answer = {}
+    for topic, analysis in coverage.items():
+        answer[topic] = {
+            "direct_review_count": int(analysis.get("direct_review_count") or 0),
+            "direct_sentence_count": int(analysis.get("direct_sentence_count") or 0),
+            "polarity_summary": _model_polarity_summary(analysis.get("polarity_summary")),
+        }
+    return answer
+
+
+def _model_comparison_decision(decision: dict) -> dict:
+    return {
+        key: value for key, value in decision.items()
+        if key in {"status", "winner", "leader", "reason"}
+    } | {
+        "summaries": {airline: _model_polarity_summary(summary)
+                      for airline, summary in decision.get("summaries", {}).items()}
+    }
+
+
 def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
     language = result.get("language", "zh")
     aspect_names = _ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES
@@ -158,7 +195,7 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
 2. 评分均值、评分人数和差值只能逐字使用 rating_summary 中给出的数值；正负比例只能使用 full_label_distributions 或 comparison_subtopic_decisions 中的全量统计，不能统计页面展示的几条证据。
 3. 评分汇总是主要定量依据，评论原文用来解释具体优缺点。引用格式严格为 [1]、[2] 或比较查询中的 [A1]、[B2]，只能使用存在的编号。
 4. 自动分类标签仅供选证据参考，应按英文原文理解。不要把检索到的几句话当作总体好评率。
-5. requested_subtopics 非空时，每个细分项必须单独成段，段与段之间空一行；单航司问题的每段以具体航司名和细分项开头，例如“关于新加坡航空的腿部空间”，不要写成“关于航司的腿部空间”。随后给出该项的发现和引用。禁止把多个细分项挤在同一段。优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。回答中不要使用“多数、普遍、更多人、较多、整体、总体”等范围词，应写“检索到的原文同时包含……”并说明正反例。
+5. requested_subtopics 非空时，每个细分项必须单独成段，段与段之间空一行；单航司问题的每段以具体航司名和细分项开头，例如“关于新加坡航空的腿部空间”，不要写成“关于航司的腿部空间”。随后给出该项的发现和引用。禁止把多个细分项挤在同一段。优先引用 direct_subtopic_matches、其次引用 matched_subtopics 含对应名称的证据。原始方面评分只是上位方面的总体分，不能据此断言某个细分项好坏，也不能据此决定细分项比较的胜负；某项缺少直接证据就明确说明。只有完整直接匹配评论的自动标签汇总可以支持“总体偏正面/负面”的说法；不要用“多数旅客、普遍认为、更多人”等措辞把自动标签解释成人工共识。
 6. 数据来自 2002–2019 年，只能描述这批历史评论，不能声称是当前服务。用自然、具体的中文，避免套话和“整体呈现某种倾向”。回答控制在 150–350 个中文字符。"""
     if subtopics:
         system = system.replace(
@@ -169,7 +206,7 @@ def _prompt(question: str, result: dict, rows: list[dict]) -> list[dict]:
 7. 这是细分属性的航司比较。必须逐家写出 parent_aspect_rating_summary 中的原始上位方面平均分、满分和评分份数，明确它不是细分项独立评分。上位 comparison 为 clear_difference 时，先明确说明 winner 在所问上位方面的历史评分更好。每个细分项严格服从 comparison_subtopic_decisions：clear_difference 才明确该项更支持 winner；no_clear_difference 应报告方向但说明差异不足以可靠区分；insufficient_evidence 才说证据不足。每个细分项把各航司的正向数量与百分比、负向数量与百分比合并在一句“自动标签汇总”中；这些汇总来自完整直接命中原文，不是页面展示的几条证据。随后用可见引用举例。没有直接原文的候选必须明确写出缺证据。"""
         else:
             system += """
-7. subtopic_coverage 包含每个细分项完整直接命中原文的统计，single_subtopic_directions 是基于完整匹配池计算的总体方向。每个细分项的“偏正面/偏负面/正负接近”结论必须严格服从 single_subtopic_directions，绝不能根据页面展示的几条 evidence 决定。若 polarity_summary 可用，在对应细分项段落里用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。展示引用只用于举例，优先给一条主流方向和一条反例。"""
+7. subtopic_coverage 包含每个细分项完整直接命中原文的统计，single_subtopic_directions 是基于完整匹配池计算的总体方向。每个细分项的“偏正面/偏负面/正负接近”结论必须严格服从 single_subtopic_directions，绝不能根据页面展示的几条 evidence 决定。若 polarity_summary 可用，在对应细分项段落里用一句话写出总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。展示引用只用于举例：单个细分项优先引用1–2条主流方向评论和1–2条反例；多个细分项时每个方向各引用1条，避免回答过长。"""
     elif result.get("type") == "comparison":
         system += """
 7. full_label_distributions 是各航司在当前结构化条件下、该上位方面的全量离线标签统计。用一句话分别写出每家航司的总评论数、正向数量与百分比、负向数量与百分比，并明确称为“自动标签汇总”。"""
@@ -187,7 +224,7 @@ Rules:
 3. Use citations exactly as supplied, such as [1], [A1], or [B2]. Every substantive evidence claim needs a valid citation.
 4. Automatic labels are supporting statistics rather than human gold labels. Describe the data as historical reviews from 2002–2019.
 5. When requested_subtopics is nonempty, give each requested subtopic its own paragraph in the requested order. Parent-aspect ratings are context and cannot decide a subtopic winner. Follow comparison_subtopic_decisions: declare a subtopic winner only for clear_difference; describe direction without a winner for no_clear_difference; abstain only for insufficient_evidence.
-6. For a single-airline subtopic, the positive/negative/mixed conclusion must follow single_subtopic_directions, which was computed from the full direct-match pool. Never infer the overall direction from the few displayed evidence excerpts. When aggregate statistics are available, include total matched reviews and the positive and negative counts and percentages in one compact sentence. Displayed quotations are examples only; prefer one majority-direction example and one counterexample.
+6. For a single-airline subtopic, the positive/negative/mixed conclusion must follow single_subtopic_directions, which was computed from the full direct-match pool. Never infer the overall direction from the few displayed evidence excerpts. When aggregate statistics are available, include total matched reviews and the positive and negative counts and percentages in one compact sentence. Displayed quotations are examples only: for one subtopic, prefer one or two majority-direction examples and one or two counterexamples; for multiple subtopics, use one from each direction per subtopic.
 7. Translate nothing into Chinese and do not output Chinese characters. Write natural, specific English and avoid boilerplate. Keep the answer concise."""
     payload = {"question": question, "aspect": aspect, "filters": result.get("filters", {}),
                "requested_subtopics": subtopics,
@@ -195,16 +232,21 @@ Rules:
                "parent_aspect_rating_summary": (_rating_payload(result.get("rating_summary"))
                                                 if subtopics and result.get("type") == "comparison" else None),
                "comparison_subtopic_coverage": {
-                   airline: part.get("subtopic_analysis", {})
+                   airline: _model_subtopic_coverage(part.get("subtopic_analysis", {}))
                    for airline, part in result.get("results", {}).items()
                } if subtopics and result.get("type") == "comparison" else {},
-               "subtopic_coverage": (result.get("subtopic_analysis", {})
+               "subtopic_coverage": (_model_subtopic_coverage(result.get("subtopic_analysis", {}))
                                      if subtopics and result.get("type") != "comparison" else {}),
                "single_subtopic_directions": {
-                   topic: _single_subtopic_direction(result, topic) for topic in subtopics
+                   topic: {
+                       "status": (direction := _single_subtopic_direction(result, topic))["status"],
+                       "direct_review_count": direction.get("direct_review_count", 0),
+                       "summary": _model_polarity_summary(direction.get("summary")),
+                   } for topic in subtopics
                } if subtopics and result.get("type") != "comparison" else {},
                "comparison_subtopic_decisions": {
-                   topic: _comparison_subtopic_decision(result, topic) for topic in subtopics
+                   topic: _model_comparison_decision(_comparison_subtopic_decision(result, topic))
+                   for topic in subtopics
                } if subtopics and result.get("type") == "comparison" else {},
                "full_label_distributions": full_label_distributions,
                "requested_aspects": requested_aspects,
@@ -263,6 +305,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
         topic_paragraphs[topic] = containing
         if not containing:
             reasons.append("missing_subtopic:" + topic)
+    aggregate_direction_paragraphs: set[int] = set()
     for topic, expected in (expected_subtopic_directions or {}).items():
         indices = topic_paragraphs.get(topic, [])
         relevant = " ".join(paragraphs[index] for index in indices)
@@ -270,13 +313,24 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
             opposite = (r"leans? negative|mostly negative|negative (?:reviews? )?(?:dominate|majority)"
                         if expected == "positive" else
                         r"leans? positive|mostly positive|positive (?:reviews? )?(?:dominate|majority)")
+            matching = (r"leans? positive|mostly positive|positive (?:reviews? )?(?:dominate|majority)"
+                        if expected == "positive" else
+                        r"leans? negative|mostly negative|negative (?:reviews? )?(?:dominate|majority)")
             relevant = relevant.casefold()
         else:
             opposite = (r"偏负面|负面(?:评价|评论)?(?:占主导|为主|居多)|负向(?:占主导|为主|居多)"
                         if expected == "positive" else
                         r"偏正面|正面(?:评价|评论)?(?:占主导|为主|居多)|正向(?:占主导|为主|居多)")
+            matching = (r"偏正面|正面(?:评价|评论)?(?:占主导|为主|居多)|正向(?:占主导|为主|居多)"
+                        if expected == "positive" else
+                        r"偏负面|负面(?:评价|评论)?(?:占主导|为主|居多)|负向(?:占主导|为主|居多)")
         if expected in {"positive", "negative"} and re.search(opposite, relevant):
             reasons.append("contradicts_full_subtopic_aggregate:" + topic)
+        elif expected in {"positive", "negative"}:
+            aggregate_direction_paragraphs.update(
+                index for index in indices
+                if re.search(matching, paragraphs[index].casefold() if language == "en"
+                             else paragraphs[index]))
     if len(required_subtopics) > 1:
         used = set()
         assigned = []
@@ -327,23 +381,29 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
             reasons.append("aspects_not_separated")
         elif assigned != sorted(assigned):
             reasons.append("aspects_out_of_order")
-    if required_subtopics and re.search(
-            r"多数|普遍|大部分|更多(?:人|旅客|评论)|较多(?:人|旅客|评论)|整体|总体", clean):
+    prevalence_pattern = (r"多数|普遍|大部分|更多(?:人|旅客|评论)|较多(?:人|旅客|评论)"
+                          if expected_subtopic_directions else
+                          r"多数|普遍|大部分|更多(?:人|旅客|评论)|较多(?:人|旅客|评论)|整体|总体")
+    if required_subtopics and re.search(prevalence_pattern, clean):
         reasons.append("unsupported_prevalence_claim")
     # Each substantive paragraph must contain a citation.  A paragraph can open
     # with a short conclusion and immediately substantiate it in later cited
     # sentences, which is the normal answer form produced by the local model.
     # Generic caveats are allowed without citations because they describe system
     # limits, not the review evidence.
-    exemptions = (("data", "sample", "retriev", "does not represent", "insufficient", "automatic-label", "rating")
+    exemptions = (("data", "sample", "retriev", "does not represent", "insufficient", "automatic-label", "rating",
+                   "full direct-match aggregate")
                   if language == "en" else
-                  ("数据", "样本", "检索", "不能代表", "证据不足", "自动标签", "截至", "评分"))
-    for paragraph in paragraphs:
+                  ("数据", "样本", "检索", "不能代表", "证据不足", "自动标签", "截至", "评分",
+                   "完整直接匹配评论"))
+    for paragraph_index, paragraph in enumerate(paragraphs):
         aspect_mentions = sum(_ASPECT_NAMES.get(aspect, aspect) in paragraph for aspect in required_aspects)
         if aspect_mentions >= 2 and any(term in paragraph for term in ("如下", "分别")):
             continue
         searchable = paragraph.casefold() if language == "en" else paragraph
-        if len(paragraph) < 8 or _CITATION_RE.search(paragraph) or any(term in searchable for term in exemptions):
+        if (len(paragraph) < 8 or _CITATION_RE.search(paragraph)
+                or paragraph_index in aggregate_direction_paragraphs
+                or any(term in searchable for term in exemptions)):
             continue
         reasons.append("uncited_claim")
         break
@@ -400,6 +460,48 @@ def _single_subtopic_direction(result: dict, topic: str) -> dict:
         status = "mixed"
     return {"status": status, "summary": summary,
             "direct_review_count": analysis.get("direct_review_count", 0)}
+
+
+def _balanced_polarity_examples(rows: list[dict], preferred: str | None,
+                                *, per_direction: int) -> list[dict]:
+    """Pick majority examples and counterexamples without using them for the conclusion."""
+    positive_cues = re.compile(
+        r"\b(?:excellent|wonderful|great|good|helpful|professional|friendly|polite|comfortable|"
+        r"generous|plentiful|easy|simple|reasonable|impressive|delicious|clean|on time)\b|"
+        r"\b(?:full|complete) refund\b|\bno (?:luggage|baggage|bags?).{0,25}\blost\b",
+        re.IGNORECASE)
+    negative_cues = re.compile(
+        r"\b(?:awful|terrible|poor|bad|worst|rude|dirty|filthy|cramped|uncomfortable|"
+        r"problem|fault|broken|damaged|lost|cancelled|canceled|delay(?:ed)?|complaint)\b|"
+        r"\b(?:no|not|never|hardly) (?:available|helpful|comfortable|working|received)\b|"
+        r"\bkeep my money\b|\brun out\b",
+        re.IGNORECASE)
+
+    def agreement(row: dict, polarity: str) -> int:
+        text = str(row.get("text", ""))
+        positive = len(positive_cues.findall(text))
+        negative = len(negative_cues.findall(text))
+        signed = positive - negative if polarity == "positive" else negative - positive
+        return 0 if signed > 0 else 1 if signed == 0 else 2
+
+    order = ([preferred, "negative" if preferred == "positive" else "positive"]
+             if preferred in {"positive", "negative"} else ["positive", "negative"])
+    chosen = []
+    for polarity in order:
+        candidates = [row for row in rows if row.get("pred_polarity") == polarity
+                      and row not in chosen]
+        # Preserve reranker order inside each tier while moving sentences whose
+        # wording plainly contradicts their automatic label to the back.
+        candidates.sort(key=lambda row: (
+            agreement(row, polarity),
+            not 35 <= len(str(row.get("text", "")).strip()) <= 220,
+            len(str(row.get("text", "")).strip()),
+        ))
+        consistent = [row for row in candidates if agreement(row, polarity) < 2]
+        if consistent:
+            candidates = consistent
+        chosen.extend(candidates[:per_direction])
+    return chosen
 
 
 def _polarity_distribution_sentence(summaries: dict[str, dict], *, direct: bool = False) -> str:
@@ -522,17 +624,8 @@ def _fallback_answer_en(result: dict, rows: list[dict]) -> str:
                 airline = next(iter(by_airline), "Selected airline")
                 aggregate = _polarity_distribution_sentence_en({airline: aggregate_data}, direct=True) if aggregate_data else ""
                 preferred = decision.get("status") if decision.get("status") in {"positive", "negative"} else None
-                chosen = []
-                if preferred:
-                    primary = next((row for row in matches if row.get("pred_polarity") == preferred), None)
-                    counter = next((row for row in matches if row.get("pred_polarity") in {"positive", "negative"}
-                                    and row.get("pred_polarity") != preferred), None)
-                    chosen.extend(row for row in (primary, counter) if row is not None)
-                for row in matches:
-                    if row not in chosen:
-                        chosen.append(row)
-                    if len(chosen) == 2:
-                        break
+                chosen = _balanced_polarity_examples(
+                    matches, preferred, per_direction=2 if len(subtopics) == 1 else 1)
                 finding = ("the full direct-match aggregate leans positive" if decision.get("status") == "positive" else
                            "the full direct-match aggregate leans negative" if decision.get("status") == "negative" else
                            "the full direct-match aggregate has no decisive positive or negative direction" if decision.get("status") == "mixed" else
@@ -678,17 +771,8 @@ def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
             else:
                 decision = _single_subtopic_direction(result, topic)
                 preferred = decision.get("status") if decision.get("status") in {"positive", "negative"} else None
-                chosen = []
-                if preferred:
-                    primary = next((row for row in matches if row.get("pred_polarity") == preferred), None)
-                    counter = next((row for row in matches if row.get("pred_polarity") in {"positive", "negative"}
-                                    and row.get("pred_polarity") != preferred), None)
-                    chosen.extend(row for row in (primary, counter) if row is not None)
-                for row in matches:
-                    if row not in chosen:
-                        chosen.append(row)
-                    if len(chosen) == 2:
-                        break
+                chosen = _balanced_polarity_examples(
+                    matches, preferred, per_direction=2 if len(subtopics) == 1 else 1)
                 missing_airlines = []
             name = _SUBTOPIC_SUBJECTS.get(topic, SUBTOPIC_NAMES.get(topic, topic))
             if not chosen:
@@ -886,14 +970,24 @@ def localize_evidence(result: dict, *, language: str, endpoint: str = DEFAULT_EN
         return result
     unique = list(dict.fromkeys(str(item.get("text", "")).strip() for item in items if item.get("text")))
     translated_by_source: dict[str, str] = {}
-    try:
-        for offset in range(0, len(unique), 8):
-            batch = tuple(unique[offset:offset + 8])
+    failed_count = 0
+    for offset in range(0, len(unique), 4):
+        batch = tuple(unique[offset:offset + 4])
+        try:
             translations = _translate_batch_cached(batch, endpoint)
             translated_by_source.update(zip(batch, translations))
-        status = "translated"
-    except (OSError, ValueError, KeyError, json.JSONDecodeError, urllib.error.URLError, socket.timeout):
-        status = "fallback_summary"
+        except (OSError, ValueError, KeyError, json.JSONDecodeError,
+                urllib.error.URLError, socket.timeout):
+            # A small model can occasionally return malformed JSON for one
+            # batch. Retry its items separately; keep every successful result.
+            for source in batch:
+                try:
+                    translated_by_source[source] = _translate_batch_cached((source,), endpoint)[0]
+                except (OSError, ValueError, KeyError, json.JSONDecodeError,
+                        urllib.error.URLError, socket.timeout):
+                    failed_count += 1
+    status = ("translated" if not failed_count else
+              "partial_translation" if translated_by_source else "fallback_summary")
     for item in items:
         source = str(item.get("text", "")).strip()
         translated = translated_by_source.get(source)
@@ -903,7 +997,13 @@ def localize_evidence(result: dict, *, language: str, endpoint: str = DEFAULT_EN
             translated = f"这条评论被自动识别为关于{aspect}的{polarity}评价；翻译服务暂时未返回逐句译文。"
         item["text_zh"] = translated
         item["display_text"] = translated
-    result["evidence_translation"] = {"status": status, "language": "zh", "translated_count": len(items)}
+    result["evidence_translation"] = {
+        "status": status, "language": "zh",
+        "translated_count": sum(bool(translated_by_source.get(str(item.get("text", "")).strip()))
+                                for item in items),
+        "fallback_count": sum(not bool(translated_by_source.get(str(item.get("text", "")).strip()))
+                              for item in items),
+    }
     return result
 
 

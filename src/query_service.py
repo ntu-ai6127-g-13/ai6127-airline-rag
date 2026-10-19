@@ -313,6 +313,37 @@ def merge_subtopic_rankings(rankings: dict[str, list[dict]], *, limit: int) -> l
     return answer
 
 
+def prioritize_polarity_coverage(rows: list[dict], predictions_by_id: dict[str, dict],
+                                 *, aspect: str, preferred: str | None,
+                                 per_direction: int = 2) -> list[dict]:
+    """Keep highly relevant examples from both sentiment directions visible.
+
+    Rows have already been restricted to direct subtopic matches and ordered by
+    the reranker.  This only promotes the first few aspect-aligned examples of
+    each polarity, so a minority view is not lost when the visible evidence is
+    truncated.  Corpus conclusions still use every direct match separately.
+    """
+    directions = ([preferred, "negative" if preferred == "positive" else "positive"]
+                  if preferred in {"positive", "negative"}
+                  else ["positive", "negative"])
+    promoted: list[dict] = []
+    promoted_ids: set[str] = set()
+    for direction in directions:
+        for row in rows:
+            chunk_id = str(row["chunk_id"])
+            prediction = predictions_by_id.get(chunk_id, {})
+            if (chunk_id not in promoted_ids
+                    and prediction.get("subjectivity") == "subjective"
+                    and prediction.get("aspect") == aspect
+                    and prediction.get("polarity") == direction):
+                promoted.append(row)
+                promoted_ids.add(chunk_id)
+                if sum(predictions_by_id.get(str(item["chunk_id"]), {}).get("polarity") == direction
+                       for item in promoted) >= per_direction:
+                    break
+    return promoted + [row for row in rows if str(row["chunk_id"]) not in promoted_ids]
+
+
 @_single_query
 def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str | None = None,
                   filters: dict | None = None, top_k: int = 10, candidate_k: int = 60,
@@ -348,6 +379,12 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
                     [chunk_id for chunk_id, _ in all_direct_candidates], label_index_path)
                 scan_summary["polarity_summary"] = _direct_review_polarity_summary(
                     all_direct_candidates, aggregate_predictions, aspect=aspect)
+                aggregate_predictions_by_id = {
+                    chunk_id: prediction
+                    for (chunk_id, _), prediction in zip(all_direct_candidates, aggregate_predictions)
+                }
+            else:
+                aggregate_predictions_by_id = {}
             # Put explicit matches from the complete structured slice into the
             # cross-encoder before truncation. Hybrid hits remain as semantic
             # backfill for wording not covered by the direct rules.
@@ -366,6 +403,14 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             direct = [row for row in ranked if row["_direct_subtopic_match"]]
             if len(direct) >= 2:
                 ranked = direct
+            if aggregate_predictions_by_id:
+                polarity_summary = scan_summary.get("polarity_summary") or {}
+                share = polarity_summary.get("positive_share")
+                preferred = ("positive" if share is not None and share >= .5 else
+                             "negative" if share is not None else None)
+                ranked = prioritize_polarity_coverage(
+                    ranked, aggregate_predictions_by_id, aspect=aspect,
+                    preferred=preferred, per_direction=2)
             rankings[topic] = ranked[:per_topic_limit]
             subtopic_analysis[topic] = {**scan_summary, "semantic_candidate_count": len(hits),
                                         "combined_rerank_count": len(combined)}

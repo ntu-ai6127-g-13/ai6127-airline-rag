@@ -8,7 +8,7 @@ from unittest.mock import patch
 from src.grounded_qa import (_generate, answer_question, collect_evidence,
                              localize_evidence, validate_answer)
 from src.question_parser import parse_question
-from src.query_service import QueryBusyError, query_session
+from src.query_service import QueryBusyError, prioritize_polarity_coverage, query_session
 
 
 def evidence(chunk_id: str, airline: str, polarity: str) -> dict:
@@ -27,6 +27,45 @@ class QuestionParserTests(unittest.TestCase):
         self.assertEqual(parsed.filters["cabin"], "Business Class")
         self.assertTrue(parsed.comparison)
 
+    def test_mixed_language_airline_name_next_to_chinese_is_recognized(self):
+        parsed = parse_question(
+            "Spirit Airlines经济舱的行李服务怎么样？",
+            known_airlines=[*self.airlines, "Spirit Airlines"],
+        )
+        self.assertEqual(parsed.airlines, ["Spirit Airlines"])
+        self.assertEqual(parsed.filters["airline"], "Spirit Airlines")
+
+    def test_long_airline_name_suppresses_nested_alias(self):
+        parsed = parse_question(
+            "国泰航空商务舱空乘服务态度怎么样？",
+            known_airlines=[*self.airlines, "Cathay Pacific Airways", "Thai Airways"],
+        )
+        self.assertEqual(parsed.airlines, ["Cathay Pacific Airways"])
+
+    def test_seat_cleanliness_remains_a_seat_subtopic(self):
+        parsed = parse_question(
+            "新加坡航空经济舱的座椅清洁度怎么样？",
+            known_airlines=self.airlines,
+        )
+        self.assertEqual(parsed.aspects, ["seat"])
+        self.assertEqual(list(parsed.subtopics), ["seat_cleanliness"])
+
+    def test_delay_or_cancellation_is_delay_handling(self):
+        parsed = parse_question(
+            "Alaska Airlines经济舱遇到延误或取消时处理得怎么样？",
+            known_airlines=[*self.airlines, "Alaska Airlines"],
+        )
+        self.assertEqual(parsed.aspect, "ground")
+        self.assertEqual(list(parsed.subtopics), ["delay_handling"])
+
+    def test_english_plural_dirty_seats_is_seat_cleanliness(self):
+        parsed = parse_question(
+            "How are legroom and dirty seats in Singapore Airlines economy class?",
+            known_airlines=self.airlines,
+        )
+        self.assertEqual(parsed.aspects, ["seat"])
+        self.assertEqual(list(parsed.subtopics), ["legroom", "seat_cleanliness"])
+
     def test_explicit_question_overrides_sidebar_defaults(self):
         parsed = parse_question("Aer Lingus entertainment 好评", known_airlines=self.airlines,
                                 default_aspect="seat", default_polarity="negative",
@@ -38,6 +77,13 @@ class QuestionParserTests(unittest.TestCase):
     def test_general_question_maps_to_overall_experience(self):
         parsed = parse_question("新航总体怎么样？", known_airlines=self.airlines)
         self.assertEqual(parsed.aspect, "overall")
+
+    def test_good_or_bad_question_keeps_both_sentiments(self):
+        parsed = parse_question("新航经济舱腿部空间好不好？", known_airlines=self.airlines,
+                                default_polarity="negative")
+        self.assertEqual(parsed.aspect, "seat")
+        self.assertEqual(parsed.subtopics, {"legroom": "seat legroom leg room knee space pitch cramped"})
+        self.assertIsNone(parsed.polarity)
 
     def test_food_subtopics_are_all_preserved(self):
         parsed = parse_question("新加坡航空的食物质量、分量和品种怎么样？",
@@ -81,6 +127,19 @@ class QuestionParserTests(unittest.TestCase):
         self.assertEqual(parsed.subtopics, {"legroom": "seat legroom leg room knee space pitch cramped"})
         self.assertIsNone(parsed.polarity)
         self.assertTrue(parsed.comparison)
+
+
+class EvidenceCoverageTests(unittest.TestCase):
+    def test_promotes_two_examples_from_each_available_direction(self):
+        rows = [{"chunk_id": str(index), "text": str(index)} for index in range(1, 8)]
+        predictions = {
+            str(index): {"subjectivity": "subjective", "aspect": "ground",
+                         "polarity": "negative" if index <= 5 else "positive"}
+            for index in range(1, 8)
+        }
+        ordered = prioritize_polarity_coverage(
+            rows, predictions, aspect="ground", preferred="negative", per_direction=2)
+        self.assertEqual([row["chunk_id"] for row in ordered[:4]], ["1", "2", "6", "7"])
 
 
 class GroundedAnswerTests(unittest.TestCase):
@@ -128,6 +187,19 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertEqual(row["text"], "Quoted review 1")
         self.assertEqual(row["display_text"], "翻译后的评论。")
         self.assertEqual(result["evidence_translation"]["status"], "translated")
+
+    def test_chinese_translation_keeps_successful_batches_when_one_batch_fails(self):
+        rows = [evidence(str(index), "A Air", "negative") for index in range(1, 6)]
+        result = {"language": "zh", "evidence": rows}
+        with patch("src.grounded_qa._translate_batch_cached",
+                   side_effect=[("译文一", "译文二", "译文三", "译文四"),
+                                ValueError("bad batch json"), ValueError("bad item json")]):
+            localize_evidence(result, language="zh")
+        self.assertEqual(result["evidence_translation"]["status"], "partial_translation")
+        self.assertEqual(result["evidence_translation"]["translated_count"], 4)
+        self.assertEqual(result["evidence_translation"]["fallback_count"], 1)
+        self.assertEqual(rows[0]["display_text"], "译文一")
+        self.assertIn("翻译服务暂时未返回", rows[4]["display_text"])
 
     def test_english_program_fallback_contains_no_chinese(self):
         row = evidence("1", "A Air", "positive")
@@ -299,6 +371,27 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertIn("一条负向反例", text)
         self.assertNotIn("偏负面", text)
 
+    def test_representative_examples_avoid_obvious_label_text_conflicts(self):
+        mislabeled = {**evidence("1", "AirAsia", "negative"),
+                      "text": "He provided excellent professional customer service.",
+                      "pred_aspect": "value", "matched_subtopics": ["support"]}
+        consistent = {**evidence("2", "AirAsia", "negative"),
+                      "text": "Customer service was rude and never helpful.",
+                      "pred_aspect": "value", "matched_subtopics": ["support"]}
+        positive = {**evidence("3", "AirAsia", "positive"),
+                    "text": "Customer service was friendly and helpful.",
+                    "pred_aspect": "value", "matched_subtopics": ["support"]}
+        result = {"aspect": "value", "subtopics": {"support": "customer support"},
+                  "rating_summary": {"available": False},
+                  "evidence": [mislabeled, consistent, positive],
+                  "subtopic_analysis": {"support": {"direct_review_count": 50, "polarity_summary": {
+                      "labeled_review_count": 45, "positive_review_count": 5,
+                      "negative_review_count": 40, "positive_share": .1111,
+                      "positive_share_ci95_low": .05, "positive_share_ci95_high": .23}}}}
+        text = answer_question("客服怎么样", result, use_model=False)["text"]
+        self.assertIn("Customer service was rude and never helpful", text)
+        self.assertNotIn("excellent professional customer service", text)
+
     def test_validation_rejects_direction_that_contradicts_full_aggregate(self):
         text = "关于座位腿部空间，完整评论偏负面，但自动标签中正向78条、负向20条。[1]"
         ok, reasons = validate_answer(
@@ -307,6 +400,14 @@ class GroundedAnswerTests(unittest.TestCase):
             expected_subtopic_directions={"legroom": "positive"})
         self.assertFalse(ok)
         self.assertIn("contradicts_full_subtopic_aggregate:legroom", reasons)
+
+    def test_validation_allows_aggregate_scoped_overall_direction(self):
+        text = ("这批历史评论中的座位腿部空间整体偏正面。\n\n"
+                "自动标签为正向78条、负向20条；一条评论提到腿部空间充足。[1]")
+        ok, reasons = validate_answer(
+            text, {"1"}, required_subtopics=("legroom",), evidence_numbers={"78", "20"},
+            allow_aggregate_counts=True, expected_subtopic_directions={"legroom": "positive"})
+        self.assertTrue(ok, reasons)
 
     def test_style_validation_failure_is_repaired_once(self):
         row = {**evidence("1", "A Air", "negative"),
