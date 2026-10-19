@@ -315,3 +315,24 @@ BM25、Dense、Hybrid+RRF 和 Hybrid+RRF+Cross-encoder。Hybrid+RRF 的 MRR/NDCG
 工作，但由于参考方向仍由自动标签汇总产生，不能代替独立人工或外部 judge 对真实性和答案质量的评估。
 
 复现入口与逐题结果见 [`experiments/final_auto_eval/`](../experiments/final_auto_eval/README.md)。
+
+## 2026-10-19 回答级 RAG 指标、性能与统一消融
+
+20 个固定问题已运行完整中文问答链路，同模型 Qwen3 4B 自动 judge 得到 Faithfulness 0.8429、Answer Relevance
+0.9875、Context Precision 0.6000；10,000 次题目级 bootstrap 95% 区间分别为 [0.8000, 0.8900]、
+[0.9625, 1.0000]、[0.5167, 0.6813]。judge 同时读取展示原文和程序计算的评分／全量汇总。由于生成器和 judge
+使用同一模型，这些是机器代理指标，不能描述为独立人工或独立模型验收。
+
+20 题中，模型初稿或自动修正版最终采用 4 题，另外 16 题使用程序回退，说明严格 harness 有效保护最终输出，
+也说明当前 Qwen 自由生成的协议通过率只有 20%。端到端检索、首 token 和最终完成的中位时间分别为 2.873、
+24.279 和 40.815 秒，最终完成 P95 为 72.305 秒。并发探针确认本地 MLX 服务为串行吞吐，增加到两个并发请求
+不会提高每秒请求数，第二个请求延迟约翻倍。
+
+统一指标消融在 7 个方向明确的单航司题上运行：完整评论池使方向准确率从 85.7% 提高到 100%，正反平衡证据使
+Context Precision 从 0.9286 提高到 1.0000；Faithfulness 和 Answer Relevance 未单调改善，表明简短模板还需
+更清楚地解释反例与总体结论的关系。完整方法、逐题回答和证据见
+[`experiments/final_rag_eval/`](../experiments/final_rag_eval/README.md)。
+
+冻结 gold 的提交文件已生成为 `data/eval/eval.xls`，包含 1,000 条且前两列严格为 `text`、`label`。三人原始标注的
+Fleiss’ κ 为主客观 0.572、极性 0.841、方面 0.778，联合标签 0.732；主客观的 κ 低于表面一致率主要受类别高度
+不均衡影响，报告同时保留两两一致率和 κ，不以 100% 最终审核通过率代替标注者一致率。
