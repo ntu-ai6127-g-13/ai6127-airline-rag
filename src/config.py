@@ -31,6 +31,7 @@ EVAL_XLS = DATA_EVAL / "eval.xls"                     # 作业指定的文件名
 BM25_INDEX = INDEX_DIR / "bm25.pkl"
 FAISS_INDEX = INDEX_DIR / "faiss.index"
 CHUNK_IDS = INDEX_DIR / "chunk_ids.npy"
+CHUNK_TEXTS = INDEX_DIR / "chunk_texts.npy"  # 与 FAISS 行号对齐，用于结果去重
 
 for _d in (DATA_RAW, DATA_PROC, DATA_EVAL, INDEX_DIR, MODEL_DIR, OUT_DIR):
     _d.mkdir(parents=True, exist_ok=True)

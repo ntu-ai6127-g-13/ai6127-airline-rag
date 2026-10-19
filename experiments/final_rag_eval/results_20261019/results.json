@@ -1,0 +1,131 @@
+{
+  "generated_at": "2026-10-19T04:55:12.559776+00:00",
+  "evaluation_kind": "same_qwen4b_automatic_proxy_not_human_independent",
+  "generator_and_judge": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
+  "judge_rubric": {
+    "faithfulness": "supported checkable claims / all checkable claims",
+    "answer_relevance": "0-4 rubric normalized to 0-1",
+    "context_precision": "judge-relevant displayed passages / all displayed passages"
+  },
+  "full_system": {
+    "questions": 20,
+    "answer_modes": {
+      "validation_fallback": 16,
+      "local_qwen": 1,
+      "local_qwen_repaired": 3
+    },
+    "faithfulness_mean_ci95": [
+      0.8429,
+      0.8,
+      0.89
+    ],
+    "answer_relevance_mean_ci95": [
+      0.9875,
+      0.9625,
+      1.0
+    ],
+    "context_precision_mean_ci95": [
+      0.6,
+      0.5167,
+      0.6813
+    ],
+    "retrieval_seconds": {
+      "mean": 5.2,
+      "median": 2.8731,
+      "p95": 10.4891,
+      "max": 24.6273
+    },
+    "time_to_first_token_seconds": {
+      "mean": 26.759,
+      "median": 24.279,
+      "p95": 41.8516,
+      "max": 50.8243
+    },
+    "end_to_end_seconds": {
+      "mean": 47.683,
+      "median": 40.8151,
+      "p95": 72.3051,
+      "max": 81.9698
+    },
+    "first_process_query_seconds": 60.4112,
+    "model_answer_accepted": 4,
+    "program_fallback_used": 16,
+    "measured_question_and_judge_seconds": 1103.416,
+    "warm_queries_end_to_end": {
+      "median": 40.0476,
+      "p95": 72.8138
+    }
+  },
+  "common_metric_ablation": {
+    "A_top10_naive": {
+      "cases": 7,
+      "direction_accuracy": 0.8571,
+      "faithfulness": 0.8571,
+      "answer_relevance": 1.0,
+      "context_precision": 0.9286
+    },
+    "B_full_aggregate": {
+      "cases": 7,
+      "direction_accuracy": 1.0,
+      "faithfulness": 0.8286,
+      "answer_relevance": 0.9643,
+      "context_precision": 0.9286
+    },
+    "C_balanced_evidence": {
+      "cases": 7,
+      "direction_accuracy": 1.0,
+      "faithfulness": 0.7929,
+      "answer_relevance": 0.9286,
+      "context_precision": 1.0
+    },
+    "D_consistency_filter": {
+      "cases": 7,
+      "direction_accuracy": 1.0,
+      "faithfulness": 0.7929,
+      "answer_relevance": 0.9286,
+      "context_precision": 1.0
+    }
+  },
+  "judge_received_program_aggregate_facts": true,
+  "run_invocation_elapsed_seconds": 163.652,
+  "concurrency_probe": {
+    "scope": "local Qwen generation service only; fixed 120-token cap",
+    "service_design": "single-threaded HTTPServer with serialized MLX access",
+    "concurrency_1": {
+      "concurrency": 1,
+      "requests": 2,
+      "wall_seconds": 2.069714916869998,
+      "requests_per_second": 0.9663166572836868,
+      "calls": [
+        {
+          "wall_seconds": 1.0685043754056096,
+          "server_seconds": 1.06,
+          "characters": 71
+        },
+        {
+          "wall_seconds": 1.001202458050102,
+          "server_seconds": 0.999,
+          "characters": 71
+        }
+      ]
+    },
+    "concurrency_2": {
+      "concurrency": 2,
+      "requests": 2,
+      "wall_seconds": 1.9738340829499066,
+      "requests_per_second": 1.0132563913431814,
+      "calls": [
+        {
+          "wall_seconds": 0.9879507082514465,
+          "server_seconds": 0.985,
+          "characters": 71
+        },
+        {
+          "wall_seconds": 1.9728959579952061,
+          "server_seconds": 0.984,
+          "characters": 71
+        }
+      ]
+    }
+  }
+}

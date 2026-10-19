@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-10-19T02:14:27.034799+00:00",
+  "evaluation_kind": "automated_proxy_not_human_independent",
+  "retrieval_qrels": "metadata-constrained direct-subtopic matches; grade 2 if offline aspect-aligned subjective",
+  "retrieval": {
+    "bm25": {
+      "query_units": 30,
+      "precision_at_5": 0.88,
+      "recall_at_50": 0.4033,
+      "mrr": 0.95,
+      "ndcg_at_10": 0.7896,
+      "success_at_10": 1.0,
+      "latency_mean_seconds": 0.5473,
+      "latency_median_seconds": 0.5337,
+      "latency_p95_seconds": 0.6401,
+      "latency_max_seconds": 1.2778
+    },
+    "dense": {
+      "query_units": 30,
+      "precision_at_5": 0.7533,
+      "recall_at_50": 0.3067,
+      "mrr": 0.8667,
+      "ndcg_at_10": 0.6864,
+      "success_at_10": 1.0,
+      "latency_mean_seconds": 0.4636,
+      "latency_median_seconds": 0.0567,
+      "latency_p95_seconds": 0.0957,
+      "latency_max_seconds": 12.1411
+    },
+    "hybrid_rrf": {
+      "query_units": 30,
+      "precision_at_5": 0.88,
+      "recall_at_50": 0.3808,
+      "mrr": 0.9611,
+      "ndcg_at_10": 0.8095,
+      "success_at_10": 1.0,
+      "latency_mean_seconds": 1.011,
+      "latency_median_seconds": 0.5915,
+      "latency_p95_seconds": 0.7012,
+      "latency_max_seconds": 13.4191
+    },
+    "hybrid_rerank": {
+      "query_units": 30,
+      "precision_at_5": 0.8267,
+      "recall_at_50": 0.3865,
+      "mrr": 0.9325,
+      "ndcg_at_10": 0.7439,
+      "success_at_10": 1.0,
+      "latency_mean_seconds": 1.4519,
+      "latency_median_seconds": 0.7141,
+      "latency_p95_seconds": 0.8367,
+      "latency_max_seconds": 22.9795
+    },
+    "paired_deltas": {
+      "hybrid_rrf_minus_bm25": {
+        "precision_at_5": {
+          "mean_delta": 0.0,
+          "ci95_low": -0.0733,
+          "ci95_high": 0.0667
+        },
+        "recall_at_50": {
+          "mean_delta": -0.0225,
+          "ci95_low": -0.0456,
+          "ci95_high": 0.0005
+        },
+        "mrr": {
+          "mean_delta": 0.0111,
+          "ci95_low": -0.05,
+          "ci95_high": 0.0667
+        },
+        "ndcg_at_10": {
+          "mean_delta": 0.0199,
+          "ci95_low": -0.0357,
+          "ci95_high": 0.0726
+        }
+      },
+      "hybrid_rerank_minus_hybrid_rrf": {
+        "precision_at_5": {
+          "mean_delta": -0.0533,
+          "ci95_low": -0.12,
+          "ci95_high": 0.0133
+        },
+        "recall_at_50": {
+          "mean_delta": 0.0057,
+          "ci95_low": -0.0108,
+          "ci95_high": 0.0222
+        },
+        "mrr": {
+          "mean_delta": -0.0286,
+          "ci95_low": -0.0794,
+          "ci95_high": 0.0
+        },
+        "ndcg_at_10": {
+          "mean_delta": -0.0656,
+          "ci95_low": -0.1141,
+          "ci95_high": -0.0193
+        }
+      }
+    }
+  },
+  "downstream_ablation": {
+    "evaluated_airline_subtopics": 18,
+    "direction_accuracy": {
+      "displayed_top10_vote": 0.6667,
+      "full_direct_aggregate": 1.0,
+      "displayed_top10_vote_count": 12,
+      "full_direct_aggregate_count": 18
+    },
+    "two_sided_example_coverage_when_available": {
+      "naive_rank_order": 0.6471,
+      "balanced_selection": 1.0,
+      "eligible_count": 17,
+      "naive_count": 11,
+      "balanced_count": 17
+    },
+    "obvious_label_text_conflicts_in_selected_examples": {
+      "naive": 13,
+      "consistency_filter": 0
+    },
+    "adversarial_wrong_direction_rejection_rate": {
+      "citation_only_validation": 0.0,
+      "full_aggregate_direction_guard": 1.0,
+      "citation_only_rejected_count": 0,
+      "direction_guard_rejected_count": 18
+    }
+  },
+  "elapsed_seconds": 198.327
+}
