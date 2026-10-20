@@ -106,6 +106,12 @@ SUBTOPIC_CONTEXT_PATTERNS = {
 SUBTOPIC_SCAN_COLUMNS = ("chunk_id", "review_id", "text", "airline", "cabin",
                          "traveller_type", "route_from", "route_to", "date")
 MAX_DIRECT_RERANK = 240
+SMALL_STRUCTURED_SLICE_LIMIT = 10
+_CHUNK_RATING_FIELDS = {
+    "seat": "r_seat", "staff": "r_staff", "food": "r_food",
+    "entertainment": "r_entertainment", "ground": "r_ground",
+    "value": "r_value", "overall": "overall_rating",
+}
 
 
 def _direct_subtopic_match(text: str, topic: str) -> bool:
@@ -151,6 +157,65 @@ def _filtered_scan_frame(frame: pd.DataFrame, filters: dict | None) -> pd.DataFr
         else:
             mask &= series.eq(value)
     return frame.loc[mask]
+
+
+@lru_cache(maxsize=2)
+def _load_review_slice_metadata(path_text: str, modified_ns: int, size: int) -> pd.DataFrame:
+    del modified_ns, size
+    columns = ["review_id", "airline", "cabin", "traveller_type",
+               "route_from", "route_to", "date"]
+    return pd.read_parquet(path_text, columns=columns).drop_duplicates("review_id", keep="first")
+
+
+def small_structured_slice_reviews(*, filters: dict | None, aspect: str | None,
+                                   chunks_path: str | Path = CHUNKS,
+                                   limit: int = SMALL_STRUCTURED_SLICE_LIMIT) -> dict:
+    """Return every full review when a route-constrained slice is very small.
+
+    These reviews are browsing context, not automatically aspect-relevant
+    evidence.  Keeping the two concepts separate lets a user inspect every
+    route match without allowing unrelated sentences to justify a verdict.
+    """
+    active = dict(filters or {})
+    if not ({"route_from", "route_to"} & set(active)):
+        return {"review_count": None, "complete": False, "reviews": []}
+    path = Path(chunks_path).resolve()
+    stat = path.stat()
+    metadata = _load_review_slice_metadata(str(path), stat.st_mtime_ns, stat.st_size)
+    scoped = _filtered_scan_frame(metadata, active)
+    review_ids = list(dict.fromkeys(scoped.review_id.astype(str)))
+    count = len(review_ids)
+    if count == 0 or count > limit:
+        return {"review_count": count, "complete": False, "reviews": []}
+
+    rating_field = _CHUNK_RATING_FIELDS.get(aspect)
+    columns = ["review_id", "review_text", "airline", "cabin", "traveller_type",
+               "route", "route_from", "route_to", "date"]
+    if rating_field:
+        columns.append(rating_field)
+    frame = pd.read_parquet(path, columns=columns,
+                            filters=[("review_id", "in", review_ids)])
+    frame = frame.drop_duplicates("review_id", keep="first").set_index("review_id")
+    reviews = []
+    for review_id in review_ids:
+        row = frame.loc[review_id]
+        value = row.get(rating_field) if rating_field else None
+        reviews.append({
+            "review_id": review_id,
+            "text": str(row.get("review_text") or ""),
+            "airline": None if pd.isna(row.get("airline")) else str(row.get("airline")),
+            "cabin": None if pd.isna(row.get("cabin")) else str(row.get("cabin")),
+            "traveller_type": (None if pd.isna(row.get("traveller_type"))
+                               else str(row.get("traveller_type"))),
+            "route": None if pd.isna(row.get("route")) else str(row.get("route")),
+            "date": (None if pd.isna(row.get("date")) else
+                     row.get("date").isoformat() if hasattr(row.get("date"), "isoformat")
+                     else str(row.get("date"))),
+            "aspect": aspect,
+            "aspect_rating": None if value is None or pd.isna(value) else float(value),
+            "context_kind": "route_matched_full_review",
+        })
+    return {"review_count": count, "complete": True, "reviews": reviews, "limit": limit}
 
 
 def scan_direct_subtopic_matches(topic: str, *, filters: dict | None = None,
@@ -480,6 +545,8 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
         for topic in subtopics}
     for topic, count in direct_subtopic_evidence_counts.items():
         subtopic_analysis[topic]["displayed_direct_count"] = count
+    small_slice = small_structured_slice_reviews(
+        filters=filters, aspect=aspect, chunks_path=chunks_path)
     result = {"query": query, "retrieval_query": phrase, "aspect": aspect, "polarity": polarity,
             "filters": filters or {}, "evidence": selected, "baseline_evidence": baseline,
             "subtopics": subtopics, "subtopic_evidence_counts": subtopic_evidence_counts,
@@ -492,6 +559,9 @@ def query_reviews(query: str = "", *, aspect: str | None = None, polarity: str |
             "label_lookup_mode": label_lookup_mode,
             "corpus_label_matches": corpus_label_matches,
             "rating_summary": rating_summary,
+            "structured_slice_review_count": small_slice["review_count"],
+            "small_slice_complete": small_slice["complete"],
+            "small_slice_reviews": small_slice["reviews"],
             "acceptance_evaluated": False}
     if include_candidates: result["candidate_evidence"] = baseline
     return result
