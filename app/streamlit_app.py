@@ -224,13 +224,21 @@ if submitted and "result" in st.session_state:
 def display_result(result,citation_prefix=""):
     answer=result["answer"]
     full=result.get("corpus_label_matches")
+    evidence_abstention=(result.get("grounded_answer") or {}).get("mode")=="evidence_abstention"
     if full:
-        st.info((f"全库离线标签中，符合当前结构化条件的评价有 {full['sentence_count']:,} 句，"
-                 f"来自 {full['review_count']:,} 条不同评论；当前展示相关性最高的 {len(result['evidence'])} 条。")
-                if language=="zh" else
-                (f"The offline label index contains {full['sentence_count']:,} matching sentences from "
-                 f"{full['review_count']:,} distinct reviews under the current structured filters; "
-                 f"the {len(result['evidence'])} most relevant excerpts are displayed."))
+        if evidence_abstention and result.get("small_slice_complete"):
+            st.info((f"离线标签中没有找到直接讨论所问方面的句子；航线等结构化条件共命中 "
+                     f"{len(result.get('small_slice_reviews',[]))} 条完整评论，下面已全部列出。")
+                    if language=="zh" else
+                    ("No sentence in the offline label index directly discusses the requested aspect; "
+                     f"all {len(result.get('small_slice_reviews',[]))} full reviews matching the route and other structured filters are shown below."))
+        else:
+            st.info((f"全库离线标签中，符合当前结构化条件的评价有 {full['sentence_count']:,} 句，"
+                     f"来自 {full['review_count']:,} 条不同评论；当前展示相关性最高的 {len(result['evidence'])} 条。")
+                    if language=="zh" else
+                    (f"The offline label index contains {full['sentence_count']:,} matching sentences from "
+                     f"{full['review_count']:,} distinct reviews under the current structured filters; "
+                     f"the {len(result['evidence'])} most relevant excerpts are displayed."))
         if result.get("subtopics"):
             st.caption(tr("全量数按上位评价方面统计，不是各细分问题的匹配数；细分问题使用各自的检索式选取下方评论。",
                           "The full count is for the parent aspect rather than each subtopic; each subtopic uses its own retrieval query for the evidence below."))
@@ -278,6 +286,10 @@ def display_result(result,citation_prefix=""):
                            if language=="zh" else
                            (f"Review {review.get('review_id')} · Date {review.get('date') or 'Unknown'} · Full route-matched review; not necessarily direct evidence for the requested aspect"))
         st.divider()
+        if evidence_abstention:
+            st.caption(tr("没有直接匹配所问方面的句子，因此不再把语义上接近但方面不符的片段列作回答证据。",
+                          "No sentence directly matches the requested aspect, so semantically nearby excerpts from other aspects are not presented as answer evidence."))
+            return
     for i,item in enumerate(result["evidence"],1):
         st.markdown(f"**[{citation_prefix}{i}] {airline_name(item['airline'])} · {cabin_name(item.get('cabin')) if item.get('cabin') else tr('舱位未知','Cabin unknown')}**")
         st.write(item.get("display_text") or item.get("text_zh") or item["text"])
