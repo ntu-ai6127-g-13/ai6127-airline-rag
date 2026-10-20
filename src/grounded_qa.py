@@ -1138,8 +1138,9 @@ def _generate(messages: list[dict], *, endpoint: str, timeout: float,
 
 def _evidence_items(result: dict) -> list[dict]:
     if result.get("results"):
-        return [item for part in result["results"].values() for item in part.get("evidence", [])]
-    return list(result.get("evidence", []))
+        return [item for part in result["results"].values()
+                for key in ("evidence", "small_slice_reviews") for item in part.get(key, [])]
+    return list(result.get("evidence", [])) + list(result.get("small_slice_reviews", []))
 
 
 @lru_cache(maxsize=512)
@@ -1175,11 +1176,18 @@ def localize_evidence(result: dict, *, language: str, endpoint: str = DEFAULT_EN
             item["display_text"] = str(item.get("text", ""))
         result["evidence_translation"] = {"status": "not_needed", "language": "en"}
         return result
-    unique = list(dict.fromkeys(str(item.get("text", "")).strip() for item in items if item.get("text")))
+    unique_evidence = list(dict.fromkeys(
+        str(item.get("text", "")).strip() for item in items
+        if item.get("text") and item.get("context_kind") != "route_matched_full_review"))
+    unique_full_reviews = list(dict.fromkeys(
+        str(item.get("text", "")).strip() for item in items
+        if item.get("text") and item.get("context_kind") == "route_matched_full_review"))
     translated_by_source: dict[str, str] = {}
     failed_count = 0
-    for offset in range(0, len(unique), 4):
-        batch = tuple(unique[offset:offset + 4])
+    batches = ([tuple(unique_evidence[offset:offset + 4])
+                for offset in range(0, len(unique_evidence), 4)]
+               + [(source,) for source in unique_full_reviews])
+    for batch in batches:
         try:
             translations = _translate_batch_cached(batch, endpoint)
             translated_by_source.update(zip(batch, translations))
@@ -1199,9 +1207,12 @@ def localize_evidence(result: dict, *, language: str, endpoint: str = DEFAULT_EN
         source = str(item.get("text", "")).strip()
         translated = translated_by_source.get(source)
         if not translated:
-            aspect = _ASPECT_NAMES.get(item.get("pred_aspect"), "所问方面")
-            polarity = {"positive": "正面", "negative": "负面"}.get(item.get("pred_polarity"), "相关")
-            translated = f"这条评论被自动识别为关于{aspect}的{polarity}评价；翻译服务暂时未返回逐句译文。"
+            if item.get("context_kind") == "route_matched_full_review":
+                translated = "完整评论翻译服务暂时未返回译文；原文仍保存在本次证据下载文件中。"
+            else:
+                aspect = _ASPECT_NAMES.get(item.get("pred_aspect"), "所问方面")
+                polarity = {"positive": "正面", "negative": "负面"}.get(item.get("pred_polarity"), "相关")
+                translated = f"这条评论被自动识别为关于{aspect}的{polarity}评价；翻译服务暂时未返回逐句译文。"
         item["text_zh"] = translated
         item["display_text"] = translated
     result["evidence_translation"] = {

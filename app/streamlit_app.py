@@ -261,6 +261,23 @@ def display_result(result,citation_prefix=""):
         st.caption(coverage)
         st.caption(tr("系统先扫描符合结构化条件的完整语料，再重排直接提及细分属性的评论；完整直接匹配数量用于判断证据是否充足。",
                       "The system scans the full structured corpus slice before reranking reviews that directly mention the subtopic; full direct-match counts determine evidence sufficiency."))
+    if result.get("small_slice_complete") and result.get("small_slice_reviews"):
+        reviews=result["small_slice_reviews"]
+        st.subheader(tr("当前筛选命中的全部评论","All reviews matching the current filters"))
+        st.info(tr(
+            f"严格筛选后只有 {len(reviews)} 条评论，所以下面全部列出。它们证明评论与航司和航线等条件匹配；只有直接谈到所问方面的文字才能作为结论依据。",
+            f"Only {len(reviews)} reviews remain after strict filtering, so all are shown below. They match the airline and route filters; only text directly discussing the requested aspect supports a service conclusion."))
+        for review_index,review in enumerate(reviews,1):
+            rating=(f" · {aspect_names.get(review.get('aspect'),review.get('aspect'))} {review['aspect_rating']:.0f}/5"
+                    if review.get("aspect_rating") is not None else "")
+            title=(f"{review_index}. {airline_name(review.get('airline'))} · {cabin_name(review.get('cabin')) if review.get('cabin') else tr('舱位未知','Cabin unknown')}"
+                   f" · {review.get('route') or tr('航线未知','Route unknown')}{rating}")
+            with st.expander(title,expanded=len(reviews)<=3):
+                st.write(review.get("display_text") or review.get("text_zh") or review.get("text"))
+                st.caption((f"评论 {review.get('review_id')} · 日期 {review.get('date') or '未知'} · 路线匹配完整评论，不等同于所问方面的直接证据")
+                           if language=="zh" else
+                           (f"Review {review.get('review_id')} · Date {review.get('date') or 'Unknown'} · Full route-matched review; not necessarily direct evidence for the requested aspect"))
+        st.divider()
     for i,item in enumerate(result["evidence"],1):
         st.markdown(f"**[{citation_prefix}{i}] {airline_name(item['airline'])} · {cabin_name(item.get('cabin')) if item.get('cabin') else tr('舱位未知','Cabin unknown')}**")
         st.write(item.get("display_text") or item.get("text_zh") or item["text"])
@@ -418,11 +435,11 @@ if "result" in st.session_state:
         mode_zh={"local_qwen":"本地 Qwen3 4B · 引用校验通过","local_qwen_repaired":"本地 Qwen3 4B · 自动修正后校验通过",
                  "rating_decision":"原始评分汇总 + 评论证据","validation_fallback":"模型回答未通过校验 · 已使用程序回答",
                  "service_fallback":"本地模型未连接 · 已使用程序回答","program_fallback":"程序回答",
-                 "menu_item_evidence":"具体菜品证据汇总"}
+                 "menu_item_evidence":"具体菜品证据汇总","evidence_abstention":"直接证据不足 · 保守回答"}
         mode_en={"local_qwen":"Local Qwen3 4B · citations validated","local_qwen_repaired":"Local Qwen3 4B · corrected answer validated",
                  "rating_decision":"Original ratings + review evidence","validation_fallback":"Model answer failed validation · program answer used",
                  "service_fallback":"Local model unavailable · program answer used","program_fallback":"Program-generated answer",
-                 "menu_item_evidence":"Concrete dish evidence summary"}
+                 "menu_item_evidence":"Concrete dish evidence summary","evidence_abstention":"Insufficient direct evidence · conservative answer"}
         mode=(mode_zh if language=="zh" else mode_en).get(grounded.get("mode"),grounded.get("mode",""))
         timing=((f" · 生成 {grounded['model_seconds']:.1f} 秒" if language=="zh" else f" · generated in {grounded['model_seconds']:.1f}s")
                 if grounded.get("model_seconds") else "")

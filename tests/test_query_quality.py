@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import unittest
 from unittest.mock import patch
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import pandas as pd
 
@@ -11,7 +13,7 @@ from src.generate import evidence_answer
 from src.query_service import (_direct_review_polarity_summary, _direct_subtopic_match, compare_airlines,
                                compare_available_airlines, merge_subtopic_rankings,
                                query_aspects, query_reviews, rank_evidence,
-                               scan_direct_subtopic_matches)
+                               scan_direct_subtopic_matches, small_structured_slice_reviews)
 
 
 class QueryQualityTests(unittest.TestCase):
@@ -99,6 +101,33 @@ class QueryQualityTests(unittest.TestCase):
         self.assertEqual(result["direct_sentence_count"], 1)
         self.assertEqual(result["direct_review_count"], 1)
         self.assertEqual(result["candidate_ids"], ["1"])
+
+    def test_small_route_slice_returns_every_review_once_with_parent_rating(self):
+        rows = []
+        for review_id, rating, text in (("r1", 5.0, "First full review."),
+                                        ("r2", 4.0, "Second full review.")):
+            for sentence in range(2):
+                rows.append({
+                    "chunk_id": f"{review_id}-{sentence}", "review_id": review_id,
+                    "text": f"sentence {sentence}", "review_text": text,
+                    "airline": "Singapore Airlines", "cabin": "Economy Class",
+                    "traveller_type": "Solo Leisure", "route": "Shanghai to Singapore",
+                    "route_from": "Shanghai", "route_to": "Singapore",
+                    "date": pd.Timestamp("2018-01-01"), "r_ground": rating,
+                })
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "chunks.parquet"
+            pd.DataFrame(rows).to_parquet(path, index=False)
+            result = small_structured_slice_reviews(
+                filters={"airline": "Singapore Airlines", "route_from": ["Shanghai"],
+                         "route_to": ["Singapore"]},
+                aspect="ground", chunks_path=path)
+        self.assertTrue(result["complete"])
+        self.assertEqual(result["review_count"], 2)
+        self.assertEqual([row["review_id"] for row in result["reviews"]], ["r1", "r2"])
+        self.assertEqual([row["aspect_rating"] for row in result["reviews"]], [5.0, 4.0])
+        self.assertEqual([row["text"] for row in result["reviews"]],
+                         ["First full review.", "Second full review."])
 
     def test_direct_polarity_summary_counts_each_review_once_and_requires_parent_aspect(self):
         candidates = [("1", "r1"), ("2", "r1"), ("3", "r2"), ("4", "r3")]
