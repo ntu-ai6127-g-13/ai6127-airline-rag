@@ -310,6 +310,31 @@ class GroundedAnswerTests(unittest.TestCase):
         self.assertEqual(answer["mode"], "validation_fallback")
         self.assertIn("[", answer["text"])
 
+    def test_narrow_route_without_direct_aspect_text_abstains(self):
+        rows = [
+            {**evidence("1", "Singapore Airlines", "positive"), "pred_aspect": "overall",
+             "text": "This flight was slightly below standard but it was fine."},
+            {**evidence("2", "Singapore Airlines", "positive"), "pred_aspect": "staff",
+             "text": "The cabin crew were smiling and polite."},
+        ]
+        result = {
+            "language": "zh", "aspect": "ground", "evidence": rows,
+            "filters": {"airline": "Singapore Airlines", "route_from": ["Shanghai"],
+                        "route_to": ["Singapore"]},
+            "corpus_label_matches": {"sentence_count": 0, "review_count": 0,
+                                     "labeled_review_count": 0},
+            "rating_summary": {"available": True, "scale": 5, "minimum_reliable_n": 30,
+                               "airlines": {"Singapore Airlines": {"mean": 4.5, "n": 2}},
+                               "comparison": {"status": "not_applicable"}},
+        }
+        answer = answer_question("新航从上海飞新加坡的航线地勤怎么样", result, use_model=True)
+        self.assertEqual(answer["mode"], "evidence_abstention")
+        self.assertIn("只有 2 份原始地面服务评分", answer["text"])
+        self.assertIn("没有评论原文直接讨论地面服务", answer["text"])
+        self.assertIn("不能可靠判断这条精确航线的地面服务表现", answer["text"])
+        self.assertNotIn("略低于平均水平", answer["text"])
+        self.assertEqual(answer["citations"], [])
+
     def test_subtopic_comparison_does_not_use_broad_rating_as_winner(self):
         a = {**evidence("1", "A Air", "positive"), "matched_subtopics": ["legroom"],
              "direct_subtopic_matches": ["legroom"]}

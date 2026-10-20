@@ -814,11 +814,67 @@ def _fallback_answer_en(result: dict, rows: list[dict]) -> str:
     return f"The source table does not provide enough comparable ratings for a firm conclusion. Available evidence: {examples}."
 
 
+def _rating_without_direct_text_answer(result: dict, *, language: str) -> str | None:
+    """Abstain when a structured slice has ratings but no aspect-matched text.
+
+    A narrow route can contain one or two review-level scores while none of its
+    sentences discusses the requested aspect.  In that case, citing the nearest
+    generic sentence as an explanation turns unrelated prose into evidence.
+    Keep the score as a small-sample observation and state that the text cannot
+    support a substantive conclusion.
+    """
+    if result.get("type") in {"comparison", "multi_aspect"} or result.get("subtopics"):
+        return None
+    distribution = result.get("corpus_label_matches")
+    if not isinstance(distribution, dict) or not any(
+        key in distribution for key in ("sentence_count", "review_count", "labeled_review_count")
+    ):
+        return None
+    if max(int(distribution.get(key) or 0)
+           for key in ("sentence_count", "review_count", "labeled_review_count")) > 0:
+        return None
+
+    aspect = result.get("aspect")
+    rating = result.get("rating_summary") or {}
+    if not aspect or not rating.get("available") or len(rating.get("airlines", {})) != 1:
+        return None
+    airline, data = next(iter(rating["airlines"].items()))
+    n, mean = int(data.get("n") or 0), data.get("mean")
+    if not n or mean is None:
+        return None
+    scale = rating.get("scale", 5)
+    minimum = int(rating.get("minimum_reliable_n") or 30)
+    route_limited = bool({"route_from", "route_to"} & set((result.get("filters") or {}).keys()))
+    if language == "en":
+        scope = "this exact route" if route_limited else "the selected filters"
+        sample = (f"far below the {minimum}-rating reliability threshold" if n < minimum
+                  else f"meeting the {minimum}-rating sample threshold")
+        return (f"For {airline}, {scope} contains only {n:,} original { _ASPECT_NAMES_EN.get(aspect, aspect) } "
+                f"rating{'s' if n != 1 else ''}, averaging {mean:.2f}/{scale} ({sample}). "
+                f"However, no review text in this slice directly discusses {_ASPECT_NAMES_EN.get(aspect, aspect)}, "
+                "so unrelated retrieved sentences cannot explain the score. The available data are insufficient "
+                "for a reliable service conclusion.")
+
+    airline_label = _AIRLINE_NAMES_ZH.get(airline, airline)
+    aspect_name = _ASPECT_NAMES.get(aspect, aspect)
+    scope = "这条精确航线" if route_limited else "当前筛选条件"
+    threshold = (f"远低于系统采用的 {minimum} 份可靠性门槛" if n < minimum
+                 else f"达到系统采用的 {minimum} 份样本门槛")
+    return (f"{airline_label}在{scope}下只有 {n:,} 份原始{aspect_name}评分，平均为 "
+            f"{mean:.2f}/{scale}（{threshold}）。但是，这个切片中没有评论原文直接讨论{aspect_name}；"
+            "检索到的其他句子不能拿来解释这项评分。因此目前只能记录这几份打分，"
+            f"不能可靠判断{scope}的{aspect_name}表现。")
+
+
 def fallback_answer(question: str, result: dict, rows: list[dict]) -> str:
     """Produce a useful answer without an LLM, grounded in visible evidence."""
     del question
     if result.get("answer_intent", "evaluation") != "evaluation" and rows:
         return _fact_evidence_answer(result, rows)
+    rating_only_abstention = _rating_without_direct_text_answer(
+        result, language=result.get("language", "zh"))
+    if rating_only_abstention:
+        return rating_only_abstention
     if result.get("language") == "en":
         return _fallback_answer_en(result, rows)
     if result.get("type") == "multi_aspect":
@@ -1171,6 +1227,9 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     rows = collect_evidence(result)
     valid_ids = {row["citation_id"] for row in rows}
     fallback = fallback_answer(question, result, rows)
+    if _rating_without_direct_text_answer(result, language=language):
+        return {"text": fallback, "mode": "evidence_abstention", "valid": True,
+                "validation_errors": [], "citations": [], "model_seconds": 0.0}
     if set(result.get("subtopics", {})) == {"menu_items"} and rows:
         menu_answer = _menu_item_answer(result, rows)
         return {"text": menu_answer, "mode": "menu_item_evidence", "valid": True,
