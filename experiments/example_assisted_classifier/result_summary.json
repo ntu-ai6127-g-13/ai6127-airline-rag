@@ -1,0 +1,249 @@
+{
+  "recorded_date": "2026-10-24",
+  "selected": "example_word_fallback",
+  "reference_kind": "Codex sentence-only blind AI silver, not human gold",
+  "human_reviewed": false,
+  "production_ready": false,
+  "monitor_used_for_selection": false,
+  "monitor": {
+    "word_policy": {
+      "n": 63,
+      "subjective_n": 53,
+      "aspect_scored_n": 53,
+      "polarity_scored_n": 53,
+      "joint_scored_n": 53,
+      "subjective_aspect_f1": 0.743939393939394,
+      "subjective_polarity_f1": 0.9269572235673931,
+      "subjective_joint_accuracy": 0.660377358490566,
+      "subjective_recall": 0.9056603773584906,
+      "subjective_false_objective_n": 5,
+      "objective_n": 10,
+      "objective_precision": 0.6428571428571429,
+      "objective_recall": 0.9,
+      "subjective_aspect_per_class": {
+        "entertainment": {
+          "support": 5,
+          "f1": 0.8
+        },
+        "food": {
+          "support": 7,
+          "f1": 0.8333333333333334
+        },
+        "ground": {
+          "support": 7,
+          "f1": 0.6666666666666666
+        },
+        "other": {
+          "support": 6,
+          "f1": 0.6666666666666666
+        },
+        "overall": {
+          "support": 13,
+          "f1": 0.8181818181818182
+        },
+        "seat": {
+          "support": 6,
+          "f1": 0.8333333333333334
+        },
+        "staff": {
+          "support": 5,
+          "f1": 0.8333333333333334
+        },
+        "value": {
+          "support": 4,
+          "f1": 0.5
+        }
+      },
+      "target_failures": {
+        "subjective_aspect_f1": {
+          "actual": 0.743939393939394,
+          "target": 0.85
+        },
+        "subjective_joint_accuracy": {
+          "actual": 0.660377358490566,
+          "target": 0.8
+        },
+        "subjective_recall": {
+          "actual": 0.9056603773584906,
+          "target": 0.97
+        }
+      },
+      "point_targets_passed": false,
+      "all_rows_n": 64,
+      "unclear_n": 1,
+      "review_coverage": 0.984375,
+      "human_reviewed": false,
+      "independent_human_acceptance": false,
+      "joint_accuracy_all_rows_lower_bound": 0.671875,
+      "valid_n": 64,
+      "invalid_n": 0
+    },
+    "direct_word_fallback": {
+      "n": 63,
+      "subjective_n": 53,
+      "aspect_scored_n": 53,
+      "polarity_scored_n": 53,
+      "joint_scored_n": 53,
+      "subjective_aspect_f1": 0.7455946830946831,
+      "subjective_polarity_f1": 0.9915254237288136,
+      "subjective_joint_accuracy": 0.7358490566037735,
+      "subjective_recall": 0.9811320754716981,
+      "subjective_false_objective_n": 1,
+      "objective_n": 10,
+      "objective_precision": 0.8888888888888888,
+      "objective_recall": 0.8,
+      "subjective_aspect_per_class": {
+        "entertainment": {
+          "support": 5,
+          "f1": 0.8
+        },
+        "food": {
+          "support": 7,
+          "f1": 0.8333333333333334
+        },
+        "ground": {
+          "support": 7,
+          "f1": 0.7777777777777778
+        },
+        "other": {
+          "support": 6,
+          "f1": 0.7272727272727273
+        },
+        "overall": {
+          "support": 13,
+          "f1": 0.7
+        },
+        "seat": {
+          "support": 6,
+          "f1": 0.8571428571428571
+        },
+        "staff": {
+          "support": 5,
+          "f1": 0.7692307692307693
+        },
+        "value": {
+          "support": 4,
+          "f1": 0.5
+        }
+      },
+      "target_failures": {
+        "subjective_aspect_f1": {
+          "actual": 0.7455946830946831,
+          "target": 0.85
+        },
+        "subjective_joint_accuracy": {
+          "actual": 0.7358490566037735,
+          "target": 0.8
+        }
+      },
+      "point_targets_passed": false,
+      "all_rows_n": 64,
+      "unclear_n": 1,
+      "review_coverage": 0.984375,
+      "human_reviewed": false,
+      "independent_human_acceptance": false,
+      "joint_accuracy_all_rows_lower_bound": 0.703125,
+      "valid_n": 64,
+      "invalid_n": 0
+    },
+    "example_word_fallback": {
+      "n": 63,
+      "subjective_n": 53,
+      "aspect_scored_n": 53,
+      "polarity_scored_n": 53,
+      "joint_scored_n": 53,
+      "subjective_aspect_f1": 0.8114753302253302,
+      "subjective_polarity_f1": 0.9690760059612519,
+      "subjective_joint_accuracy": 0.7735849056603774,
+      "subjective_recall": 0.9811320754716981,
+      "subjective_false_objective_n": 1,
+      "objective_n": 10,
+      "objective_precision": 0.875,
+      "objective_recall": 0.7,
+      "subjective_aspect_per_class": {
+        "entertainment": {
+          "support": 5,
+          "f1": 0.8888888888888888
+        },
+        "food": {
+          "support": 7,
+          "f1": 0.8333333333333334
+        },
+        "ground": {
+          "support": 7,
+          "f1": 0.75
+        },
+        "other": {
+          "support": 6,
+          "f1": 0.9090909090909091
+        },
+        "overall": {
+          "support": 13,
+          "f1": 0.8181818181818182
+        },
+        "seat": {
+          "support": 6,
+          "f1": 0.9230769230769231
+        },
+        "staff": {
+          "support": 5,
+          "f1": 0.7692307692307693
+        },
+        "value": {
+          "support": 4,
+          "f1": 0.6
+        }
+      },
+      "target_failures": {
+        "subjective_aspect_f1": {
+          "actual": 0.8114753302253302,
+          "target": 0.85
+        },
+        "subjective_joint_accuracy": {
+          "actual": 0.7735849056603774,
+          "target": 0.8
+        }
+      },
+      "point_targets_passed": false,
+      "all_rows_n": 64,
+      "unclear_n": 1,
+      "review_coverage": 0.984375,
+      "human_reviewed": false,
+      "independent_human_acceptance": false,
+      "joint_accuracy_all_rows_lower_bound": 0.75,
+      "valid_n": 64,
+      "invalid_n": 0
+    }
+  },
+  "bootstrap_95": {
+    "subjective_aspect_f1": [
+      0.6632421242873983,
+      0.9077692393730996
+    ],
+    "subjective_polarity_f1": [
+      0.9109363476733978,
+      1.0
+    ],
+    "subjective_joint_accuracy": [
+      0.6529627640529896,
+      0.8823529411764706
+    ],
+    "subjective_recall": [
+      0.9411764705882353,
+      1.0
+    ]
+  },
+  "raw_invalid_n_all_128": {
+    "direct": 21,
+    "examples": 6
+  },
+  "source_artifacts_sha256": {
+    "protocol.json": "26fa0694b3c291890eecae78e8fdd78f5d6e6589483b3e532913f43625f64a2e",
+    "runtime_lock.json": "d52b5178dd5cfc28ca5d3bf68e674f41b706eccf486b0039c4cb371d72f399c5",
+    "ai_review.txt": "11dd5cb4d75377087004fe0c111655bf813cffe1221fd604be1138c9beb529bb",
+    "selected_candidate.json": "585cd56b892e5724304f165274689dfcf63c30f4b835c3fc4b039f53ee3a37a3",
+    "monitor_report.json": "2c56acc420f6538a81fc13260b70171e6b1a5fea050283bf8f603824244818b5",
+    "texts.jsonl": "e4657e64239829b4c21a0f897e1bc0ec99934155820fadf0b435420c45104c59"
+  },
+  "comparison_warning": "word_policy is a local Qwen word-output control, NOT the complete main-branch system. No same-input head-to-head against current main and no retrieval/QA improvement claim."
+}

@@ -1,0 +1,517 @@
+{
+  "schema_version": 1,
+  "source": "Codex sentence-only blind AI silver, first experiment calibration only, frozen 2026-10-24",
+  "human_reviewed": false,
+  "gold_used": false,
+  "limitations": [
+    "AI annotations may be wrong; not human gold.",
+    "First experiment excluded historical weak-training parent reviews but two of its 128 texts matched weak-training normalized texts. No first-monitor labels enter this bank.",
+    "Bank excludes all 1,100 eval sentences, their parent reviews and normalized duplicate texts."
+  ],
+  "annotations": [
+    {
+      "id": "EVD000",
+      "chunk_id": "R028307_s05",
+      "review_id": "R028307",
+      "aspect": "staff",
+      "label": "negative",
+      "text_sha256": "a6f8c470e4a9741f5764a34d42af879f4e1f51acd41a793811fcb19f7249979f"
+    },
+    {
+      "id": "EVD002",
+      "chunk_id": "R052196_s02",
+      "review_id": "R052196",
+      "aspect": "ground",
+      "label": "positive",
+      "text_sha256": "d75315823ea6294dae5b6e57f53170f3727956285c0d783e4953e300a6d4a3ef"
+    },
+    {
+      "id": "EVD004",
+      "chunk_id": "R047239_s07",
+      "review_id": "R047239",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "a5965ec1a75cd4e67c5561b8bf76b45dd374b87eafff99822470f70931aa8b93"
+    },
+    {
+      "id": "EVD006",
+      "chunk_id": "R017587_s08",
+      "review_id": "R017587",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "9e58aff3d8a47874acdeb13ed4b0b873f299772b54152279f2e64fcbb83fefc9"
+    },
+    {
+      "id": "EVD008",
+      "chunk_id": "R044962_s05",
+      "review_id": "R044962",
+      "aspect": "overall",
+      "label": "negative",
+      "text_sha256": "2faa6043d9c74904085806cba37049d6ea0a290b31fcb3b20ceb75d49732ea50"
+    },
+    {
+      "id": "EVD010",
+      "chunk_id": "R014350_s00",
+      "review_id": "R014350",
+      "aspect": "overall",
+      "label": "positive",
+      "text_sha256": "eec6ba1a35f772000ded3d0a51a5956252b02a95d59c1ead6222ef90b0ef3f2b"
+    },
+    {
+      "id": "EVD012",
+      "chunk_id": "R042637_s00",
+      "review_id": "R042637",
+      "aspect": "other",
+      "label": "objective",
+      "text_sha256": "58706cf41ca3b65abbc8017cdfede48ad233ad7d33aa2208798521df5e1c5318"
+    },
+    {
+      "id": "EVD014",
+      "chunk_id": "R022833_s06",
+      "review_id": "R022833",
+      "aspect": "food",
+      "label": "negative",
+      "text_sha256": "154685fc3b7597e5ca7b2176f8474d5d907d80d30859fa9e1df15c86c2319e45"
+    },
+    {
+      "id": "EVD016",
+      "chunk_id": "R020966_s09",
+      "review_id": "R020966",
+      "aspect": "food",
+      "label": "negative",
+      "text_sha256": "0c26009f5680d0ab5f079b9e037ea4e12f7a9f5191bac9b10e7ea7efef95bff9"
+    },
+    {
+      "id": "EVD018",
+      "chunk_id": "R054906_s06",
+      "review_id": "R054906",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "e19abba1416178c95df3b8ea9de2b9eda7448d9487635fa55cfd836c9fc1a76f"
+    },
+    {
+      "id": "EVD020",
+      "chunk_id": "R043035_s01",
+      "review_id": "R043035",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "c7688284f0d79c745e133d3e30750fdb2a10747ec2565da799191d24c967fb07"
+    },
+    {
+      "id": "EVD022",
+      "chunk_id": "R060999_s06",
+      "review_id": "R060999",
+      "aspect": "value",
+      "label": "negative",
+      "text_sha256": "68035b56e8339b0c730ff3186a865850effab029e41e8f97adf3c292e4c81ff9"
+    },
+    {
+      "id": "EVD024",
+      "chunk_id": "R015261_s01",
+      "review_id": "R015261",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "05de6b25fb376c2bf75f81a800f7296a7cb564c63de79f648b7cd6b4658abd14"
+    },
+    {
+      "id": "EVD026",
+      "chunk_id": "R002127_s14",
+      "review_id": "R002127",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "0f684c51646e44effe90dbb662dd4d7cc25998ea6836d8ff141c181ee82ba1c5"
+    },
+    {
+      "id": "EVD028",
+      "chunk_id": "R017502_s03",
+      "review_id": "R017502",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "d534c10f8e7c697f20d084b595841e9c38d735eea43d17c325a8fade940fcf9c"
+    },
+    {
+      "id": "EVD030",
+      "chunk_id": "R031056_s07",
+      "review_id": "R031056",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "4a8a929c0e93e454f217f7cfd8d43ab2c174fb88439760b12022fb869d9b9df1"
+    },
+    {
+      "id": "EVD032",
+      "chunk_id": "R018155_s14",
+      "review_id": "R018155",
+      "aspect": "entertainment",
+      "label": "objective",
+      "text_sha256": "08cda3ad91b2efe0359b693784a5d55e0fc6f7a346c262fc3df0b7d5464ed1e0"
+    },
+    {
+      "id": "EVD034",
+      "chunk_id": "R025800_s05",
+      "review_id": "R025800",
+      "aspect": "entertainment",
+      "label": "negative",
+      "text_sha256": "eb519c3a9b8bfad28947114336d681ab7855afd911c9bd42027e52de6f654333"
+    },
+    {
+      "id": "EVD036",
+      "chunk_id": "R050470_s02",
+      "review_id": "R050470",
+      "aspect": "food",
+      "label": "negative",
+      "text_sha256": "67382309e23e3934f6e3a1d797b1d926f5fb0732f99135b578e8c57bbbc9af8a"
+    },
+    {
+      "id": "EVD038",
+      "chunk_id": "R029548_s17",
+      "review_id": "R029548",
+      "aspect": "entertainment",
+      "label": "negative",
+      "text_sha256": "4eeb20b44b79ace56e0ec9546663ec62468f0a39934a876332397086e6cb1f2f"
+    },
+    {
+      "id": "EVD040",
+      "chunk_id": "R014388_s08",
+      "review_id": "R014388",
+      "aspect": "entertainment",
+      "label": "positive",
+      "text_sha256": "45c6082aea3cb821bbd00bdf03fc4ad224d62a3a22f3e708d194ab6c8b9ed62d"
+    },
+    {
+      "id": "EVD042",
+      "chunk_id": "R005883_s04",
+      "review_id": "R005883",
+      "aspect": "food",
+      "label": "negative",
+      "text_sha256": "90836c7dc44fbd623aeb0c0526e887785a70f8583c33700535afcd4d6f836513"
+    },
+    {
+      "id": "EVD044",
+      "chunk_id": "R032872_s03",
+      "review_id": "R032872",
+      "aspect": "food",
+      "label": "positive",
+      "text_sha256": "d61613fe1b388f1233c472777f02e16b1403f5871da5d8d48e42802ce7f50afa"
+    },
+    {
+      "id": "EVD046",
+      "chunk_id": "R045891_s03",
+      "review_id": "R045891",
+      "aspect": "food",
+      "label": "objective",
+      "text_sha256": "e054770580fccbbf1e4f16c4f42f6c1f99929c7d5fd5d723af0c0c3bcb09081b"
+    },
+    {
+      "id": "EVD048",
+      "chunk_id": "R058398_s02",
+      "review_id": "R058398",
+      "aspect": "food",
+      "label": "positive",
+      "text_sha256": "71f25471307e5b48206654ea22041b8a83395cb7cc7ca2f1459805a35e2dedf1"
+    },
+    {
+      "id": "EVD050",
+      "chunk_id": "R036252_s00",
+      "review_id": "R036252",
+      "aspect": "overall",
+      "label": "negative",
+      "text_sha256": "6b79fdfb291005d45658648f6cf35fffffb916407f1931c5c2cddc63d30b2b77"
+    },
+    {
+      "id": "EVD052",
+      "chunk_id": "R040226_s02",
+      "review_id": "R040226",
+      "aspect": "overall",
+      "label": "negative",
+      "text_sha256": "8d2e16044b03e4f5bae087873c41a80cac8c6ccd438bae5118f46844fea42e9d"
+    },
+    {
+      "id": "EVD054",
+      "chunk_id": "R032927_s07",
+      "review_id": "R032927",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "26e205fe7bccb578b35e9184919daafa91ad8ec5e2ad512b0b61a066ce0e9cdd"
+    },
+    {
+      "id": "EVD056",
+      "chunk_id": "R000857_s00",
+      "review_id": "R000857",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "1f899482c9419cfc8b924626e031132736656484c5e634415f290ee753b4de67"
+    },
+    {
+      "id": "EVD058",
+      "chunk_id": "R052593_s00",
+      "review_id": "R052593",
+      "aspect": "other",
+      "label": "objective",
+      "text_sha256": "b8b6fcdbd276d322e9f855fed7b6a9a4a8e4bcbf89196f548561e05a0d4592f3"
+    },
+    {
+      "id": "EVD060",
+      "chunk_id": "R031624_s02",
+      "review_id": "R031624",
+      "aspect": "ground",
+      "label": "negative",
+      "text_sha256": "4983c0684a88593e05e9f8307b3fbc2be29823193a3896eaf187bdf20eacecdb"
+    },
+    {
+      "id": "EVD062",
+      "chunk_id": "R012556_s05",
+      "review_id": "R012556",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "b8e916d747588e83f8c94ca97baf28187a2b5c3a246c3de96ba4289757ac75e3"
+    },
+    {
+      "id": "EVD064",
+      "chunk_id": "R028554_s04",
+      "review_id": "R028554",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "0b497c2639b3bd062c7a6c9e8247e7643194644b3c819a6244c96503b7426d34"
+    },
+    {
+      "id": "EVD068",
+      "chunk_id": "R002564_s00",
+      "review_id": "R002564",
+      "aspect": "other",
+      "label": "objective",
+      "text_sha256": "e97d50c9049c0822f9fe657e26ee0fbadc4e8c6694a9a30be01253fc126c3f3b"
+    },
+    {
+      "id": "EVD070",
+      "chunk_id": "R044130_s01",
+      "review_id": "R044130",
+      "aspect": "other",
+      "label": "negative",
+      "text_sha256": "903d9db7fccdc7f17f5456622e50e41c936baef241c1d178af0eaa202eb2182b"
+    },
+    {
+      "id": "EVD072",
+      "chunk_id": "R011314_s02",
+      "review_id": "R011314",
+      "aspect": "other",
+      "label": "positive",
+      "text_sha256": "800ffb7594ac0e851ee83bd47da98faa01f2ce900959a902583c430ed2d4a1f3"
+    },
+    {
+      "id": "EVD074",
+      "chunk_id": "R001956_s03",
+      "review_id": "R001956",
+      "aspect": "other",
+      "label": "objective",
+      "text_sha256": "a2468f56e5b161bf4b942424afa505db6adf5789f27a0187fb52fc602db0fa30"
+    },
+    {
+      "id": "EVD076",
+      "chunk_id": "R039448_s03",
+      "review_id": "R039448",
+      "aspect": "overall",
+      "label": "positive",
+      "text_sha256": "aa3bcd17c976b81c54d815993fef0152c224b9b033305f1e06850eb333fc7a5a"
+    },
+    {
+      "id": "EVD078",
+      "chunk_id": "R034205_s02",
+      "review_id": "R034205",
+      "aspect": "other",
+      "label": "negative",
+      "text_sha256": "b11e44a6f9acd7ab80621075075e1396680efe69cc1a9415b3662ce9f9518fd1"
+    },
+    {
+      "id": "EVD080",
+      "chunk_id": "R039434_s06",
+      "review_id": "R039434",
+      "aspect": "overall",
+      "label": "positive",
+      "text_sha256": "ffe44d4b3085e6e37db72fec437f2f1e8ba1725afb956d1a0a61b0da9581fb4e"
+    },
+    {
+      "id": "EVD082",
+      "chunk_id": "R039668_s10",
+      "review_id": "R039668",
+      "aspect": "overall",
+      "label": "negative",
+      "text_sha256": "173715f0d57f524a1502f4e092f6329a976cef032212f531cba01c9fb04592b4"
+    },
+    {
+      "id": "EVD084",
+      "chunk_id": "R044557_s05",
+      "review_id": "R044557",
+      "aspect": "overall",
+      "label": "positive",
+      "text_sha256": "d08f6d7c374b42a7c2f7e2c585119c06f7bf5e27c99acdf0591640284d85765d"
+    },
+    {
+      "id": "EVD086",
+      "chunk_id": "R008783_s00",
+      "review_id": "R008783",
+      "aspect": "overall",
+      "label": "negative",
+      "text_sha256": "c2b737f19628d1cff390e3b42aaecb7d479e4e94d110fe8bacd94928fe93cdad"
+    },
+    {
+      "id": "EVD088",
+      "chunk_id": "R049906_s01",
+      "review_id": "R049906",
+      "aspect": "overall",
+      "label": "positive",
+      "text_sha256": "f4b3fee79261404d0a04c7486be89f5602e809c4548a30c6b384fa7d2de7f059"
+    },
+    {
+      "id": "EVD090",
+      "chunk_id": "R058700_s10",
+      "review_id": "R058700",
+      "aspect": "overall",
+      "label": "negative",
+      "text_sha256": "1c1dcc1e3668abe30d0fbc6f64d8deab8fa32a18d3ca900edb5a5b84770ce04d"
+    },
+    {
+      "id": "EVD092",
+      "chunk_id": "R040600_s03",
+      "review_id": "R040600",
+      "aspect": "seat",
+      "label": "negative",
+      "text_sha256": "3d4bb116b7621b68e9e58413cbd981d02b2f43b557e102d32f5d88f57434375f"
+    },
+    {
+      "id": "EVD094",
+      "chunk_id": "R055876_s00",
+      "review_id": "R055876",
+      "aspect": "ground",
+      "label": "objective",
+      "text_sha256": "e9317d280f1d38b2e1f4dbe942a1350b65e4280882dd6cbddaefcf575e8c95f7"
+    },
+    {
+      "id": "EVD096",
+      "chunk_id": "R058687_s04",
+      "review_id": "R058687",
+      "aspect": "seat",
+      "label": "negative",
+      "text_sha256": "e8101d550e09b5ea6b55e50bd71cdee36b7714dc18ef380652d4fca12281d572"
+    },
+    {
+      "id": "EVD098",
+      "chunk_id": "R031131_s02",
+      "review_id": "R031131",
+      "aspect": "seat",
+      "label": "positive",
+      "text_sha256": "2801aa701986519709c8e9c65deeeecd14dcfb59aec112ecac7d32d2c4020f36"
+    },
+    {
+      "id": "EVD100",
+      "chunk_id": "R059412_s07",
+      "review_id": "R059412",
+      "aspect": "seat",
+      "label": "positive",
+      "text_sha256": "e7c2a72fbeaf6bf0e82b21af8062b8b598008aa674f5b9502ab12b6e78f749f0"
+    },
+    {
+      "id": "EVD102",
+      "chunk_id": "R054811_s02",
+      "review_id": "R054811",
+      "aspect": "value",
+      "label": "negative",
+      "text_sha256": "854610002680f5919560c457f7318092e53fa021c7c04a9c7ceeecefeaebdb89"
+    },
+    {
+      "id": "EVD104",
+      "chunk_id": "R022035_s11",
+      "review_id": "R022035",
+      "aspect": "staff",
+      "label": "negative",
+      "text_sha256": "4fd54b48ba508f5302f861c415b4020c4c453bf229665ccd060b2cf0cb417bbc"
+    },
+    {
+      "id": "EVD106",
+      "chunk_id": "R026576_s06",
+      "review_id": "R026576",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "397c391759148d3bb1cdeff741786dfa52230a2d82eddff014b0fba2e7a382d0"
+    },
+    {
+      "id": "EVD108",
+      "chunk_id": "R035458_s02",
+      "review_id": "R035458",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "19f7880878304b001b5dc7fa41bde445af16f954798355f40e68786b411f48ee"
+    },
+    {
+      "id": "EVD110",
+      "chunk_id": "R025714_s07",
+      "review_id": "R025714",
+      "aspect": "staff",
+      "label": "positive",
+      "text_sha256": "e8c00f628baf22ead241cbd087b772d5a9e8fd3e08b58f39d395d783b48386e9"
+    },
+    {
+      "id": "EVD112",
+      "chunk_id": "R054083_s01",
+      "review_id": "R054083",
+      "aspect": "overall",
+      "label": "positive",
+      "text_sha256": "419b42aefb3b659ce9e222c1d8532a27ab1c8eb67eec3bcb2fcc76905e0b996a"
+    },
+    {
+      "id": "EVD114",
+      "chunk_id": "R027254_s01",
+      "review_id": "R027254",
+      "aspect": "staff",
+      "label": "negative",
+      "text_sha256": "f070f2d7838ff56aeaeb472c41ba7bcf403fcd0dea8b04e3dcb5f5aa10e2b203"
+    },
+    {
+      "id": "EVD116",
+      "chunk_id": "R017170_s15",
+      "review_id": "R017170",
+      "aspect": "value",
+      "label": "negative",
+      "text_sha256": "a4a6f089d662a1f3d55fc3dd6ab641dee5517cede11ce0a18e6eca9d097ed7c3"
+    },
+    {
+      "id": "EVD118",
+      "chunk_id": "R002968_s03",
+      "review_id": "R002968",
+      "aspect": "value",
+      "label": "negative",
+      "text_sha256": "d4a79ee4e71811cd25683cc9c71a8242e32861631cf121d9355f190c01858dd8"
+    },
+    {
+      "id": "EVD120",
+      "chunk_id": "R021867_s01",
+      "review_id": "R021867",
+      "aspect": "value",
+      "label": "positive",
+      "text_sha256": "7a64193f2bbf4e33399c40ac4d96e7ed9e4ca724d7e77af1e1e9b5cf7fcb8062"
+    },
+    {
+      "id": "EVD122",
+      "chunk_id": "R005103_s01",
+      "review_id": "R005103",
+      "aspect": "value",
+      "label": "positive",
+      "text_sha256": "761e477616aa56b0fc25cc751bac8b219219cd7c62ded0e5b25f50b0bcac6da9"
+    },
+    {
+      "id": "EVD124",
+      "chunk_id": "R001432_s02",
+      "review_id": "R001432",
+      "aspect": "value",
+      "label": "negative",
+      "text_sha256": "176323f4fd13e4231f77a9439277fdbf1252441e8e74b70dfdf6bf1eed87ae50"
+    },
+    {
+      "id": "EVD126",
+      "chunk_id": "R035908_s04",
+      "review_id": "R035908",
+      "aspect": "value",
+      "label": "negative",
+      "text_sha256": "ec787d6f2fd91ee1f131fe12c549d255b12e68ad9222ef1b4b4ead501b97892b"
+    }
+  ]
+}
