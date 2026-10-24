@@ -1,0 +1,8 @@
+# Main Python environment, in addition to the repository requirements.txt.
+# These are the versions used for the portable 128-sentence replay.
+numpy==2.4.6
+pandas==3.0.6
+scikit-learn==1.9.1
+sentence-transformers==6.1.0
+pytest>=8,<10
+# MLX runs separately; use experiments/query_quality/requirements-mlx.lock.txt.
