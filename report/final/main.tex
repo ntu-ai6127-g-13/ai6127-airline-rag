@@ -40,7 +40,7 @@
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{positioning,arrows.meta,calc}
 \usepackage{fancyvrb}
-\usepackage[style=numeric-comp,sorting=none,maxbibnames=3,backend=biber]{biblatex}
+\usepackage[style=numeric-comp,sorting=none,maxbibnames=3,backend=biber,urldate=iso,seconds=true]{biblatex}
 \addbibresource{refs.bib}
 \renewcommand*{\bibfont}{\small}
 \usepackage{xurl}
@@ -103,12 +103,13 @@ fused by reciprocal rank fusion; an offline sentence classifier labels subjectiv
 verdict is a count over \emph{every} matching review; and a local Qwen3-4B model writes a cited answer that program
 guards accept only if its citations, numbers and direction agree with the evidence. On 30 airline $\times$
 sub-attribute queries the hybrid retriever reaches NDCG@10 0.810 and MRR 0.961, while a general-purpose cross-encoder
-\emph{lowers} NDCG@10 by 0.066 (95\% CI $[-0.114,-0.019]$). Distilling the LLM labeller into a linear classifier raises
-three-class macro-F1 on our \num{1000}-sentence human-labelled set from 57.2 to 78.5 and joint aspect--polarity accuracy
+\emph{lowers} NDCG@10 by 0.066 (95\% CI $[-0.114,-0.019]$). Replacing the rule-based classifier with a linear student trained on weak labels plus
+labels distilled from an LLM raises three-class macro-F1 on our \num{1000}-sentence human-labelled set from 57.2 to 78.5 and joint aspect--polarity accuracy
 by 7.4 points (CI $[+4.5,+10.4]$), while relabelling the whole corpus in 18\,s. On 20 end-to-end questions the guarded
-system scores 0.84 faithfulness and 0.99 answer relevance. A full factorial ablation of the three answer-side
+system scores 0.84 faithfulness and 0.99 answer relevance, with 16 of the 20 final answers written by the program
+fallback. A full factorial ablation of the three answer-side
 components (160 answers) finds balanced evidence plus validation the most faithful configuration ($+0.053$, CI
-$[+0.004,+0.106]$) and shows that the components do not simply add up. Text-derived airline rankings agree with
+$[+0.004,+0.106]$) and shows that their gains are not additive. Text-derived airline rankings agree with
 held-out passenger ratings (Spearman $\rho=0.81$ over 58 airlines). Everything runs locally at zero API cost.
 \end{abstract}
 
@@ -206,7 +207,7 @@ sentiment signals. Lower-casing happens only inside the BM25 index.
 \textbf{Problem} & \textbf{Share} & \textbf{Example and fix} \\
 \midrule
 Blank spreadsheet rows & 50.0\% of rows & \num{131895} rows, of which \num{65947} carry a review; the rest are dropped. \\
-Mojibake (UTF-8 read as cp1252) & 42.4\% & \texttt{wasnâ€™t}\,$\to$\,\texttt{wasn't}; \texttt{DÃ¼sseldorf}\,$\to$\,\texttt{Düsseldorf}. Re-encoding whole reviews left 2.14\% broken, repairing suspicious spans 0.37\%; \texttt{ftfy}~\cite{ftfy} plus a span-level second pass leaves 0.03\% (9 genuine residues). \\
+Mojibake (UTF-8 read as cp1252) & 42.4\% & \texttt{wasnâ€™t}\,$\to$\,\texttt{wasn't}; \texttt{DÃ¼sseldorf}\,$\to$\,\texttt{Düsseldorf}. Re-encoding whole reviews left 2.14\% broken, repairing suspicious spans 0.37\%; \texttt{ftfy}~\cite{ftfy} plus a span-level second pass leaves 6 flagged sentences (0.001\%), all genuine Spanish, French or Portuguese. \\
 Site boilerplate & 43.5\% & Prefixes \texttt{Trip Verified |} (\num{13670}), \texttt{Verified Review |} (\num{12126}), \texttt{Not Verified |} (\num{1714}) and a trailing \texttt{… Ranking}, removed with anchored patterns; otherwise every query on ``verified'' would match them. \\
 Duplicate reviews & 7.2\% & Exact de-duplication: \num{65947}\,$\to$\,\num{61172} unique texts. \\
 Too-short reviews & $<$0.01\% & Under 20 characters after cleaning: \num{61172}\,$\to$\,\num{61167}. \\
@@ -219,13 +220,13 @@ opinion about one aspect, so a retrieval hit, a classifier label and a citation 
 windows mix aspects, because a typical review moves from check-in to seat to food (\cref{fig:corpus}, bottom). Each
 sentence keeps its \nolinkurl{review_id} and the full review, so the interface can expand a hit to its parent
 (parent-document retrieval). Sentences of fewer than three words or five letters are dropped at split time;
-\num{16772} route-only lines, 336 non-English sentences and 19 fragments are flagged and excluded from retrieval,
-leaving a pool of \num{529031} of the \num{546139} sentences.
+\num{16772} route-only lines and 336 non-English sentences are excluded from retrieval (19 sentence fragments are
+flagged but kept), leaving a pool of \num{529031} of the \num{546139} sentences.
 
 \paragraph{Storage.} The result is one table, \nolinkurl{data/processed/chunks.parquet} (31 columns: sentence, parent
 review, metadata, ratings, route parsed into origin, destination and stop-over, quality flags), which is the single
 data contract of all three subgroups. zstd compression reduces it from 96\,MB to 31\,MB. On it we build a BM25 index
-(3.5\,s), a FAISS \texttt{IndexFlatIP} over L2-normalised 384-d \texttt{all-MiniLM-L6-v2} embeddings (78.5\,s) and the
+(6\,s), a FAISS \texttt{IndexFlatIP} over L2-normalised 384-d \texttt{all-MiniLM-L6-v2} embeddings (4.6\,min, mostly encoding) and the
 label index of \cref{sec:cls}. A full rebuild takes about 14 minutes.
 
 \begin{table}[t]
@@ -243,6 +244,7 @@ Airlines & 81 \\
 Review dates & Aug 2002 -- Jun 2019 \\
 Reviews by cabin: Economy & \num{45163} \\
 \quad Business / Premium / First & \num{9589} / \num{2411} / \num{1532} \\
+\quad Cabin not given & \num{2472} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -265,7 +267,7 @@ Reviews by cabin: Economy & \num{45163} \\
 \addplot[fill=s1, draw=none] coordinates {(1-2,968) (3-4,7650) (5-6,14363) (7-8,12608) (9-10,8840) (11-12,5817) (13-14,3694) (15-16,2366) (17-20,2541) (21-30,1919) (31+,401)};
 \end{axis}
 \end{tikzpicture}
-\caption{Top: review volume grows from 2013 (209 reviews before 2009 omitted); 2019 is partial. Bottom: most reviews
+\caption{Top: review volume grows from 2013 (115 reviews before 2009 omitted); 2019 is partial. Bottom: most reviews
 have 5--10 sentences and therefore mix several aspects, which motivates sentence-level passages.}
 \label{fig:corpus}
 \end{figure}
@@ -279,7 +281,7 @@ matching reviews so users can judge how thin the evidence is.
 quality. They ask in English or Chinese, or set filters directly, and receive a cited verdict, a positive/negative tally
 over all matching reviews, the rating summary and the evidence. Typical queries: \emph{How is the legroom in Singapore
 Airlines economy?} (one sub-attribute); \emph{Flying Singapore to London in economy, which airline has the best
-legroom?} (route constraint, open comparison); \emph{Compare Qatar Airways and British Airways business-class seat
+legroom?} (route constraint, open comparison); \emph{Compare Qatar Airways and British Airways business class seat
 recline} (two airlines); \emph{Singapore Airlines economy: food, value for money and ground service?} (several
 aspects); and the Chinese \emph{阿联酋航空经济舱的退款和改签处理怎么样？} (Emirates refunds and rebooking).
 
@@ -288,7 +290,7 @@ aspects); and the Chinese \emph{阿联酋航空经济舱的退款和改签处理
 \label{sec:method}
 
 \Cref{fig:arch} shows the pipeline. Indexes and labels are built offline; per query, filters are applied before
-retrieval, and the generator's draft is accepted only if program checks pass. All components run on an Apple M1 Pro
+retrieval, and the generator's draft is accepted only if program checks pass. The system runs on an Apple M1 Pro
 laptop with 16\,GB of memory; no hosted RAG service or paid API is used.
 
 \begin{figure*}[t]
@@ -304,7 +306,7 @@ laptop with 16\,GB of memory; no hosted RAG service or paid API is used.
   \node[off, right=of raw] (chunks) {\textbf{Sentence table}\\ 546k sentences, 31 cols};
   \node[off, right=of chunks] (bm25) {\textbf{BM25 index}\\ lexical};
   \node[off, right=of bm25] (faiss) {\textbf{FAISS index}\\ MiniLM, 384-d};
-  \node[off, right=of faiss] (cls) {\textbf{Fast classifier}\\ distilled from LLM};
+  \node[off, right=of faiss] (cls) {\textbf{Fast classifier}\\ weak / distilled labels};
   \node[off, below=3mm of cls] (labels) {\textbf{Label index}\\ 529k labels};
   \draw[arr] (raw) -- (chunks);
   \draw[arr] (chunks) -- (bm25);
@@ -402,7 +404,7 @@ symbolic--subsymbolic design.
 \textbf{Component} & \textbf{What it is} & \textbf{Why} \\
 \midrule
 LLM teacher (r36) &
-Qwen3-4B-Instruct-2507~\cite{qwen3}, 4-bit MLX. Two-step closed-choice prompts (one of eight aspects, then a polarity). A sentence is objective only if an independent NLI-based classifier agrees. &
+Qwen3-4B-Instruct-2507~\cite{qwen3}, 4-bit MLX; r36 is the best of the labelling configurations we compared. Two-step closed-choice prompts (one of eight aspects, then a polarity). A sentence is objective only if an independent NLI-based classifier agrees. &
 Most accurate labeller we have (\cref{tab:cls}), but $\approx$0.5\,s per sentence: about three days for the corpus. \\
 Fast student &
 TF-IDF (1--2-grams, \num{20000} features) concatenated with frozen MiniLM embeddings; one logistic regression per task; trained on weak labels plus teacher labels (\cref{sec:exp-distill}). &
@@ -485,9 +487,10 @@ of them with a clear direction (79.6\% positive).}
 \includegraphics[height=78mm]{figures/ui_compare_evidence.png}
 \caption{Evidence tab with coverage counts.}
 \end{subfigure}
-\caption{Comparison of Cathay Pacific and Singapore Airlines on economy legroom. The rating gap on the parent aspect
-(3.46 vs.\ 3.83 of 5) is significant and reported as a lead; the legroom tallies (72.5\% vs.\ 79.6\% positive) are
-reported as not decisive. The evidence tab shows 95 direct legroom sentences in 86 reviews and a retrieval time of 4.5\,s.}
+\caption{Comparison of Cathay Pacific and Singapore Airlines on economy legroom. Singapore Airlines' higher
+seat-comfort rating (3.83 vs.\ 3.46 of 5) is significant and reported for the parent aspect; the legroom tallies (72.5\%
+vs.\ 79.6\% positive) are reported as not decisive. The evidence tab shows 95 direct legroom sentences in 86 reviews and
+a retrieval time of 4.5\,s (a separate run from \cref{tab:five}).}
 \label{fig:ui-compare}
 \end{figure*}
 
@@ -498,8 +501,9 @@ reported as not decisive. The evidence tab shows 95 direct legroom sentences in 
 \subsection{Setup and evaluation data}
 \label{sec:data}
 
-All experiments run on an Apple M1 Pro (16\,GB). Intervals are 95\% bootstrap intervals over \num{10000} resamples at the
-query, question or parent-review level. We use three evaluation sets: 30 airline $\times$ sub-attribute retrieval units
+E1--E5 and E8 run on an Apple M1 Pro (16\,GB); E6 and E7 ran on a Linux machine with an AMD Radeon RX 7800 XT.
+Intervals are 95\% bootstrap intervals at the query, question or parent-review level (\num{10000} resamples for E1 and
+E5, \num{2000} for E4, E6 and E7). The evaluation data are: 30 airline $\times$ sub-attribute retrieval units
 (E1); 20 fixed end-to-end questions written in Chinese (12 single-airline, 5 comparisons, 3 multi-aspect; E2, E5);
 a \num{1000}-sentence human-labelled gold set (E3, E4); 20 English single-attribute questions for the factorial
 ablation (E6, Appendix~\ref{app:factorial}); and held-out passenger ratings for the airline ranking (E7).
@@ -551,7 +555,8 @@ MRR, NDCG@10~\cite{ndcg} and Success@10.
 \begin{table*}[t]
 \centering\small
 \caption{E1: retrieval quality on 30 airline $\times$ sub-attribute queries (automatic graded relevance). Best per column
-in bold; latency is the warm median per query including metadata filtering.}
+in bold; latency is the warm median per query including metadata filtering. These are the retriever configurations; the
+deployed pipeline also scans the filtered slice for sub-attribute mentions (\cref{sec:ret}).}
 \label{tab:retrieval}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
@@ -589,7 +594,7 @@ precision and adds paraphrases further down. The gain over BM25 is not significa
 $[-0.114,-0.019]$): trained on MS MARCO web questions, it prefers sentences that answer a question in general, such as
 a long comfort description, over short sentences that name the attribute. We therefore use it only to order candidates
 that already mention the requested sub-attribute. Success@10 is 1.0 everywhere, so differences are about ordering and
-coverage. These qrels are reproducible but favour explicit mentions, which advantages BM25 and under-counts dense
+coverage. These relevance labels are reproducible but favour explicit mentions, which advantages BM25 and under-counts dense
 paraphrases (``knees touching the seat in front''); human judgements would make the comparison stronger.
 
 \subsection{E2: How fast is a query? (Q2)}
@@ -599,14 +604,15 @@ paraphrases (``knees touching the seat in front''); human judgements would make 
 with the local model on. \emph{Retrieval} covers parsing, filtering, BM25, dense search, fusion, reranking and evidence
 selection; \emph{first token} is measured from submission; \emph{total} runs until the checked answer is shown.
 \Cref{fig:latency} shows that retrieval is a small share of the wait: the 4B model on a laptop dominates, which we
-mitigate by streaming. Measured alone over the full pool, BM25 top-20 takes a median of 101\,ms, FAISS top-20 11.5\,ms,
-RRF over two top-100 lists 118\,ms and cross-encoder reranking of 100 candidates 67\,ms. With the LLM off, the
+mitigate by streaming. Timed alone over the full pool without filters (the 30 E1 queries, warm medians), BM25 top-20 takes 503\,ms, FAISS
+top-20 20\,ms, hybrid retrieval (both top-100 lists and RRF) 519\,ms and cross-encoder reranking of 100 candidates
+108\,ms (\nolinkurl{experiments/final_auto_eval/component_latency.py}); scoring all sentences with BM25 dominates. With the LLM off, the
 program-written path averaged 5.0\,s per question over a 40-question smoke test.
 
 \begin{table}[t]
 \centering\small
-\caption{E2: five representative queries (asked in Chinese; originals in Appendix~\ref{app:queries}). Answer: model draft
-(D), repaired draft (R) or program-written (P).}
+\caption{E2: five representative queries (asked in Chinese; original wording and results in Appendix~\ref{app:queries}).
+Answer: model draft (D), repaired draft (R) or program-written (P). The All-20 rows include the cold first question.}
 \label{tab:five}
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabularx}{\columnwidth}{@{}lYrrrc@{}}
@@ -652,7 +658,9 @@ recall and F1 as the brief requests, and \cref{fig:aspect} breaks aspect F1 down
 \begin{table}[t]
 \centering\small
 \caption{E3: classifier quality on the gold set (\%). Aspect and polarity F1 are macro-averaged over 919 subjective
-sentences. Shaded: the distilled student now used for the label index.}
+sentences. Shaded: the distilled student, selected to replace v4.1 (\cref{sec:exp-distill}). Joint: aspect and polarity both
+correct; S-rec./O-rec.: recall of subjective/objective sentences over all \num{1000}. v4.1 is the weak-supervision
+classifier the interface uses; r36 is the LLM teacher (\cref{tab:approach}); targets were fixed at the project start.}
 \label{tab:cls}
 \setlength{\tabcolsep}{3pt}
 \begin{tabularx}{\columnwidth}{@{}Yrrrrr@{}}
@@ -716,7 +724,7 @@ every model.}
 \label{fig:aspect}
 \end{figure}
 
-\paragraph{Results.} Objective sentences are the main weakness of weak supervision: with 221 objective training
+\paragraph{Results.} Objective sentences are the main weakness of weak supervision: with 179 objective training
 examples, v4.1 finds 7.4\% of them and the embedding model 21.0\%; teacher labels raise this to 66.7\% at a cost of 3
 points of subjective recall, and three-class macro-F1 rises from 57.2 to 78.5. Aspect errors are concentrated: the
 student's most frequent confusions are \emph{staff} predicted as \emph{food} (18 sentences, mostly crew handling of the
@@ -734,12 +742,13 @@ but would need about three days for the corpus.
 
 \paragraph{Protocol.} (i)~We drew \num{10003} sentences from \num{1154} parent reviews in the \emph{development} split of
 the weak labels, excluding every gold sentence, its parent review and its normalised text, and any text seen in
-weak-label training. (ii)~The teacher labelled all of them in 87 minutes with no invalid outputs (12.8\% objective).
+weak-label training. (ii)~The teacher labelled all of them in 89 minutes with no invalid outputs (12.8\% objective).
 (iii)~We split by parent review into pseudo-train (\num{7355}) and pseudo-dev (\num{2648}). (iv)~Before training we fixed
 three students with identical features that differ only in supervision: \emph{weak} (weak labels only, reproducing a
 teammate's model), \emph{teacher} (teacher labels only) and \emph{mixed} (both, teacher examples up-weighted so each
 source carries equal weight). (v)~The winner was selected by a fixed rank score against the \emph{teacher} on
-pseudo-dev; a file-read guard prevented access to gold. (vi)~Also fixed in advance: the winner replaces v4.1 only if it
+pseudo-dev ($0.35\,$aspect F1 $+\,0.20\,$polarity F1 $+\,0.35\,$joint $+\,0.10\,$subjective recall, minus penalties
+when subjective recall falls below 97\% or objective recall below 60\%); a file-read guard prevented access to gold. (vi)~Also fixed in advance: the winner replaces v4.1 only if it
 beats v4.1 on gold in both rank score and joint accuracy.
 
 \begin{table*}[t]
@@ -755,7 +764,7 @@ models on human gold, scored once after selection. Features are identical; only 
 \midrule
 v4.1 production (reference) & 54.0 & 3.9 & 0.637 & 61.1 & 56.1 & 7.4 & 0.648 \\
 Weak only & 59.9 & 18.9 & 0.692 & 68.1 & 61.5 & 21.0 & 0.705 \\
-Teacher only (7.4k) & 64.0 & \best{75.8} & 0.662 & \best{71.4} & 61.4 & \best{76.5} & 0.651 \\
+Teacher only (7.4k) & 64.0 & \best{75.7} & 0.662 & \best{71.4} & 61.4 & \best{76.5} & 0.651 \\
 \rowcolor{shade} Weak + teacher (selected) & \best{65.8} & 67.1 & \best{0.729} & 70.4 & \best{63.5} & 66.7 & \best{0.735} \\
 \bottomrule
 \end{tabular}
@@ -785,7 +794,7 @@ $[+2.6,+8.1]$, $[-0.1,+4.3]$, $[-10.4,-4.1]$.}
 
 \paragraph{Results.} The mixed student was selected on pseudo-dev and passed the adoption rule on gold
 (\cref{tab:distill}). Replacing the v4.1 features by TF-IDF + MiniLM gives +5.3 points of joint accuracy (confounded by
-v4.1's rule layer); adding teacher labels gives a further +2.1, borderline significant (\cref{fig:distill}), and lifts
+v4.1's rule layer); adding teacher labels gives a further +2.1, not significant at the 95\% level (CI $[-0.1,+4.3]$, \cref{fig:distill}), and lifts
 objective recall from 21.0\% to 66.7\%. Teacher labels are valuable per example: the teacher-only student, trained on
 7.4k sentences, has the best aspect F1 and objective recall of the three, but is weaker on polarity than models that also
 see the \num{231779} weak labels, so mixing works best overall. Rebuilding the \num{529031}-label index takes 18\,s
@@ -839,7 +848,8 @@ without labels; all eight configurations share the pool, the prompt and a budget
 corpus counts and the overall direction are hidden from generation, validation and fallback; with Y off, the top four
 candidates are used; with Z off, the model's draft is returned unchecked. Qwen3-4B-Instruct-2507 (BF16, Transformers
 backend on an AMD Radeon RX 7800 XT) both generates and judges, using the metrics of E5 with answer relevance scored
-0--4 and rescaled. The run produced 80 drafts, 54 repair attempts and 160 final answers. Intervals come from 2,000
+0--4 and rescaled. Each question gets one draft per X/Y setting, shared by its Z-off and Z-on variants, so the run produced 80 drafts,
+54 repair attempts and 160 final answers. Intervals come from 2,000
 paired bootstrap resamples over questions (seed 6127), without multiple-comparison adjustment.
 
 \begin{table*}[t]
@@ -888,7 +898,8 @@ and Y + Z have intervals entirely above zero.}
 \begin{table}[t]
 \centering\small
 \caption{E6: main and interaction effects (20 paired questions). A main effect is the on-minus-off difference averaged
-over the four settings of the other two factors.}
+over the four settings of the other two factors; XY is the difference between X's effect with Y on and off, averaged
+over Z, and XYZ the difference between the XY interactions with Z on and off.}
 \label{tab:effects}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lrlrr@{}}
@@ -912,7 +923,8 @@ relevance at 1.000 and raises context precision from 0.808 to 0.871 while using 
 average). The deployed configuration, X + Y + Z, is level with the baseline on faithfulness ($-0.002$) and X + Z lowers
 answer relevance the most ($-0.075$, $[-0.125,-0.025]$). Averaged over the other factors (\cref{tab:effects}), Y has the
 largest positive main effect, Z a small positive one and X a negative one; all three intervals include zero and the
-largest interaction is XZ. The components therefore do not simply add up. X is partly penalised by construction: it
+largest interaction is XZ. The gains are therefore not additive (all three together are level with the baseline),
+although with 20 questions no single interaction is significant. X is partly penalised by construction: it
 adds aggregate claims that the judge must verify, whereas an answer that only paraphrases quotations has little to get
 wrong. Faithfulness measures how the answer uses its context, not whether the overall opinion summary is right, which
 is what X is for; the targeted checks below measure that directly.
@@ -934,7 +946,8 @@ marked as not fully supported.
 
 \begin{table}[t]
 \centering\small
-\caption{E6: targeted checks, each component measured on the property it targets.}
+\caption{E6: targeted checks, each component measured on the property it targets. The last two rows are sanity checks
+of the mechanism rather than measured gains.}
 \label{tab:ablation}
 \setlength{\tabcolsep}{3pt}
 \begin{tabularx}{\columnwidth}{@{}Yrr@{}}
@@ -943,7 +956,7 @@ marked as not fully supported.
 \midrule
 X: full-pool verdict vs.\ top-10 vote (direction agrees with all matching reviews) & 12/18 & \best{18/18} \\
 Y: balanced evidence vs.\ naive order (top four show both sides when both exist) & 11/17 & \best{17/17} \\
-Y: consistency filter (clear label--text conflicts among shown examples) & 13 & \best{0} \\
+Y: consistency filter (clear label--text conflicts among the examples shown for the 18 cases) & 13 & \best{0} \\
 Z: direction guard vs.\ citation check only (wrong-direction answers rejected) & 0/18 & \best{18/18} \\
 \bottomrule
 \end{tabularx}
@@ -969,8 +982,8 @@ Spearman $\rho=0.810$, 95\% CI $[0.682, 0.838]$.}
 \label{fig:rank}
 \end{figure}
 
-\paragraph{Results.} 58 airlines qualify, covering \num{8365} held-out reviews with a valid seat rating and \num{3152}
-with a usable text prediction. The rankings agree closely: Spearman $\rho=0.810$, 95\% CI $[0.682,0.838]$, from 2,000
+\paragraph{Results.} 58 airlines qualify. The held-out reference set holds \num{8365} reviews with a valid seat
+rating, \num{3152} of them with a usable text prediction. The rankings agree closely: Spearman $\rho=0.810$, 95\% CI $[0.682,0.838]$, from 2,000
 paired resamples of parent reviews over the fixed airline set (\cref{fig:rank}). Opinion mined from text and aggregated
 per review therefore preserves clear differences between airlines, which supports using it for comparison questions.
 The rating is a reference for overall seat comfort, not a gold standard for each sub-attribute, and the interval does
@@ -992,12 +1005,12 @@ Retrieval and evidence selection & 2.9\,s (10.5\,s) \\
 Submission to first streamed token & 24.3\,s (41.9\,s) \\
 Submission to final checked answer & 40.8\,s (72.3\,s) \\
 Program-only answer (LLM off) & 5.0\,s / query \\
-LLM throughput (1--2 concurrent requests) & $\approx$1 req/s \\
+Short LLM request (120 tokens), 1 or 2 at once & $\approx$1\,s each, serialised \\
 \midrule
 Student labelling of \num{529031} sentences & 18\,s \\
 One-off MiniLM encoding of all sentences & 573\,s \\
 LLM teacher labelling & $\approx$0.5\,s / sentence \\
-KB rebuild / BM25 build / FAISS build & 14\,min / 3.5\,s / 78.5\,s \\
+KB rebuild / BM25 build / FAISS build & 14\,min / 6\,s / 4.6\,min \\
 \midrule
 Cost per query & \$0 (all local) \\
 \bottomrule
@@ -1030,9 +1043,10 @@ per example than weak labels, the cheapest next steps are more teacher labels (3
 fine-tuning a small encoder on them, and a cascade that sends only low-confidence sentences to the LLM. Allowing more
 than one aspect per sentence would also match the data better.
 
-\paragraph{English free-text comparisons.} An English question naming two airlines (``\ldots Cathay Pacific or
-Singapore Airlines?'') was parsed as a single-airline question in our tests; the Chinese phrasing and the sidebar
-comparison work. The parser's English comparison patterns need extending.
+\paragraph{Airline names in English.} Late testing found ``\ldots Cathay Pacific or Singapore Airlines?'' parsed as a
+single-airline question, because the corpus spells the name ``Cathay Pacific Airways''. A table of common English short
+names now resolves this (it changes the parse of none of the evaluation questions); names outside the table still need
+the corpus spelling, a Chinese name or the sidebar.
 
 \paragraph{Data age.} Reviews end in mid-2019. The interface states this on every page; answers describe historical
 experiences, not current service.
@@ -1042,11 +1056,11 @@ experiences, not current service.
 
 We built a local RAG system for airline-service questions that keeps constraints, works at the level of fine-grained
 attributes and gives verdicts a user can verify. Four lessons stand out. First, structured constraints and
-attribute routing fixed more failing queries than any change of ranking model, and a general-purpose cross-encoder even
-hurt. Second, distilling an LLM labeller into a linear classifier recovers most of its gain in objective detection and
-joint accuracy at a tiny fraction of its cost, provided selection is kept away from the test set. Third, balanced
-evidence and program validation make a small generator's answers more faithful (Y + Z is the best of eight
-configurations), but components do not simply add up: exact full-pool statistics fix the verdict while lowering judged
+attribute routing fixed the failing queries of \cref{tab:fixes}, which no change of ranking model addressed, and a
+general-purpose cross-encoder even hurt. Second, distilling an LLM labeller into a linear classifier recovers most of its gain in objective detection and
+about half of its gain in joint accuracy at a tiny fraction of its cost, provided selection is kept away from the test set. Third, balanced
+evidence plus validation with a program-written fallback gives the most faithful final answers (Y + Z is the best of
+eight configurations), but the gains are not additive: exact full-pool statistics fix the verdict while lowering judged
 faithfulness. Finally, airline rankings mined from text agree with held-out passenger ratings ($\rho=0.81$), which
 supports answering comparison questions from review text.
 
@@ -1078,12 +1092,13 @@ group.
 \section{Reproducing the Results}
 \label{app:repro}
 
-All commands run from the repository root with Python 3.11. Every experiment script refuses to overwrite an existing
-output directory; the distillation scripts also record SHA-256 hashes of their inputs.
+All commands run from the repository root with Python 3.11. Experiment scripts never overwrite earlier results: most
+refuse an existing output directory, and the long-running ones resume from their checkpoints; the distillation scripts
+also record SHA-256 hashes of their inputs.
 
 \begin{Verbatim}[fontsize=\footnotesize, frame=single, framesep=3mm, rulecolor=\color{black!25}]
 # environment and data (Q1)
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m spacy download en_core_web_sm
 .venv/bin/python scripts/download_data.py
 .venv/bin/python -m src.build_kb                       # about 14 min
@@ -1092,7 +1107,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m src.retriever build-bm25
 .venv/bin/python -m src.retriever build-dense --batch-size 64
 .venv/bin/python -m src.label_index --model outputs/weak_rebuild_20261019/model.joblib \
-    --output-dir outputs/label_index_20261019
+    --output-dir outputs/label_index_replay     # the archive already has label_index_20261019
 
 # interface (Q2): local model server, then the app
 .venv/bin/python scripts/setup_query_model.py           # once: pinned Qwen3-4B weights
@@ -1103,30 +1118,33 @@ outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 .venv/bin/python -u experiments/final_auto_eval/run.py --output-dir outputs/final_auto_eval_replay
 .venv/bin/python -u experiments/final_rag_eval/run.py --output-dir outputs/final_rag_eval_replay
 
-# factorial ablation (E6) and airline ranking (E7): Linux GPU, Transformers backend
+# factorial ablation (E6) and airline ranking (E7): Linux GPU, Transformers backend;
+# full commands in experiments/downstream_evaluation/README.md and FACTORIAL.md
 .venv/bin/python scripts/local_qa_server.py --backend transformers --device cuda
-#   see experiments/downstream_evaluation/README.md and FACTORIAL.md for the full commands
+P=outputs/downstream_protocol_replay
+.venv/bin/python -m experiments.downstream_evaluation.freeze --output-dir $P
 .venv/bin/python -m experiments.downstream_evaluation.ranking \
-    --protocol outputs/downstream_protocol_replay/protocol.json --output-dir outputs/downstream_ranking_replay
+    --protocol $P/protocol.json --output-dir outputs/downstream_ranking_replay
 
-# distillation (E3, E4); D=experiments/distilled_label_index, O=outputs
-.venv/bin/python $D/encode.py --output-dir $O/distill_embeddings_20261029
-.venv/bin/python $D/sample.py                            # 10,003 sentences
-.venv/bin/python $D/label_teacher.py --sample-dir $O/distill_sample_20261029
-.venv/bin/python $D/train_students.py --sample-dir $O/distill_sample_20261029 \
-    --embeddings $O/distill_embeddings_20261029 --output-dir $O/distill_students_20261029
-.venv/bin/python $D/evaluate_gold.py --selection $O/distill_students_20261029/selection.json \
-    --output-dir $O/distill_gold_audit_20261029
-.venv/bin/python $D/build_index.py --audit $O/distill_gold_audit_20261029/gold_audit.json \
-    --selection $O/distill_students_20261029/selection.json \
-    --embeddings $O/distill_embeddings_20261029 --output-dir $O/label_index_20261029_distilled
+# distillation (E3, E4); encode.py and evaluate_gold.py default to --device mps (use cpu/cuda
+# elsewhere). The teacher step needs the MLX runtime and earlier r36 outputs, so the sample and
+# its teacher labels ship in the data archive ($S); sample.py and label_teacher.py remake them.
+D=experiments/distilled_label_index; O=outputs
+S=$O/distill_sample_20261029; E=$O/distill_embeddings_20261029; R=$O/distill_students_replay
+.venv/bin/python $D/encode.py --output-dir $E                                   # 5-10 min
+.venv/bin/python $D/train_students.py --sample-dir $S --embeddings $E --output-dir $R
+.venv/bin/python $D/evaluate_gold.py --selection $R/selection.json --output-dir $R/gold
+.venv/bin/python $D/build_index.py --audit $R/gold/gold_audit.json \
+    --selection $R/selection.json --embeddings $E --output-dir $O/label_index_distilled_replay
 \end{Verbatim}
 
 \section{Evaluation File Format}
 \label{app:eval}
 
 \texttt{eval.xls} (SHA-256 \texttt{fe0bcf0c…a477045}) is an Excel 97--2003 workbook written with \texttt{xlwt} from the
-frozen gold CSV; \num{1000} rows, no duplicate texts.
+frozen gold CSV: one sheet, \num{1000} rows, no duplicate texts, and exactly the two benchmark columns \texttt{text} and
+\texttt{label}. The gold CSV (\nolinkurl{data/eval/gold_human_frozen_1000_20261019_v1.csv}) has the same rows in the same
+order and adds the step-wise labels and provenance:
 
 \begin{center}\small
 \begin{tabularx}{\textwidth}{@{}P{34mm}P{52mm}Y@{}}
@@ -1143,28 +1161,45 @@ IDs and provenance & sentence, review and chunk IDs; review status & Joins back 
 \end{tabularx}
 \end{center}
 
-\section{Original Wording of the Queries in Table~\ref{tab:five}}
+\paragraph{Question sets.} \nolinkurl{data/eval/query_smoke_40_20261019.json} is a JSON array of 40 questions, each
+with \texttt{id}, \texttt{language}, \texttt{question}, the expected \texttt{aspect}/\texttt{aspects}, the expected
+\texttt{subtopics} (sub-attributes) and a \texttt{comparison} flag. E1 parses Q01--Q25 into the 30 airline $\times$
+sub-attribute units; E2 and E5 use Q01--Q12, Q21--Q25 and Q28--Q30. Results are JSONL with one record per question
+(\texttt{case}, \texttt{parsed}, \texttt{result} with the retrieved evidence and timings, \texttt{answer} with text,
+mode and citations, and \texttt{judge}), or CSV with one row per query and method.
+
+\section{The Queries of Table~\ref{tab:five}: Wording and Results}
 \label{app:queries}
 
-\begin{enumerate}[label=Q\arabic*, leftmargin=3em]
-  \item[Q05] 阿联酋航空经济舱的退款和改签处理怎么样？
-  \item[Q10] 卡塔尔航空商务舱的电影选择和娱乐内容怎么样？
-  \item[Q24] 国泰航空和新加坡航空经济舱腿部空间哪家评价更好？
-  \item[Q28] 新加坡航空经济舱的腿部空间、靠背调节、座椅舒适度和座椅清洁度分别怎么样？
-  \item[Q30] 新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？
-\end{enumerate}
+Counts are reviews that directly match the attribute; percentages are over those with a clear direction. Full answers,
+with citations and evidence, are in \nolinkurl{outputs/final_rag_eval_20261019/answers.jsonl}.
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}lP{62mm}Y@{}}
+\toprule
+\textbf{ID} & \textbf{Question as asked} & \textbf{Result} \\
+\midrule
+Q05 & 阿联酋航空经济舱的退款和改签处理怎么样？ & Negative: 19 of 19 directional reviews (24 matches) negative; cites unpaid refunds after repeated contact and cancellation and seat fees. \\
+Q10 & 卡塔尔航空商务舱的电影选择和娱乐内容怎么样？ & Mixed: 15 positive, 15 negative (86 matches); a wide film selection versus dated content and poor TV choice. \\
+Q24 & 国泰航空和新加坡航空经济舱腿部空间哪家评价更好？ & No clear winner on legroom: Cathay Pacific 72.5\% positive (50/69), Singapore Airlines 79.6\% (78/98); Singapore's seat rating is higher (3.83 vs.\ 3.46 of 5). \\
+Q28 & 新加坡航空经济舱的腿部空间、靠背调节、座椅舒适度和座椅清洁度分别怎么样？ & Legroom positive (78/98, 79.6\%); recline mixed (14/26); seat comfort positive (97/123, 78.9\%); cleanliness too few to decide (7/10). \\
+Q30 & 新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？ & Food 65.5\% positive (289/441, rating 3.88); value 34.6\% positive (75/217, rating 3.88); ground service 43.6\% positive (163/374, rating 3.99). \\
+\bottomrule
+\end{tabularx}
+\end{center}
 
 \section{Questions of the Factorial Ablation}
 \label{app:factorial}
 
-Each question reads ``What do historical reviews say about [attribute] on [airline] in [cabin]?''.
+Each question reads ``What do historical reviews say about [attribute] on [airline] in [cabin]?''. These IDs are
+local to E6 and unrelated to the IDs of \cref{tab:five}.
 
 \begin{center}\small
 \begin{tabular}{@{}llll@{\hspace{10mm}}llll@{}}
 \toprule
 \textbf{ID} & \textbf{Airline} & \textbf{Cabin} & \textbf{Attribute} & \textbf{ID} & \textbf{Airline} & \textbf{Cabin} & \textbf{Attribute} \\
 \midrule
-Q01 & Singapore Airlines & Economy & legroom & Q11 & British Airways & Premium & recline / lie-flat \\
+Q01 & Singapore Airlines & Economy & legroom & Q11 & British Airways & Prem.\ Econ. & recline / lie-flat \\
 Q02 & Air Canada rouge & Economy & legroom & Q12 & Cathay Pacific & Business & staff attitude \\
 Q03 & Spirit Airlines & Economy & baggage & Q13 & United Airlines & Economy & seat width \\
 Q04 & Alaska Airlines & Economy & delay handling & Q14 & Turkish Airlines & Economy & food quality \\

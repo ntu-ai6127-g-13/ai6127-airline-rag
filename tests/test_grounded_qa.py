@@ -42,6 +42,15 @@ class QuestionParserTests(unittest.TestCase):
         )
         self.assertEqual(parsed.airlines, ["Cathay Pacific Airways"])
 
+    def test_english_short_airline_names_resolve_for_comparisons(self):
+        parsed = parse_question(
+            "Which has better legroom in economy, Cathay Pacific or Singapore Airlines?",
+            known_airlines=[*self.airlines, "Cathay Pacific Airways"],
+        )
+        self.assertEqual(parsed.airlines, ["Cathay Pacific Airways", "Singapore Airlines"])
+        self.assertTrue(parsed.comparison)
+        self.assertNotIn("airline", parsed.filters)
+
     def test_seat_cleanliness_remains_a_seat_subtopic(self):
         parsed = parse_question(
             "新加坡航空经济舱的座椅清洁度怎么样？",

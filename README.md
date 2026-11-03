@@ -39,9 +39,9 @@ It contains the knowledge base, the evaluation set, the label indexes and every 
 (see `DATA_README.md` inside the archive). Then build the two retrieval indexes from the knowledge base:
 
 ```bash
-unzip ai6127-g13-data.zip                       # run in the repository root
-.venv/bin/python -m src.retriever build-bm25    # ~5 s
-.venv/bin/python -m src.retriever build-dense --batch-size 64   # ~1.5 min on Apple M1 Pro
+unzip -n ai6127-g13-data.zip                    # in the repository root; -n keeps the tracked copies of data/eval/
+.venv/bin/python -m src.retriever build-bm25    # ~6 s
+.venv/bin/python -m src.retriever build-dense --batch-size 64   # ~5 min on Apple M1 Pro (encodes 529k sentences)
 ```
 
 **Full rebuild from the raw data.** Downloads the public Kaggle dataset (no account needed), cleans it and splits
@@ -53,10 +53,12 @@ it into sentences (about 14 minutes), then builds the indexes and the v4.1 label
 .venv/bin/python -m src.retriever build-bm25
 .venv/bin/python -m src.retriever build-dense --batch-size 64
 .venv/bin/python -m src.label_index --model outputs/weak_rebuild_20261019/model.joblib \
-    --output-dir outputs/label_index_20261019
+    --output-dir outputs/label_index_replay
 ```
 
-The label index needs the classifier in `outputs/weak_rebuild_20261019/model.joblib`, which is in the data archive.
+The label index needs the classifier in `outputs/weak_rebuild_20261019/model.joblib` and the interface needs
+`data/processed/reviews.parquet` for its rating summary; both are in the data archive. The interface reads the label
+index from `outputs/label_index_20261019`, also in the archive.
 
 ## 4. Run the interface
 
@@ -72,12 +74,13 @@ Example questions:
 - `How is the legroom in Singapore Airlines economy class?`
 - `Flying Singapore to London in economy, which airline has the best legroom?`
 - `新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？`
-- For two named airlines, use the sidebar comparison or the Chinese phrasing
-  (`国泰航空和新加坡航空经济舱腿部空间哪家评价更好？`); the English two-airline phrasing is a known limitation.
+- `Which has better legroom in economy, Cathay Pacific or Singapore Airlines?` or
+  `国泰航空和新加坡航空经济舱腿部空间哪家评价更好？` (the sidebar comparison also works)
 
 ### Optional: local answer generation
 
-**Apple Silicon (MLX).** Once, create the pinned model runtime and download Qwen3-4B-Instruct-2507 (4-bit):
+**Apple Silicon (MLX).** Once, create the pinned model runtime and download Qwen3-4B-Instruct-2507 (4-bit); this
+setup script is for Apple Silicon only:
 
 ```bash
 .venv/bin/python scripts/setup_query_model.py
@@ -101,19 +104,21 @@ The app detects the server automatically; if it is not running, answers fall bac
 ## 5. Tests
 
 ```bash
-.venv/bin/pip install pytest
-.venv/bin/python -m pytest -q
+.venv/bin/pip install pytest -r annotation/requirements.txt   # the annotation tool's tests need bcrypt etc.
+.venv/bin/python -m pytest -q                                   # needs the data archive unzipped
 ```
 
 ## 6. Reproducing the report
 
-Each experiment script refuses to overwrite an existing output directory. Commands are in Appendix A of the report.
+Experiment scripts never overwrite earlier results: most refuse an existing output directory and the long-running
+ones resume from checkpoints, so replay into a new directory name. Commands are in Appendix A of the report.
 
 | Report | What | Entry point | Results (data archive) |
 |---|---|---|---|
 | Q1, §3 | Cleaning, chunking, corpus statistics | `src/clean_text.py`, `src/build_kb.py` | `data/processed/chunks.parquet` |
 | Q2/Q3, E1 | Retrieval benchmark (P@5, Recall@50, MRR, NDCG@10) | `experiments/final_auto_eval/run.py` | `outputs/final_auto_eval_20261019_v2/` |
 | Q2/Q4, E2, E5 | Query latency, RAG metrics on 20 questions | `experiments/final_rag_eval/run.py` | `outputs/final_rag_eval_20261019/` |
+| Q2, E2 | Retrieval components timed alone | `experiments/final_auto_eval/component_latency.py` | `outputs/component_latency_20261104/` |
 | Q4, E3 | Classifier quality on the gold set | `experiments/distilled_label_index/evaluate_gold.py` | `outputs/distill_gold_audit_20261029/` |
 | Q5, E4 | LLM-to-student distillation | `experiments/distilled_label_index/` | `outputs/distill_*_20261029/`, `outputs/label_index_20261029_distilled/` |
 | Q5, E6 | Factorial ablation of X/Y/Z, targeted checks | `experiments/downstream_evaluation/`, `experiments/final_auto_eval/run.py` | see release notes |

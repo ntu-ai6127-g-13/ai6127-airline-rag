@@ -7,7 +7,7 @@ especially three-way aspect disagreements.
 
 Example:
     python scripts/audit_annotations.py \
-      --raw /Users/mac/Downloads/annotations_raw.csv
+      --raw path/to/annotations_raw.csv
 """
 
 from __future__ import annotations
