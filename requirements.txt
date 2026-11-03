@@ -4,7 +4,9 @@ kagglehub>=0.3          # 从 Kaggle 下载数据集
 # 数据处理
 pandas>=2.0
 pyarrow>=14.0          # 读写 parquet
-openpyxl>=3.1          # 读写 xls/xlsx（评测集要用）
+openpyxl>=3.1          # 读写 xlsx（Kaggle 原始数据）
+xlwt>=1.3              # 写 eval.xls（Excel 97–2003 格式）
+xlrd>=2.0              # pandas.read_excel 读 eval.xls
 
 # 文本处理
 # ⚠️ spacy 必须钉死，不能用 >=。切句器版本一变，句子边界就变，chunk_id 跟着变，

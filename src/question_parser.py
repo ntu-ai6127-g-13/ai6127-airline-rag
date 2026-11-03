@@ -45,6 +45,14 @@ AIRLINE_ALIASES = {
     "瑞士航空": "Swiss Intl Air Lines", "芬兰航空": "Finnair",
     "爱尔兰航空": "Aer Lingus", "冰岛航空": "Icelandair",
     "瑞安航空": "Ryanair", "易捷航空": "easyJet",
+    # Everyday English short names of airlines whose corpus name is longer.
+    # Ambiguous short forms such as "LOT" (a lot) or "ANA" are left out.
+    "Cathay Pacific": "Cathay Pacific Airways", "Cathay": "Cathay Pacific Airways",
+    "All Nippon": "ANA All Nippon Airways", "Aeroflot": "Aeroflot Russian Airlines",
+    "Delta": "Delta Air Lines", "KLM": "KLM Royal Dutch Airlines",
+    "LOT Polish": "LOT Polish Airlines", "Royal Jordanian": "Royal Jordanian Airlines",
+    "Saudia": "Saudi Arabian Airlines", "South African": "South African Airways",
+    "Swiss": "Swiss Intl Air Lines",
 }
 
 CABIN_ALIASES = {

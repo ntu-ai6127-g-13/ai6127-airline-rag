@@ -1,0 +1,13 @@
+# LaTeX build files; the submitted PDFs are 13.pdf and 13_zh.pdf
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.xdv
+main.pdf
+main_zh.pdf

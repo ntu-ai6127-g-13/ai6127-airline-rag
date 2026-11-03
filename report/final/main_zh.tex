@@ -35,7 +35,7 @@
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{positioning,arrows.meta,calc}
 \usepackage{fancyvrb}
-\usepackage[style=numeric-comp,sorting=none,maxbibnames=3,backend=biber]{biblatex}
+\usepackage[style=numeric-comp,sorting=none,maxbibnames=3,backend=biber,urldate=iso,seconds=true]{biblatex}
 \addbibresource{refs.bib}
 \renewcommand*{\bibfont}{\small}
 \usepackage{xurl}
@@ -95,7 +95,7 @@ AI6127 Deep Neural Networks for NLP\,---\,第 13 组\\
 
 %------------------------------------------------------------------ 摘要
 \begin{abstract}
-我们研究的是面向“选航空公司的旅客”的评论问答。真实的问题往往带有约束（某条航线、某个舱位、某类旅客），问的是结构化评分覆盖不到的细粒度属性（如腿部空间、座椅清洁度），并且需要一个用户能自己核对的结论。我们在 \num{61167} 条 Skytrax 评论上构建了一个检索增强系统，评论被切分为 \num{546139} 个句子级段落。系统把问题解析为硬性元数据过滤条件和 46 个细分属性之一；用 BM25 与 MiniLM 稠密检索取证据，并以倒数排名融合（RRF）合并；离线句子分类器为每句标注主客观、极性和方面，使最终结论是对\emph{所有}匹配评论的计数；本地 Qwen3-4B 模型生成带引用的回答，只有当引用、数字和总体倾向与证据一致时，程序校验才会放行。在 30 个“航司 $\times$ 细分属性”查询上，混合检索的 NDCG@10 为 0.810、MRR 为 0.961；而通用交叉编码器反而使 NDCG@10 \emph{下降} 0.066（95\% 置信区间 $[-0.114,-0.019]$）。把 LLM 标注器蒸馏为线性分类器后，在我们 \num{1000} 句人工标注集上的三分类宏 F1 从 57.2 升至 78.5，方面+极性联合准确率提高 7.4 个百分点（区间 $[+4.5,+10.4]$），且全语料重新打标只需 18 秒。在 20 个端到端问题上，带校验的系统忠实度为 0.84、答案相关性为 0.99。对三个回答端组件做的完整析因消融（160 条回答）显示，正反平衡证据加校验是忠实度最高的配置（$+0.053$，区间 $[+0.004,+0.106]$），且各组件的收益不能简单叠加。从文本推出的航司排名与留出的乘客评分高度一致（58 家航司，Spearman $\rho=0.81$）。整个系统在本地运行，API 成本为零。
+我们研究的是面向“选航空公司的旅客”的评论问答。真实的问题往往带有约束（某条航线、某个舱位、某类旅客），问的是结构化评分覆盖不到的细粒度属性（如腿部空间、座椅清洁度），并且需要一个用户能自己核对的结论。我们在 \num{61167} 条 Skytrax 评论上构建了一个检索增强系统，评论被切分为 \num{546139} 个句子级段落。系统把问题解析为硬性元数据过滤条件和 46 个细分属性之一；用 BM25 与 MiniLM 稠密检索取证据，并以倒数排名融合（RRF）合并；离线句子分类器为每句标注主客观、极性和方面，使最终结论是对\emph{所有}匹配评论的计数；本地 Qwen3-4B 模型生成带引用的回答，只有当引用、数字和总体倾向与证据一致时，程序校验才会放行。在 30 个“航司 $\times$ 细分属性”查询上，混合检索的 NDCG@10 为 0.810、MRR 为 0.961；而通用交叉编码器反而使 NDCG@10 \emph{下降} 0.066（95\% 置信区间 $[-0.114,-0.019]$）。把基于规则的分类器换成用弱标签加 LLM 蒸馏标签训练的线性学生模型后，在我们 \num{1000} 句人工标注集上的三分类宏 F1 从 57.2 升至 78.5，方面+极性联合准确率提高 7.4 个百分点（区间 $[+4.5,+10.4]$），且全语料重新打标只需 18 秒。在 20 个端到端问题上，带校验的系统忠实度为 0.84、答案相关性为 0.99，其中 16 个最终回答由程序后备生成。对三个回答端组件做的完整析因消融（160 条回答）显示，正反平衡证据加校验是忠实度最高的配置（$+0.053$，区间 $[+0.004,+0.106]$），且各组件的收益并不可加。从文本推出的航司排名与留出的乘客评分高度一致（58 家航司，Spearman $\rho=0.81$）。整个系统在本地运行，API 成本为零。
 \end{abstract}
 
 %-------------------------------------------------------------- 引言
@@ -167,7 +167,7 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
 \textbf{问题} & \textbf{占比} & \textbf{示例与修复} \\
 \midrule
 表格空行 & 占行数 50.0\% & 共 \num{131895} 行，其中 \num{65947} 行有评论，其余删除。 \\
-乱码（UTF-8 被按 cp1252 读取） & 42.4\% & \texttt{wasnâ€™t}\,$\to$\,\texttt{wasn't}；\texttt{DÃ¼sseldorf}\,$\to$\,\texttt{Düsseldorf}。整条重编码后仍有 2.14\% 损坏，只修可疑片段后剩 0.37\%；\texttt{ftfy}~\cite{ftfy} 加片段级二次修复后仅剩 0.03\%（9 处真实残留）。 \\
+乱码（UTF-8 被按 cp1252 读取） & 42.4\% & \texttt{wasnâ€™t}\,$\to$\,\texttt{wasn't}；\texttt{DÃ¼sseldorf}\,$\to$\,\texttt{Düsseldorf}。整条重编码后仍有 2.14\% 损坏，只修可疑片段后剩 0.37\%；\texttt{ftfy}~\cite{ftfy} 加片段级二次修复后只剩 6 句被标记（0.001\%），且都是真正的西班牙语、法语或葡萄牙语。 \\
 网站模板文字 & 43.5\% & 前缀 \texttt{Trip Verified |}（\num{13670}）、\texttt{Verified Review |}（\num{12126}）、\texttt{Not Verified |}（\num{1714}）以及结尾的 \texttt{… Ranking}，用锚定正则删除；否则所有含 “verified” 的查询都会命中它们。 \\
 重复评论 & 7.2\% & 精确去重：\num{65947}\,$\to$\,\num{61172} 条不重复文本。 \\
 过短评论 & $<$0.01\% & 清洗后不足 20 个字符：\num{61172}\,$\to$\,\num{61167}。 \\
@@ -175,9 +175,9 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
 \end{tabularx}
 \end{table*}
 
-\paragraph{切分。}我们用 spaCy~\cite{spacy} 把每条评论切成句子。一句话通常只就一个方面表达一个观点，因此检索命中、分类标签和引用都指向同一段文字；更长的窗口会混入多个方面，因为一条典型评论会从值机写到座椅再写到餐食（图~\ref{fig:corpus} 下）。每个句子保存其 \nolinkurl{review_id} 和完整评论，界面可以把命中句展开为原评论（父文档检索）。少于三个词或五个字母的句子在切分时丢弃；另有 \num{16772} 条纯航线行、336 条非英文句和 19 条残句被标记并排除出检索池，最终可检索池为 \num{546139} 句中的 \num{529031} 句。
+\paragraph{切分。}我们用 spaCy~\cite{spacy} 把每条评论切成句子。一句话通常只就一个方面表达一个观点，因此检索命中、分类标签和引用都指向同一段文字；更长的窗口会混入多个方面，因为一条典型评论会从值机写到座椅再写到餐食（图~\ref{fig:corpus} 下）。每个句子保存其 \nolinkurl{review_id} 和完整评论，界面可以把命中句展开为原评论（父文档检索）。少于三个词或五个字母的句子在切分时丢弃；另有 \num{16772} 条纯航线行和 336 条非英文句被排除出检索池（19 条残句只标记、不排除），最终可检索池为 \num{546139} 句中的 \num{529031} 句。
 
-\paragraph{存储。}结果是一张表 \nolinkurl{data/processed/chunks.parquet}（31 列：句子、所属评论、元数据、评分、拆分为出发地/目的地/经停地的航线、质量标记），它是三个小组共用的唯一数据接口。zstd 压缩把文件从 96\,MB 降到 31\,MB。在它之上我们构建 BM25 索引（3.5\,s）、基于 L2 归一化 384 维 \texttt{all-MiniLM-L6-v2} 向量的 FAISS \texttt{IndexFlatIP}（78.5\,s），以及\sref{sec:cls}的标签索引。完整重建约需 14 分钟。
+\paragraph{存储。}结果是一张表 \nolinkurl{data/processed/chunks.parquet}（31 列：句子、所属评论、元数据、评分、拆分为出发地/目的地/经停地的航线、质量标记），它是三个小组共用的唯一数据接口。zstd 压缩把文件从 96\,MB 降到 31\,MB。在它之上我们构建 BM25 索引（6\,s）、基于 L2 归一化 384 维 \texttt{all-MiniLM-L6-v2} 向量的 FAISS \texttt{IndexFlatIP}（4.6\,min，主要是编码），以及\sref{sec:cls}的标签索引。完整重建约需 14 分钟。
 
 \begin{table}[t]
 \centering\small
@@ -194,6 +194,7 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
 评论时间 & 2002 年 8 月 -- 2019 年 6 月 \\
 按舱位：经济舱 & \num{45163} \\
 \quad 商务 / 超经 / 头等 & \num{9589} / \num{2411} / \num{1532} \\
+\quad 未注明舱位 & \num{2472} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -216,7 +217,7 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
 \addplot[fill=s1, draw=none] coordinates {(1-2,968) (3-4,7650) (5-6,14363) (7-8,12608) (9-10,8840) (11-12,5817) (13-14,3694) (15-16,2366) (17-20,2541) (21-30,1919) (31+,401)};
 \end{axis}
 \end{tikzpicture}
-\caption{上：评论量从 2013 年起快速增长（2009 年之前的 209 条未画出）；2019 年数据不完整。下：大多数评论有 5--10 句，因此会混合多个方面，这是采用句子级段落的理由。}
+\caption{上：评论量从 2013 年起快速增长（2009 年之前的 115 条未画出）；2019 年数据不完整。下：大多数评论有 5--10 句，因此会混合多个方面，这是采用句子级段落的理由。}
 \label{fig:corpus}
 \end{figure}
 
@@ -228,7 +229,7 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
 \section{系统设计}
 \label{sec:method}
 
-图~\ref{fig:arch} 展示了整条流水线。索引和标签离线构建；每次查询时先过滤再检索，生成器的草稿只有通过程序校验才会展示。所有组件都在一台 16\,GB 内存的 Apple M1 Pro 笔记本上运行，没有使用托管 RAG 服务或付费 API。
+图~\ref{fig:arch} 展示了整条流水线。索引和标签离线构建；每次查询时先过滤再检索，生成器的草稿只有通过程序校验才会展示。系统运行在一台 16\,GB 内存的 Apple M1 Pro 笔记本上，没有使用托管 RAG 服务或付费 API。
 
 \begin{figure*}[t]
 \centering
@@ -244,7 +245,7 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
   \node[off, right=of raw] (chunks) {\textbf{句子表}\\ 54.6 万句，31 列};
   \node[off, right=of chunks] (bm25) {\textbf{BM25 索引}\\ 词法检索};
   \node[off, right=of bm25] (faiss) {\textbf{FAISS 索引}\\ MiniLM，384 维};
-  \node[off, right=of faiss] (cls) {\textbf{快速分类器}\\ 从 LLM 蒸馏};
+  \node[off, right=of faiss] (cls) {\textbf{快速分类器}\\ 弱标签 / 蒸馏标签};
   \node[off, below=3mm of cls] (labels) {\textbf{标签索引}\\ 52.9 万条标签};
   \draw[arr] (raw) -- (chunks);
   \draw[arr] (chunks) -- (bm25);
@@ -322,7 +323,7 @@ top-$k$ 只看到最相似的句子，漏掉直接提及，结论还随 $k$ 变�
 \textbf{组件} & \textbf{是什么} & \textbf{为什么} \\
 \midrule
 LLM 教师（r36） &
-Qwen3-4B-Instruct-2507~\cite{qwen3}，4-bit MLX。两步封闭式提示（先从八个方面中选一个，再选极性）。只有当另一个独立的 NLI 分类器也同意时，句子才判为客观。 &
+Qwen3-4B-Instruct-2507~\cite{qwen3}，4-bit MLX；r36 是我们比较过的标注配置中最好的一个。两步封闭式提示（先从八个方面中选一个，再选极性）。只有当另一个独立的 NLI 分类器也同意时，句子才判为客观。 &
 我们最准确的标注器（表~\ref{tab:cls}），但每句约 0.5\,s：标完全语料约需三天。 \\
 快速学生模型 &
 TF-IDF（1--2 元语法，\num{20000} 维特征）拼接冻结的 MiniLM 向量；每个子任务一个逻辑回归；用弱标签加教师标签训练（\sref{sec:exp-distill}）。 &
@@ -374,7 +375,7 @@ TF-IDF（1--2 元语法，\num{20000} 维特征）拼接冻结的 MiniLM 向量�
 \includegraphics[height=78mm]{figures/ui_compare_evidence.png}
 \caption{证据标签页及覆盖计数。}
 \end{subfigure}
-\caption{国泰航空与新加坡航空经济舱腿部空间对比。上级方面的评分差距（3.46 对 3.83，满分 5）显著，因此报告为领先；腿部空间的统计（72.5\% 对 79.6\% 正面）报告为“差距不足以下结论”。证据页显示 86 条评论中有 95 句直接提到腿部空间，检索耗时 4.5\,s。}
+\caption{国泰航空与新加坡航空经济舱腿部空间对比。新加坡航空的座椅舒适度评分更高（3.83 对 3.46，满分 5），差距显著，作为上级方面的结论报告；腿部空间的统计（72.5\% 对 79.6\% 正面）报告为“差距不足以下结论”。证据页显示 86 条评论中有 95 句直接提到腿部空间，检索耗时 4.5\,s（与表~\ref{tab:five} 不是同一次运行）。}
 \label{fig:ui-compare}
 \end{figure*}
 
@@ -385,7 +386,7 @@ TF-IDF（1--2 元语法，\num{20000} 维特征）拼接冻结的 MiniLM 向量�
 \subsection{实验设置与评估数据}
 \label{sec:data}
 
-所有实验都在 Apple M1 Pro（16\,GB）上运行。区间均为 95\% bootstrap 区间，在查询、问题或所属评论层面重采样 \num{10000} 次。评估数据包括：30 个“航司 $\times$ 细分属性”检索单元（E1）；20 个用中文写的固定端到端问题（12 个单航司、5 个比较、3 个多方面；E2、E5）；\num{1000} 句人工标注的 gold 集（E3、E4）；析因消融用的 20 个英文单属性问题（E6，附录~\ref{app:factorial}）；以及航司排名所用的留出乘客评分（E7）。
+E1--E5 和 E8 在 Apple M1 Pro（16\,GB）上运行；E6 和 E7 在一台配 AMD Radeon RX 7800 XT 的 Linux 机器上运行。区间均为在查询、问题或所属评论层面重采样的 95\% bootstrap 区间（E1、E5 重采样 \num{10000} 次，E4、E6、E7 为 \num{2000} 次）。评估数据包括：30 个“航司 $\times$ 细分属性”检索单元（E1）；20 个用中文写的固定端到端问题（12 个单航司、5 个比较、3 个多方面；E2、E5）；\num{1000} 句人工标注的 gold 集（E3、E4）；析因消融用的 20 个英文单属性问题（E6，附录~\ref{app:factorial}）；以及航司排名所用的留出乘客评分（E7）。
 
 \paragraph{Gold 集（Q4）。}候选来自去掉航线行、重复句、不足五个词的句子和无总评分评论后剩下的 \num{478969} 句。我们一半从总评分 $\ge$7 的评论中抽、一半从 $\le$4 的评论中抽，每个有评分的方面约 120 句，再加上没有明确方面的句子，然后打乱。三位标注者独立标注每一句，且\emph{只看得到句子本身}：航司和评分被隐藏，因为评分也是弱标签的来源。书面标注指南规定了混合情感等边界情况。在冻结的 \num{1000} 句上，三项任务的一致率都超过 80\%（表~\ref{tab:agree}）；主客观的 Fleiss' $\kappa$~\cite{fleiss} 只是中等，因为只有 8\% 的句子是客观句。在全部 \num{1100} 句标注上，作业要求的两项任务（主客观和极性）仍超过 80\%，但方面一致率为 75.2\%：被剔除的 100 句中，15 句是标注指南判为“看不清”的，52 句是三位标注者给了三个不同的方面。分歧先按多数投票解决，剩余的用 AI 辅助裁决，再由人工逐条确认，最终审核者改动了 9 句。该集合有 548 句负面、371 句正面、81 句客观，无重复文本，以标准基准格式存为 \nolinkurl{data/eval/eval.xls}（附录~\ref{app:eval}）。
 
@@ -415,7 +416,7 @@ TF-IDF（1--2 元语法，\num{20000} 维特征）拼接冻结的 MiniLM 向量�
 
 \begin{table*}[t]
 \centering\small
-\caption{E1：30 个“航司 $\times$ 细分属性”查询上的检索质量（自动分级相关性）。每列最优加粗；延迟为预热后每个查询的中位数，含元数据过滤。}
+\caption{E1：30 个“航司 $\times$ 细分属性”查询上的检索质量（自动分级相关性）。每列最优加粗；延迟为预热后每个查询的中位数，含元数据过滤。这些是检索器配置；线上流程还会在过滤后的子集里扫描细分属性的直接提及（\sref{sec:ret}）。}
 \label{tab:retrieval}
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
@@ -451,11 +452,11 @@ BM25 & \best{0.880} & \best{0.403} & 0.950 & 0.790 & 1.000 & 0.534\,s \\
 \subsection{E2：一次查询有多快？（Q2）}
 \label{sec:exp-speed}
 
-表~\ref{tab:five} 报告了 20 个评估问题中的 5 个，它们覆盖了系统支持的各类查询，均为开启本地模型、预热后的运行结果。\emph{检索}包括解析、过滤、BM25、稠密检索、融合、重排和证据挑选；\emph{首字}从提交开始计时；\emph{总计}截止到展示通过校验的回答。图~\ref{fig:latency} 显示检索只占等待时间的一小部分，主要耗时来自笔记本上的 4B 模型，我们用流式输出来缓解。在完整检索池上单独测量：BM25 top-20 中位数 101\,ms，FAISS top-20 11.5\,ms，两路 top-100 的 RRF 118\,ms，交叉编码器重排 100 个候选 67\,ms。关闭 LLM 时，程序生成回答在 40 个问题的冒烟测试中平均每题 5.0\,s。
+表~\ref{tab:five} 报告了 20 个评估问题中的 5 个，它们覆盖了系统支持的各类查询，均为开启本地模型、预热后的运行结果。\emph{检索}包括解析、过滤、BM25、稠密检索、融合、重排和证据挑选；\emph{首字}从提交开始计时；\emph{总计}截止到展示通过校验的回答。图~\ref{fig:latency} 显示检索只占等待时间的一小部分，主要耗时来自笔记本上的 4B 模型，我们用流式输出来缓解。不加过滤、在完整检索池上单独计时（E1 的 30 个查询，预热后中位数）：BM25 top-20 为 503\,ms，FAISS top-20 为 20\,ms，混合检索（两路 top-100 加 RRF）为 519\,ms，交叉编码器重排 100 个候选为 108\,ms（\nolinkurl{experiments/final_auto_eval/component_latency.py}）；主要耗时是 BM25 给全部句子打分。关闭 LLM 时，程序生成回答在 40 个问题的冒烟测试中平均每题 5.0\,s。
 
 \begin{table}[t]
 \centering\small
-\caption{E2：五个代表性查询（中文提问，原文见附录~\ref{app:queries}）。回答来源：模型草稿（D）、修复稿（R）或程序生成（P）。}
+\caption{E2：五个代表性查询（中文提问，原文和结果见附录~\ref{app:queries}）。回答来源：模型草稿（D）、修复稿（R）或程序生成（P）。“全部 20 题”两行包含冷启动的第一题。}
 \label{tab:five}
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabularx}{\columnwidth}{@{}lYrrrc@{}}
@@ -498,7 +499,7 @@ Q30 & 新航经济舱：餐食、性价比、地面服务？ & 6.9\,s & 50.8\,s 
 
 \begin{table}[t]
 \centering\small
-\caption{E3：gold 集上的分类器质量（\%）。方面和极性 F1 为 919 个主观句上的宏平均。灰底：目前用于标签索引的蒸馏学生模型。}
+\caption{E3：gold 集上的分类器质量（\%）。方面和极性 F1 为 919 个主观句上的宏平均。灰底：选出、将替换 v4.1 的蒸馏学生模型（\sref{sec:exp-distill}）。联合：方面和极性都正确；S-rec./O-rec.：全部 \num{1000} 句上主观/客观句的召回率。v4.1 是界面当前使用的弱监督分类器；r36 是 LLM 教师（表~\ref{tab:approach}）；目标在项目开始时设定。}
 \label{tab:cls}
 \setlength{\tabcolsep}{3pt}
 \begin{tabularx}{\columnwidth}{@{}Yrrrrr@{}}
@@ -559,14 +560,14 @@ r36 LLM 教师 & \best{74.1} & \best{91.8} & \best{70.8} & 96.8 & \best{76.5} \\
 \label{fig:aspect}
 \end{figure}
 
-\paragraph{结果。}客观句是弱监督的主要短板：只有 221 个客观训练样例，v4.1 只找出 7.4\% 的客观句，嵌入模型找出 21.0\%；加入教师标签后提高到 66.7\%，代价是主观召回下降 3 个点，三分类宏 F1 从 57.2 升到 78.5。方面错误集中在少数几类：学生模型最常见的混淆是\emph{员工}被判成\emph{餐食}（18 句，大多是空乘如何提供餐饮服务，例如 “No refills of drinks offered during or after the meal”）、\emph{地面}被判成\emph{性价比}（16 句，大多关于退款和赔偿），以及\emph{总体}与\emph{其他}互混。这些句子确实同时涉及两个方面，所以与 85\% 目标的差距有一部分来自“每句只标一个方面”的定义。没有任何模型（包括 LLM 教师）达到全部目标；我们如实报告，而不是在 gold 集上调参。
+\paragraph{结果。}客观句是弱监督的主要短板：只有 179 个客观训练样例，v4.1 只找出 7.4\% 的客观句，嵌入模型找出 21.0\%；加入教师标签后提高到 66.7\%，代价是主观召回下降 3 个点，三分类宏 F1 从 57.2 升到 78.5。方面错误集中在少数几类：学生模型最常见的混淆是\emph{员工}被判成\emph{餐食}（18 句，大多是空乘如何提供餐饮服务，例如 “No refills of drinks offered during or after the meal”）、\emph{地面}被判成\emph{性价比}（16 句，大多关于退款和赔偿），以及\emph{总体}与\emph{其他}互混。这些句子确实同时涉及两个方面，所以与 85\% 目标的差距有一部分来自“每句只标一个方面”的定义。没有任何模型（包括 LLM 教师）达到全部目标；我们如实报告，而不是在 gold 集上调参。
 
 \subsection{E4：快速分类器能学到 LLM 的标注吗？（Q5）}
 \label{sec:exp-distill}
 
 \paragraph{动机。}标签索引决定了用户看到的统计。用 v4.1 构建时，语料中只有 0.6\% 被标为客观，而 gold 集中是 8.1\%，因此几乎所有事实陈述句都被当作观点计数。教师模型好得多，但标完全语料约需三天。
 
-\paragraph{实验流程。}(i)~从弱标签\emph{开发集}的 \num{1154} 条评论中抽取 \num{10003} 句，排除所有 gold 句、其所属评论和规范化文本，以及弱标签训练中出现过的文本。(ii)~教师用 87 分钟标完全部句子，无无效输出（12.8\% 为客观）。(iii)~按所属评论划分为伪训练集（\num{7355}）和伪开发集（\num{2648}）。(iv)~训练前就固定三个特征相同、只有监督来源不同的学生模型：\emph{weak}（只用弱标签，复现一位组员的模型）、\emph{teacher}（只用教师标签）、\emph{mixed}（两者都用，教师样本加权使两种来源总权重相等）。(v)~用一个固定的排名分数，在伪开发集上以\emph{教师}为参照选出胜者；文件读取保护确保无法访问 gold。(vi)~同样事先规定：胜者只有在 gold 上的排名分数和联合准确率都超过 v4.1 时，才替换 v4.1。
+\paragraph{实验流程。}(i)~从弱标签\emph{开发集}的 \num{1154} 条评论中抽取 \num{10003} 句，排除所有 gold 句、其所属评论和规范化文本，以及弱标签训练中出现过的文本。(ii)~教师用 89 分钟标完全部句子，无无效输出（12.8\% 为客观）。(iii)~按所属评论划分为伪训练集（\num{7355}）和伪开发集（\num{2648}）。(iv)~训练前就固定三个特征相同、只有监督来源不同的学生模型：\emph{weak}（只用弱标签，复现一位组员的模型）、\emph{teacher}（只用教师标签）、\emph{mixed}（两者都用，教师样本加权使两种来源总权重相等）。(v)~用一个固定的排名分数（$0.35\,$方面 F1 $+\,0.20\,$极性 F1 $+\,0.35\,$联合准确率 $+\,0.10\,$主观召回，主观召回低于 97\% 或客观召回低于 60\% 时扣分），在伪开发集上以\emph{教师}为参照选出胜者；文件读取保护确保无法访问 gold。(vi)~同样事先规定：胜者只有在 gold 上的排名分数和联合准确率都超过 v4.1 时，才替换 v4.1。
 
 \begin{table*}[t]
 \centering\small
@@ -580,7 +581,7 @@ r36 LLM 教师 & \best{74.1} & \best{91.8} & \best{70.8} & 96.8 & \best{76.5} \\
 \midrule
 v4.1 线上版本（参照） & 54.0 & 3.9 & 0.637 & 61.1 & 56.1 & 7.4 & 0.648 \\
 只用弱标签 & 59.9 & 18.9 & 0.692 & 68.1 & 61.5 & 21.0 & 0.705 \\
-只用教师标签（7.4k） & 64.0 & \best{75.8} & 0.662 & \best{71.4} & 61.4 & \best{76.5} & 0.651 \\
+只用教师标签（7.4k） & 64.0 & \best{75.7} & 0.662 & \best{71.4} & 61.4 & \best{76.5} & 0.651 \\
 \rowcolor{shade} 弱 + 教师（入选） & \best{65.8} & 67.1 & \best{0.729} & 70.4 & \best{63.5} & 66.7 & \best{0.735} \\
 \bottomrule
 \end{tabular}
@@ -607,7 +608,7 @@ v4.1 线上版本（参照） & 54.0 & 3.9 & 0.637 & 61.1 & 56.1 & 7.4 & 0.648 \
 \label{fig:distill}
 \end{figure}
 
-\paragraph{结果。}mixed 学生模型在伪开发集上入选，并在 gold 上通过了采用规则（表~\ref{tab:distill}）。把 v4.1 的特征换成 TF-IDF + MiniLM 带来 +5.3 个点的联合准确率（与 v4.1 的规则层混杂）；再加入教师标签又带来 +2.1，处于显著性边缘（图~\ref{fig:distill}），并把客观召回从 21.0\% 提高到 66.7\%。教师标签的单位价值很高：只用 7.4k 句教师标签训练的学生，方面 F1 和客观召回是三者中最好的，但极性不如同时用了 \num{231779} 条弱标签的模型，所以两者混合总体最好。重建 \num{529031} 条标签的索引只需 18\,s，而教师估计需要三天；语料中客观句占比从 0.6\% 变为 13.0\%（教师在样本上为 12.8\%），32\% 的方面标签和 24\% 的极性标签发生变化。学生模型仍比教师低 7.3 个点。
+\paragraph{结果。}mixed 学生模型在伪开发集上入选，并在 gold 上通过了采用规则（表~\ref{tab:distill}）。把 v4.1 的特征换成 TF-IDF + MiniLM 带来 +5.3 个点的联合准确率（与 v4.1 的规则层混杂）；再加入教师标签又带来 +2.1，在 95\% 水平上不显著（区间 $[-0.1,+4.3]$，图~\ref{fig:distill}），并把客观召回从 21.0\% 提高到 66.7\%。教师标签的单位价值很高：只用 7.4k 句教师标签训练的学生，方面 F1 和客观召回是三者中最好的，但极性不如同时用了 \num{231779} 条弱标签的模型，所以两者混合总体最好。重建 \num{529031} 条标签的索引只需 18\,s，而教师估计需要三天；语料中客观句占比从 0.6\% 变为 13.0\%（教师在样本上为 12.8\%），32\% 的方面标签和 24\% 的极性标签发生变化。学生模型仍比教师低 7.3 个点。
 
 \paragraph{现状。}由于三分之一的标签发生了变化，界面要等下游统计重新跑完后才切换到新索引；下文 E5 和 E6 用的是 v4.1 标签，E7 用的是另一个专门的诊断分类器。
 
@@ -638,7 +639,7 @@ v4.1 线上版本（参照） & 54.0 & 3.9 & 0.637 & 61.1 & 56.1 & 7.4 & 0.648 \
 
 作业要求给出每项创新单独加入以及组合加入时的收益。因此我们对\sref{sec:gen}的三个因素做了完整的 $2^3$ 析因消融：X（全量统计）、Y（正反平衡且与标签一致的示例）、Z（校验、一次修复、程序后备）。
 
-\paragraph{实验设置。}使用开发冒烟集中的 20 个英文单航司、单属性问题（附录~\ref{app:factorial}），在评分前固定。每题有一个最多 30 条候选的冻结候选池，排序不借助标签；八种配置共享候选池、提示词和最多四条引用的预算。X 关闭时，语料计数和总体倾向对生成、校验和后备都不可见；Y 关闭时，使用排序前四条候选；Z 关闭时，直接返回未经检查的模型初稿。Qwen3-4B-Instruct-2507（BF16，Transformers 后端，AMD Radeon RX 7800 XT）同时负责生成和评判，指标同 E5，答案相关性按 0--4 打分后缩放。整个实验产生 80 份初稿、54 次修复尝试和 160 条最终回答。区间来自以题目为单位的 2,000 次配对 bootstrap（随机种子 6127），未做多重比较校正。
+\paragraph{实验设置。}使用开发冒烟集中的 20 个英文单航司、单属性问题（附录~\ref{app:factorial}），在评分前固定。每题有一个最多 30 条候选的冻结候选池，排序不借助标签；八种配置共享候选池、提示词和最多四条引用的预算。X 关闭时，语料计数和总体倾向对生成、校验和后备都不可见；Y 关闭时，使用排序前四条候选；Z 关闭时，直接返回未经检查的模型初稿。Qwen3-4B-Instruct-2507（BF16，Transformers 后端，AMD Radeon RX 7800 XT）同时负责生成和评判，指标同 E5，答案相关性按 0--4 打分后缩放。每题在每种 X/Y 设置下生成一份初稿，由 Z 关闭和开启两个版本共用，因此整个实验产生 80 份初稿、54 次修复尝试和 160 条最终回答。区间来自以题目为单位的 2,000 次配对 bootstrap（随机种子 6127），未做多重比较校正。
 
 \begin{table*}[t]
 \centering\small
@@ -683,7 +684,7 @@ v4.1 线上版本（参照） & 54.0 & 3.9 & 0.637 & 61.1 & 56.1 & 7.4 & 0.648 \
 
 \begin{table}[t]
 \centering\small
-\caption{E6：主效应与交互效应（20 道配对题）。主效应为组件开启减关闭的差值，在另外两个因素的四种设置上取平均。}
+\caption{E6：主效应与交互效应（20 道配对题）。主效应为组件开启减关闭的差值，在另外两个因素的四种设置上取平均；XY 为 Y 开与关时 X 效应之差（对 Z 取平均），XYZ 为 Z 开与关时 XY 交互之差。}
 \label{tab:effects}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lrlrr@{}}
@@ -701,7 +702,7 @@ XYZ & $-0.017$ & [$-0.097$, $+0.060$] & $+0.063$ & $0.000$ \\
 \end{tabular}
 \end{table}
 
-\paragraph{结果。}Y + Z 是忠实度最高的配置，为 0.940，比基线高 $+0.053$（区间 $[+0.004,+0.106]$）；仅 Z 也为正（$+0.030$，$[+0.003,+0.063]$）（表~\ref{tab:factorial}、图~\ref{fig:factorial}）。仅 Y 时答案相关性保持 1.000，上下文精确率从 0.808 升到 0.871，且引用更少（平均 3.50 条对 3.95 条）。线上使用的 X + Y + Z 在忠实度上与基线持平（$-0.002$）；X + Z 让答案相关性下降最多（$-0.075$，$[-0.125,-0.025]$）。在另外两个因素上取平均后（表~\ref{tab:effects}），Y 的正向主效应最大，Z 为小幅正向，X 为负；三个区间都包含零，最大的交互项是 XZ。因此各组件的收益并不能简单叠加。X 的负效应部分来自指标本身：它给回答增加了需要评判者核对的汇总论断，而只转述引文的回答几乎没有出错的余地。忠实度衡量的是回答如何使用上下文，而不是整体观点总结是否正确，后者才是 X 的目标；下面的针对性检查直接测量了这一点。
+\paragraph{结果。}Y + Z 是忠实度最高的配置，为 0.940，比基线高 $+0.053$（区间 $[+0.004,+0.106]$）；仅 Z 也为正（$+0.030$，$[+0.003,+0.063]$）（表~\ref{tab:factorial}、图~\ref{fig:factorial}）。仅 Y 时答案相关性保持 1.000，上下文精确率从 0.808 升到 0.871，且引用更少（平均 3.50 条对 3.95 条）。线上使用的 X + Y + Z 在忠实度上与基线持平（$-0.002$）；X + Z 让答案相关性下降最多（$-0.075$，$[-0.125,-0.025]$）。在另外两个因素上取平均后（表~\ref{tab:effects}），Y 的正向主效应最大，Z 为小幅正向，X 为负；三个区间都包含零，最大的交互项是 XZ。因此各组件的收益并不可加（三者全开与基线持平），不过只有 20 道题，没有哪个交互项单独显著。X 的负效应部分来自指标本身：它给回答增加了需要评判者核对的汇总论断，而只转述引文的回答几乎没有出错的余地。忠实度衡量的是回答如何使用上下文，而不是整体观点总结是否正确，后者才是 X 的目标；下面的针对性检查直接测量了这一点。
 
 \paragraph{成本。}Z 很依赖后备：80 条开启 Z 的回答中，26 条用初稿，7 条用修复稿，47 条用程序生成的回答；X 开启时每道题都触发了修复。生成时间中位数：X + Y + Z 为 9.78\,s，基线为 4.83\,s，仅 Y 为 4.20\,s（不含共享的检索和评判）。
 
@@ -709,7 +710,7 @@ XYZ & $-0.017$ & [$-0.097$, $+0.060$] & $+0.063$ & $0.000$ \\
 
 \begin{table}[t]
 \centering\small
-\caption{E6：针对性检查，每个组件在其目标性质上的效果。}
+\caption{E6：针对性检查，每个组件在其目标性质上的效果。后两行是机制的正确性检查，不是测得的收益。}
 \label{tab:ablation}
 \setlength{\tabcolsep}{3pt}
 \begin{tabularx}{\columnwidth}{@{}Yrr@{}}
@@ -718,7 +719,7 @@ XYZ & $-0.017$ & [$-0.097$, $+0.060$] & $+0.063$ & $0.000$ \\
 \midrule
 X：全量结论 vs.\ 前 10 句投票（倾向与全部匹配评论一致） & 12/18 & \best{18/18} \\
 Y：正反平衡 vs.\ 朴素顺序（正反都存在时，前四句同时展示两面） & 11/17 & \best{17/17} \\
-Y：一致性过滤（展示示例中明显的标签--文本冲突数） & 13 & \best{0} \\
+Y：一致性过滤（18 个案例展示示例中明显的标签--文本冲突数） & 13 & \best{0} \\
 Z：倾向校验 vs.\ 只查引用（被拒绝的倾向错误回答） & 0/18 & \best{18/18} \\
 \bottomrule
 \end{tabularx}
@@ -736,7 +737,7 @@ Z：倾向校验 vs.\ 只查引用（被拒绝的倾向错误回答） & 0/18 & 
 \label{fig:rank}
 \end{figure}
 
-\paragraph{结果。}共有 58 家航司达到门槛，涉及 \num{8365} 条有有效座椅评分的留出评论，以及 \num{3152} 条有可用文本预测的评论。两份排名高度一致：Spearman $\rho=0.810$，95\% 区间 $[0.682,0.838]$，区间来自在固定航司集合上对父评论做 2,000 次配对重采样（图~\ref{fig:rank}）。可见从文本中挖掘并按评论聚合的观点，保留了航司之间的明显差异，这支持用评论文本回答比较类问题。评分是整体座椅舒适度的参照，并不是每个细分属性的标准答案；区间也不包含重新训练分类器带来的不确定性。
+\paragraph{结果。}共有 58 家航司达到门槛。留出的参照集中有 \num{8365} 条有有效座椅评分的评论，其中 \num{3152} 条有可用的文本预测。两份排名高度一致：Spearman $\rho=0.810$，95\% 区间 $[0.682,0.838]$，区间来自在固定航司集合上对父评论做 2,000 次配对重采样（图~\ref{fig:rank}）。可见从文本中挖掘并按评论聚合的观点，保留了航司之间的明显差异，这支持用评论文本回答比较类问题。评分是整体座椅舒适度的参照，并不是每个细分属性的标准答案；区间也不包含重新训练分类器带来的不确定性。
 
 \subsection{E8：性能与可扩展性（Q4）}
 \label{sec:exp-perf}
@@ -754,12 +755,12 @@ Z：倾向校验 vs.\ 只查引用（被拒绝的倾向错误回答） & 0/18 & 
 提交到首个流式字符 & 24.3\,s（41.9\,s） \\
 提交到最终校验通过的回答 & 40.8\,s（72.3\,s） \\
 仅程序回答（关闭 LLM） & 5.0\,s / 次 \\
-LLM 吞吐（1--2 个并发请求） & $\approx$1 次/s \\
+短 LLM 请求（120 token），同时 1 或 2 个 & 每个 $\approx$1\,s，串行处理 \\
 \midrule
 学生模型标注 \num{529031} 句 & 18\,s \\
 一次性 MiniLM 编码全部句子 & 573\,s \\
 LLM 教师标注 & $\approx$0.5\,s / 句 \\
-知识库重建 / BM25 构建 / FAISS 构建 & 14\,min / 3.5\,s / 78.5\,s \\
+知识库重建 / BM25 构建 / FAISS 构建 & 14\,min / 6\,s / 4.6\,min \\
 \midrule
 每次查询成本 & \$0（全部本地） \\
 \bottomrule
@@ -778,14 +779,14 @@ LLM 教师标注 & $\approx$0.5\,s / 句 \\
 
 \paragraph{分类器未达目标。}方面 F1 为 70.4，目标是 85。由于教师标签的单位价值高于弱标签，成本最低的下一步是：更多教师标签（3--5 万句，GPU 上几小时）、在其上微调一个小编码器，以及只把低置信度句子送给 LLM 的级联方案。允许一句话标多个方面也会更符合数据。
 
-\paragraph{英文自由文本对比。}测试中，一个点名两家航司的英文问题（“\ldots Cathay Pacific or Singapore Airlines?”）被解析成了单航司问题；中文问法和侧栏对比都正常。解析器的英文比较句式需要扩充。
+\paragraph{英文航司名。}后期测试发现 “\ldots Cathay Pacific or Singapore Airlines?” 被解析成单航司问题，原因是语料里的写法是 “Cathay Pacific Airways”。现已加入常用英文简称对照表解决（不改变任何评估问题的解析结果）；表外的名称仍需使用语料中的写法、中文名或侧栏。
 
 \paragraph{数据时效。}评论截至 2019 年年中。界面在每一页都注明了这一点；回答描述的是历史体验，而非当前服务。
 
 %--------------------------------------------------------------- 结论
 \section{结论}
 
-我们构建了一个本地运行的航空服务问答 RAG 系统，它遵守约束、能细到具体属性，并给出用户可核对的结论。有四点体会最深。第一，结构化约束和属性路由修好的失败查询，比任何排序模型的更换都多，通用交叉编码器甚至起了反作用。第二，把 LLM 标注器蒸馏成线性分类器，能以极小的成本拿到它在客观句识别和联合准确率上的大部分收益，前提是模型选择远离测试集。第三，正反平衡证据和程序校验能让小生成器的回答更有据（Y + Z 是八种配置中最好的），但各组件不能简单叠加：精确的全量统计修好了结论，却拉低了评判出的忠实度。最后，从文本挖掘出的航司排名与留出的乘客评分高度一致（$\rho=0.81$），这支持用评论文本回答比较类问题。
+我们构建了一个本地运行的航空服务问答 RAG 系统，它遵守约束、能细到具体属性，并给出用户可核对的结论。有四点体会最深。第一，结构化约束和属性路由修好了表~\ref{tab:fixes} 中的失败查询，这些是更换排序模型解决不了的，通用交叉编码器甚至起了反作用。第二，把 LLM 标注器蒸馏成线性分类器，能以极小的成本拿到它在客观句识别上的大部分收益和联合准确率上约一半的收益，前提是模型选择远离测试集。第三，正反平衡证据加带程序后备的校验给出最忠实的最终回答（Y + Z 是八种配置中最好的），但各组件的收益并不可加：精确的全量统计修好了结论，却拉低了评判出的忠实度。最后，从文本挖掘出的航司排名与留出的乘客评分高度一致（$\rho=0.81$），这支持用评论文本回答比较类问题。
 
 %--------------------------------------------------------------- 附属信息
 \section*{数据与代码获取}
@@ -809,11 +810,11 @@ LLM 教师标注 & $\approx$0.5\,s / 句 \\
 \section{复现实验结果}
 \label{app:repro}
 
-所有命令都在仓库根目录下用 Python 3.11 运行。每个实验脚本都拒绝覆盖已存在的输出目录；蒸馏相关脚本还会记录输入文件的 SHA-256 哈希。
+所有命令都在仓库根目录下用 Python 3.11 运行。实验脚本不会覆盖已有结果：多数脚本拒绝写入已存在的输出目录，耗时长的脚本则从检查点续跑；蒸馏相关脚本还会记录输入文件的 SHA-256 哈希。
 
 \begin{Verbatim}[fontsize=\footnotesize, frame=single, framesep=3mm, rulecolor=\color{black!25}]
 # environment and data (Q1)
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m spacy download en_core_web_sm
 .venv/bin/python scripts/download_data.py
 .venv/bin/python -m src.build_kb                       # about 14 min
@@ -822,7 +823,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m src.retriever build-bm25
 .venv/bin/python -m src.retriever build-dense --batch-size 64
 .venv/bin/python -m src.label_index --model outputs/weak_rebuild_20261019/model.joblib \
-    --output-dir outputs/label_index_20261019
+    --output-dir outputs/label_index_replay     # the archive already has label_index_20261019
 
 # interface (Q2): local model server, then the app
 .venv/bin/python scripts/setup_query_model.py           # once: pinned Qwen3-4B weights
@@ -833,29 +834,30 @@ outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 .venv/bin/python -u experiments/final_auto_eval/run.py --output-dir outputs/final_auto_eval_replay
 .venv/bin/python -u experiments/final_rag_eval/run.py --output-dir outputs/final_rag_eval_replay
 
-# factorial ablation (E6) and airline ranking (E7): Linux GPU, Transformers backend
+# factorial ablation (E6) and airline ranking (E7): Linux GPU, Transformers backend;
+# full commands in experiments/downstream_evaluation/README.md and FACTORIAL.md
 .venv/bin/python scripts/local_qa_server.py --backend transformers --device cuda
-#   see experiments/downstream_evaluation/README.md and FACTORIAL.md for the full commands
+P=outputs/downstream_protocol_replay
+.venv/bin/python -m experiments.downstream_evaluation.freeze --output-dir $P
 .venv/bin/python -m experiments.downstream_evaluation.ranking \
-    --protocol outputs/downstream_protocol_replay/protocol.json --output-dir outputs/downstream_ranking_replay
+    --protocol $P/protocol.json --output-dir outputs/downstream_ranking_replay
 
-# distillation (E3, E4); D=experiments/distilled_label_index, O=outputs
-.venv/bin/python $D/encode.py --output-dir $O/distill_embeddings_20261029
-.venv/bin/python $D/sample.py                            # 10,003 sentences
-.venv/bin/python $D/label_teacher.py --sample-dir $O/distill_sample_20261029
-.venv/bin/python $D/train_students.py --sample-dir $O/distill_sample_20261029 \
-    --embeddings $O/distill_embeddings_20261029 --output-dir $O/distill_students_20261029
-.venv/bin/python $D/evaluate_gold.py --selection $O/distill_students_20261029/selection.json \
-    --output-dir $O/distill_gold_audit_20261029
-.venv/bin/python $D/build_index.py --audit $O/distill_gold_audit_20261029/gold_audit.json \
-    --selection $O/distill_students_20261029/selection.json \
-    --embeddings $O/distill_embeddings_20261029 --output-dir $O/label_index_20261029_distilled
+# distillation (E3, E4); encode.py and evaluate_gold.py default to --device mps (use cpu/cuda
+# elsewhere). The teacher step needs the MLX runtime and earlier r36 outputs, so the sample and
+# its teacher labels ship in the data archive ($S); sample.py and label_teacher.py remake them.
+D=experiments/distilled_label_index; O=outputs
+S=$O/distill_sample_20261029; E=$O/distill_embeddings_20261029; R=$O/distill_students_replay
+.venv/bin/python $D/encode.py --output-dir $E                                   # 5-10 min
+.venv/bin/python $D/train_students.py --sample-dir $S --embeddings $E --output-dir $R
+.venv/bin/python $D/evaluate_gold.py --selection $R/selection.json --output-dir $R/gold
+.venv/bin/python $D/build_index.py --audit $R/gold/gold_audit.json \
+    --selection $R/selection.json --embeddings $E --output-dir $O/label_index_distilled_replay
 \end{Verbatim}
 
 \section{评估文件格式}
 \label{app:eval}
 
-\texttt{eval.xls}（SHA-256 \texttt{fe0bcf0c…a477045}）是用 \texttt{xlwt} 从冻结的 gold CSV 写出的 Excel 97--2003 工作簿；共 \num{1000} 行，无重复文本。
+\texttt{eval.xls}（SHA-256 \texttt{fe0bcf0c…a477045}）是用 \texttt{xlwt} 从冻结的 gold CSV 写出的 Excel 97--2003 工作簿：一个工作表，共 \num{1000} 行，无重复文本，只有基准格式要求的 \texttt{text} 和 \texttt{label} 两列。gold CSV（\nolinkurl{data/eval/gold_human_frozen_1000_20261019_v1.csv}）行与顺序相同，另含分步标签和来源信息：
 
 \begin{center}\small
 \begin{tabularx}{\textwidth}{@{}P{34mm}P{52mm}Y@{}}
@@ -872,21 +874,32 @@ ID 与来源信息 & 句子、评论和切块 ID；审核状态 & 可回连知�
 \end{tabularx}
 \end{center}
 
-\section{表~\ref{tab:five} 中查询的原文}
+\paragraph{问题集。}\nolinkurl{data/eval/query_smoke_40_20261019.json} 是一个含 40 个问题的 JSON 数组，每题有 \texttt{id}、\texttt{language}、\texttt{question}、预期的 \texttt{aspect}/\texttt{aspects}、预期的 \texttt{subtopics}（细分属性）和 \texttt{comparison} 标记。E1 把 Q01--Q25 解析为 30 个“航司 $\times$ 细分属性”单元；E2 和 E5 使用 Q01--Q12、Q21--Q25 和 Q28--Q30。结果为每题一条记录的 JSONL（\texttt{case}、\texttt{parsed}、含检索证据和耗时的 \texttt{result}、含文本/来源/引用的 \texttt{answer}，以及 \texttt{judge}），或每个查询和方法一行的 CSV。
+
+\section{表~\ref{tab:five} 中的查询：原文与结果}
 \label{app:queries}
 
-\begin{enumerate}[leftmargin=3em]
-  \item[Q05] 阿联酋航空经济舱的退款和改签处理怎么样？
-  \item[Q10] 卡塔尔航空商务舱的电影选择和娱乐内容怎么样？
-  \item[Q24] 国泰航空和新加坡航空经济舱腿部空间哪家评价更好？
-  \item[Q28] 新加坡航空经济舱的腿部空间、靠背调节、座椅舒适度和座椅清洁度分别怎么样？
-  \item[Q30] 新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？
-\end{enumerate}
+计数为直接匹配该属性的评论；百分比以其中有明确倾向的评论为分母。完整回答（含引用和证据）见
+\nolinkurl{outputs/final_rag_eval_20261019/answers.jsonl}。
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{@{}lP{62mm}Y@{}}
+\toprule
+\textbf{编号} & \textbf{提问原文} & \textbf{结果} \\
+\midrule
+Q05 & 阿联酋航空经济舱的退款和改签处理怎么样？ & 负面：19 条有倾向的评论全部负面（共 24 条匹配）；引用了多次联系仍未退款、取消费和选座费等。 \\
+Q10 & 卡塔尔航空商务舱的电影选择和娱乐内容怎么样？ & 两极：15 正、15 负（86 条匹配）；片库丰富与内容陈旧、电视节目少并存。 \\
+Q24 & 国泰航空和新加坡航空经济舱腿部空间哪家评价更好？ & 腿部空间无明确胜者：国泰 72.5\% 正面（50/69），新航 79.6\%（78/98）；新航座椅评分更高（3.83 对 3.46）。 \\
+Q28 & 新加坡航空经济舱的腿部空间、靠背调节、座椅舒适度和座椅清洁度分别怎么样？ & 腿部空间偏正面（78/98，79.6\%）；靠背调节两极（14/26）；座椅舒适度偏正面（97/123，78.9\%）；清洁度样本太少（7/10）。 \\
+Q30 & 新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？ & 餐食 65.5\% 正面（289/441，评分 3.88）；性价比 34.6\% 正面（75/217，评分 3.88）；地面服务 43.6\% 正面（163/374，评分 3.99）。 \\
+\bottomrule
+\end{tabularx}
+\end{center}
 
 \section{析因消融使用的问题}
 \label{app:factorial}
 
-每题的问法为 “What do historical reviews say about [attribute] on [airline] in [cabin]?”。
+每题的问法为 “What do historical reviews say about [attribute] on [airline] in [cabin]?”。这里的编号只在 E6 内使用，与表~\ref{tab:five} 的编号无关。
 
 \begin{center}\small
 \begin{tabular}{@{}llll@{\hspace{10mm}}llll@{}}
