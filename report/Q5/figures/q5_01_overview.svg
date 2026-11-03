@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170mm" height="98.60mm" viewBox="0 0 2000 1160">
+<title>Overview of the three downstream innovations</title><desc>Designed for a 170 mm report column. Blue: aggregation; teal: evidence selection; purple: answer validation.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<rect x="700" y="20" width="600" height="110" rx="22" fill="#F5F7FA" stroke="#7D8DA1" stroke-width="2"/>
+<text x="1000.0" y="75.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#172B43">Question + filters</text>
+<path d="M1000 130 L1000 180 L500 180 L500 230" fill="none" stroke="#7D8DA1" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="500,230 508.0,214.0 492.0,214.0" fill="#7D8DA1"/>
+<path d="M1000 180 L1500 180 L1500 230" fill="none" stroke="#7D8DA1" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1500,230 1508.0,214.0 1492.0,214.0" fill="#7D8DA1"/>
+<rect x="50" y="230" width="900" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="500.0" y="283.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">1 Full-pool statistics</text>
+<text x="500.0" y="340.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">All direct matches → review counts</text>
+<text x="500.0" y="397.59999999999997" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Direction + uncertainty</text>
+<rect x="1050" y="230" width="900" height="220" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="1500.0" y="283.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">2 Balanced evidence</text>
+<text x="1500.0" y="340.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Retrieved candidates → quotations</text>
+<text x="1500.0" y="397.59999999999997" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Both sides + consistent wording</text>
+<path d="M500 450 L500 520 L1000 520" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<path d="M1500 450 L1500 520 L1000 520" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<path d="M1000 520 L1000 580" fill="none" stroke="#7D8DA1" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,580 1008.0,564.0 992.0,564.0" fill="#7D8DA1"/>
+<rect x="700" y="580" width="600" height="110" rx="22" fill="#F5F7FA" stroke="#7D8DA1" stroke-width="2"/>
+<text x="1000.0" y="635.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#172B43">Grounded draft</text>
+<path d="M1000 690 L1000 770" fill="none" stroke="#7D8DA1" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,770 1008.0,754.0 992.0,754.0" fill="#7D8DA1"/>
+<rect x="400" y="770" width="1200" height="170" rx="22" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="1000.0" y="827.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">3 Check, repair once, or fall back</text>
+<text x="1000.0" y="884.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Return a draft, accepted revision or program answer</text>
+<path d="M1000 940 L1000 1020" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,1020 1008.0,1004.0 992.0,1004.0" fill="#7C3AED"/>
+<rect x="700" y="1020" width="600" height="110" rx="22" fill="#F5F7FA" stroke="#7D8DA1" stroke-width="2"/>
+<text x="1000.0" y="1075.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#172B43">Final answer</text>
+</svg>

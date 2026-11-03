@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170mm" height="103.70mm" viewBox="0 0 2000 1220">
+<title>Full-pool aggregation at the parent-review level</title><desc>Designed for a 170 mm report column. Blue: aggregation; teal: evidence selection; purple: answer validation.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<rect x="600" y="20" width="800" height="130" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="1000.0" y="85.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">All direct matches + labels</text>
+<path d="M1000 150 L1000 200 L330 200 L330 250" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="330,250 338.0,234.0 322.0,234.0" fill="#2563EB"/>
+<rect x="40" y="250" width="580" height="210" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="330.0" y="327.07" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Keep aspect-aligned</text>
+<text x="330.0" y="382.93" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">opinion sentences</text>
+<path d="M620 354 L710 354" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="710,354 694.0,346.0 694.0,362.0" fill="#2563EB"/>
+<rect x="710" y="250" width="580" height="210" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="1000.0" y="299.07" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Vote within each</text>
+<text x="1000.0" y="354.93" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">review</text>
+<text x="1000.0" y="411.93" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Positive / negative / tie</text>
+<path d="M1290 354 L1380 354" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1380,354 1364.0,346.0 1364.0,362.0" fill="#2563EB"/>
+<rect x="1380" y="250" width="580" height="210" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="1670.0" y="327.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Count reviews once</text>
+<text x="1670.0" y="384.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">P positive; N negative</text>
+<path d="M1670 460 L1670 580" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1670,580 1678.0,564.0 1662.0,564.0" fill="#2563EB"/>
+<rect x="1380" y="580" width="580" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="1670.0" y="633.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Compute uncertainty</text>
+<text x="1670.0" y="690.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">p = P / (P + N)</text>
+<text x="1670.0" y="747.6" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">95% Wilson interval</text>
+<path d="M1380 690 L1290 690" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1290,690 1306.0,698.0 1306.0,682.0" fill="#2563EB"/>
+<polygon points="1000,560.0 1290.0,690 1000,820.0 710.0,690" fill="#EFF6FF" stroke="#2563EB" stroke-width="3"/>
+<text x="1000" y="690" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">P + N ≥ 10?</text>
+<path d="M710 690 L620 690" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="620,690 636.0,698.0 636.0,682.0" fill="#2563EB"/>
+<rect x="619.7109375" y="590.0" width="88.578125" height="60.0" fill="white"/>
+<text x="664" y="620" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#2563EB">Yes</text>
+<rect x="40" y="580" width="580" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="330.0" y="633.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Assess direction</text>
+<text x="330.0" y="690.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Compare the interval</text>
+<text x="330.0" y="747.6" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">with 50%</text>
+<path d="M330 800 L330 910 L230 910 L230 970" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="230,970 238.0,954.0 222.0,954.0" fill="#2563EB"/>
+<path d="M330 910 L664 910 L664 970" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="664,970 672.0,954.0 656.0,954.0" fill="#2563EB"/>
+<path d="M664 910 L1096 910 L1096 970" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1096,970 1104.0,954.0 1088.0,954.0" fill="#2563EB"/>
+<rect x="40" y="970" width="380" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="230.0" y="1052.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Positive</text>
+<text x="230.0" y="1109.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">CI above 50%</text>
+<rect x="474" y="970" width="380" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="664.0" y="1052.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Negative</text>
+<text x="664.0" y="1109.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">CI below 50%</text>
+<rect x="906" y="970" width="380" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="1096.0" y="1052.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Unclear</text>
+<text x="1096.0" y="1109.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">CI crosses 50%</text>
+<path d="M1000 820 L1000 860 L1670 860 L1670 970" fill="none" stroke="#2563EB" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1670,970 1678.0,954.0 1662.0,954.0" fill="#2563EB"/>
+<rect x="1260.8046875" y="830.0" width="78.390625" height="60.0" fill="white"/>
+<text x="1300" y="860" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#2563EB">No</text>
+<rect x="1380" y="970" width="580" height="220" rx="22" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+<text x="1670.0" y="1023.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#2563EB">Insufficient</text>
+<text x="1670.0" y="1080.4" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Too few votes or</text>
+<text x="1670.0" y="1137.6000000000001" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">labels unavailable</text>
+</svg>

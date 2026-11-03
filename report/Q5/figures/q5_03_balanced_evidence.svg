@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170mm" height="105.40mm" viewBox="0 0 2000 1240">
+<title>Balanced evidence selection and the neutral-quotation path</title><desc>Designed for a 170 mm report column. Blue: aggregation; teal: evidence selection; purple: answer validation.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<rect x="600" y="20" width="800" height="120" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="1000.0" y="80.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Retrieved passages + labels</text>
+<path d="M1000 140 L1000 170" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,170 1008.0,154.0 992.0,154.0" fill="#0F766E"/>
+<polygon points="1000,170.0 1410.0,280 1000,390.0 590.0,280" fill="#ECFDF5" stroke="#0F766E" stroke-width="3"/>
+<text x="1000" y="280" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Usable polarity labels?</text>
+<path d="M590 280 L480 280 L480 490" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="480,490 488.0,474.0 472.0,474.0" fill="#0F766E"/>
+<rect x="445.7109375" y="368.0" width="88.578125" height="60.0" fill="white"/>
+<text x="490" y="398" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#0F766E">Yes</text>
+<path d="M1410 280 L1580 280 L1580 490" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1580,490 1588.0,474.0 1572.0,474.0" fill="#0F766E"/>
+<rect x="1540.8046875" y="368.0" width="78.390625" height="60.0" fill="white"/>
+<text x="1580" y="398" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#0F766E">No</text>
+<rect x="40" y="490" width="880" height="170" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="480.0" y="547.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Split positive / negative</text>
+<text x="480.0" y="604.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Order sides by the aggregate direction</text>
+<path d="M480 660 L480 740" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="480,740 488.0,724.0 472.0,724.0" fill="#0F766E"/>
+<rect x="40" y="740" width="880" height="200" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="480.0" y="812.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Prefer consistent wording</text>
+<text x="480.0" y="869.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Filter conflicts when alternatives exist</text>
+<path d="M480 940 L480 1020" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="480,1020 488.0,1004.0 472.0,1004.0" fill="#0F766E"/>
+<rect x="40" y="1020" width="880" height="170" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="480.0" y="1077.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Take a quota per side</text>
+<text x="480.0" y="1134.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Use only available directions</text>
+<rect x="1200" y="490" width="760" height="360" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="1580.0" y="584.8" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Select neutral quotes</text>
+<text x="1580.0" y="641.8" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Prefer direct, complete text</text>
+<text x="1580.0" y="699.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Avoid repeat parent reviews</text>
+<text x="1580.0" y="756.1999999999999" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Do not invent polarity</text>
+<path d="M1580 850 L1580 1020" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1580,1020 1588.0,1004.0 1572.0,1004.0" fill="#0F766E"/>
+<path d="M920 1104 L1200 1104" fill="none" stroke="#0F766E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1200,1104 1184.0,1096.0 1184.0,1112.0" fill="#0F766E"/>
+<rect x="1200" y="1020" width="760" height="170" rx="22" fill="#ECFDF5" stroke="#0F766E" stroke-width="2"/>
+<text x="1580.0" y="1077.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#0F766E">Illustrative evidence</text>
+<text x="1580.0" y="1134.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Keep text + citation IDs</text>
+</svg>
