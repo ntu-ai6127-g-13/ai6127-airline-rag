@@ -1,4 +1,4 @@
-"""Persistent, localhost-only MLX generation service for grounded QA."""
+"""Persistent, localhost-only MLX or PyTorch generation service for grounded QA."""
 from __future__ import annotations
 
 import argparse
@@ -18,18 +18,30 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
+    parser.add_argument("--backend", choices=["mlx", "transformers"], default="mlx")
+    parser.add_argument("--device", choices=["auto", "cuda", "cpu"], default="auto")
+    parser.add_argument("--model", type=Path, default=None)
     args = parser.parse_args()
+    if args.model is None:
+        if args.backend == "mlx":
+            args.model = DEFAULT_MODEL
+        else:
+            manifest = Path(__file__).resolve().parents[1] / "outputs/minimal_rag_models.json"
+            args.model = Path(json.loads(manifest.read_text())["generator"]["path"])
     if args.host not in {"127.0.0.1", "localhost", "::1"}:
         raise ValueError("The QA model service is intentionally localhost-only")
     if not args.model.exists():
         raise FileNotFoundError(f"Local model not found: {args.model}")
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
-    from mlx_lm import generate, load, stream_generate
-    from mlx_lm.sample_utils import make_sampler
+    if args.backend == "mlx":
+        from mlx_lm import generate, load, stream_generate
+        from mlx_lm.sample_utils import make_sampler
+    else:
+        from transformers_qa_runtime import generate, load, stream_generate, make_sampler
 
     started = time.monotonic()
-    model, tokenizer = load(str(args.model))
+    model, tokenizer = (load(str(args.model), device=args.device)
+                        if args.backend == "transformers" else load(str(args.model)))
     loaded_seconds = round(time.monotonic() - started, 3)
     lock = threading.Lock()
 
@@ -51,6 +63,7 @@ def main() -> None:
             if self.path != "/health":
                 self._json(404, {"error": "not_found"}); return
             self._json(200, {"status": "ready", "model": args.model.name,
+                             "backend": args.backend,
                              "loaded_seconds": loaded_seconds})
 
         def do_POST(self) -> None:
@@ -68,7 +81,7 @@ def main() -> None:
                 # the same local-only model process.
                 max_tokens = min(max(int(payload.get("max_tokens", 420)), 32), 1600)
                 temperature = float(payload.get("temperature", 0.0))
-                prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True)
+                prompt = tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
                 request_started = time.monotonic()
                 if self.path == "/generate_stream":
                     self.send_response(200)

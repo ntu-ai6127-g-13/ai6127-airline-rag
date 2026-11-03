@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170mm" height="107.95mm" viewBox="0 0 2000 1270">
+<title>Answer validation, one repair attempt, and programmatic fallback</title><desc>Designed for a 170 mm report column. Blue: aggregation; teal: evidence selection; purple: answer validation.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<rect x="630" y="20" width="740" height="120" rx="22" fill="#F5F7FA" stroke="#7D8DA1" stroke-width="2"/>
+<text x="1000.0" y="80.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#172B43">Evidence + aggregates</text>
+<path d="M1000 140 L1000 220" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,220 1008.0,204.0 992.0,204.0" fill="#7C3AED"/>
+<rect x="630" y="220" width="740" height="130" rx="22" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="1000.0" y="285.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Generate a draft</text>
+<path d="M1000 350 L1000 410" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,410 1008.0,394.0 992.0,394.0" fill="#7C3AED"/>
+<polygon points="1000,410.0 1400.0,540 1000,670.0 600.0,540" fill="#F5F3FF" stroke="#7C3AED" stroke-width="3"/>
+<text x="1000" y="540" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Draft passes?</text>
+<rect x="1470" y="20" width="490" height="400" rx="22" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="1715.0" y="106.19999999999999" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Checks</text>
+<text x="1715.0" y="163.2" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Citations</text>
+<text x="1715.0" y="220.39999999999998" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Numbers + scope</text>
+<text x="1715.0" y="277.59999999999997" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Direction</text>
+<text x="1715.0" y="334.79999999999995" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Coverage, language</text>
+<path d="M1714 420 L1714 540 L1400 540" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round" stroke-dasharray="11 9"/>
+<polygon points="1400,540 1416.0,548.0 1416.0,532.0" fill="#7C3AED"/>
+<path d="M600 540 L270 540 L270 980" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="270,980 278.0,964.0 262.0,964.0" fill="#7C3AED"/>
+<rect x="399.7109375" y="446.0" width="88.578125" height="60.0" fill="white"/>
+<text x="444" y="476" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#7C3AED">Yes</text>
+<path d="M1000 670 L1000 770" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,770 1008.0,754.0 992.0,754.0" fill="#7C3AED"/>
+<rect x="960.8046875" y="688.0" width="78.390625" height="60.0" fill="white"/>
+<text x="1000" y="718" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#7C3AED">No</text>
+<rect x="630" y="770" width="740" height="150" rx="22" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="1000.0" y="817.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Repair once</text>
+<text x="1000.0" y="874.0" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Include validation failures</text>
+<path d="M1000 920 L1000 980" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1000,980 1008.0,964.0 992.0,964.0" fill="#7C3AED"/>
+<polygon points="1000,980.0 1370.0,1100 1000,1220.0 630.0,1100" fill="#F5F3FF" stroke="#7C3AED" stroke-width="3"/>
+<text x="1000" y="1100" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Revision passes?</text>
+<path d="M630 1100 L500 1100" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="500,1100 516.0,1108.0 516.0,1092.0" fill="#7C3AED"/>
+<rect x="519.7109375" y="1000.0" width="88.578125" height="60.0" fill="white"/>
+<text x="564" y="1030" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#7C3AED">Yes</text>
+<path d="M1370 1100 L1500 1100" fill="none" stroke="#7C3AED" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1500,1100 1484.0,1092.0 1484.0,1108.0" fill="#7C3AED"/>
+<rect x="1396.8046875" y="1000.0" width="78.390625" height="60.0" fill="white"/>
+<text x="1436" y="1030" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#7C3AED">No</text>
+<rect x="40" y="980" width="460" height="210" rx="22" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="270.0" y="1029.07" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Return model</text>
+<text x="270.0" y="1084.9299999999998" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">answer</text>
+<text x="270.0" y="1141.9299999999998" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Draft / revision</text>
+<rect x="1500" y="980" width="460" height="210" rx="22" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+<text x="1730.0" y="1029.07" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">Program</text>
+<text x="1730.0" y="1084.9299999999998" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="700" fill="#7C3AED">fallback</text>
+<text x="1730.0" y="1141.9299999999998" text-anchor="middle" dominant-baseline="central" font-family="DejaVu Sans, sans-serif" font-size="40" font-weight="400" fill="#536578">Facts + quotes</text>
+</svg>
