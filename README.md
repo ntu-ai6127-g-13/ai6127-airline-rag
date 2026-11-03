@@ -1,284 +1,137 @@
-# AI6127 小组作业 — 航空服务评价检索系统
+# Ask the Reviews — grounded question answering over airline reviews
 
-一个基于 RAG（检索增强生成）的问答系统：用 6.1 万条真实航司评论，
-回答「新加坡飞伦敦经济舱，哪家航司腿部空间评价最好？」这类**带约束的对比型问题**，
-并给出**可追溯到原文的结论**。
+AI6127 Deep Neural Networks for NLP, Group 13 (NTU, 2026).
 
-已有知识库和检索索引后，可运行 `.venv/bin/streamlit run app/streamlit_app.py`
-打开本地证据查询界面，按航司、舱位、方面、航线与日期筛选，并对照 2–3 家航司的原文。
-界面也接受中文或英文自然语言问题，并用本地 Qwen3 4B 根据检索原文生成带编号引用的回答。
-模型在独立 MLX 环境中常驻，回答通过 NDJSON 流实时显示；初稿未通过引用或数字校验时，页面会清空临时文本并
-流式显示自动修正版，第二次仍不合格才替换为程序生成的有据摘要。模型服务不可用时也会自动使用程序回答。
-查询质量目标、可选本地分类器、无 gold 选参监控及评测命令见
-[查询质量实验说明](experiments/query_quality/README.md)。实验分类器尚需独立查询验收；本机存在完整标签索引时，
-标签辅助排序默认开启且只调整顺序，不按预测标签删除评论。
-回答下方的“评论倾向概览”按评论去重显示正向、负向卡片及百分比：上位方面使用符合航司、舱位、航线和日期条件的
-全部离线方面标签，细分问题使用完整语料中直接命中该细分项且方面一致的自动标签。页面展示多少条代表性原文不会改变
-这项全量统计；“只看好评/差评”也只控制证据展示，不会把另一种倾向从概览中删除。
-侧栏可切换“中文 / English”单语言模式。中文模式会先用本地 Qwen 批量翻译本次展示的英文评论，再把中文证据交给
-问答模型，界面、流式回答、程序回退、评分表和倾向卡片均使用中文；English 模式保留英文评论，并用英文提示、英文回答和
-英文界面。翻译结果按评论文本缓存，原始英文仍保存在下载的证据 JSON 中，不会覆盖源数据。
-细分项的“偏正面/偏负面”结论只由完整直接匹配池的评论级统计决定；页面展示的 10–30 条评论只提供可核对的例子，
-不会反过来改变总体方向。系统优先展示一条主流方向评论和一条反例，并拒绝与全量统计方向矛盾的模型回答。
+A retrieval-augmented system that answers constrained, attribute-level questions about airline service, such as
+*"Flying Singapore to London in economy, which airline has the best legroom?"*, from 61,167 Skytrax passenger
+reviews (546,139 sentences). It turns route, cabin, traveller type, date, aspect and one of 46 sub-attributes into
+hard filters; retrieves evidence with BM25 and MiniLM dense search fused by reciprocal rank fusion; counts positive
+and negative opinions over every matching review with an offline sentence classifier; and lets a local Qwen3-4B
+model write a cited answer that program checks accept only if its citations, numbers and direction match the
+evidence. Questions can be asked in English or Chinese.
 
-### 启动自然语言问答
+- **Report:** [`report/final/13.pdf`](report/final/13.pdf) (Chinese reading copy: `report/final/13_zh.pdf`)
+- **Data archive:** `ai6127-g13-data.zip` on the [v1.0-submission release](https://github.com/ntu-ai6127-g-13/ai6127-airline-rag/releases/tag/v1.0-submission)
+- Team-internal Chinese documentation: [`README_zh.md`](README_zh.md) and [`docs/`](docs/)
 
-Apple Silicon 本机已经按下列流程准备好 Qwen 权重时，分别在两个终端运行：
+## 1. Requirements
+
+- Python 3.11 (3.10+ works for the core system).
+- macOS or Linux; about 3 GB of free disk space.
+- Optional, for generated answers: Apple Silicon (MLX backend) **or** an NVIDIA/AMD GPU (Transformers backend).
+  Without a local model the interface still works and shows program-written, evidence-cited answers.
+
+## 2. Install
 
 ```bash
-# 终端 1：模型只加载一次，默认仅监听本机 127.0.0.1:8765
-outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
+git clone https://github.com/ntu-ai6127-g-13/ai6127-airline-rag.git
+cd ai6127-airline-rag
+python3.11 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m spacy download en_core_web_sm
+.venv/bin/python scripts/test_env.py          # checks dependencies, spaCy, BM25 and FAISS
+```
 
-# 终端 2：检索与问答页面；异常退出时会自动重启
+## 3. Get the data
+
+**Fast path (recommended).** Download `ai6127-g13-data.zip` from the release and unzip it in the repository root.
+It contains the knowledge base, the evaluation set, the label indexes and every result file used in the report
+(see `DATA_README.md` inside the archive). Then build the two retrieval indexes from the knowledge base:
+
+```bash
+unzip ai6127-g13-data.zip                       # run in the repository root
+.venv/bin/python -m src.retriever build-bm25    # ~5 s
+.venv/bin/python -m src.retriever build-dense --batch-size 64   # ~1.5 min on Apple M1 Pro
+```
+
+**Full rebuild from the raw data.** Downloads the public Kaggle dataset (no account needed), cleans it and splits
+it into sentences (about 14 minutes), then builds the indexes and the v4.1 label index:
+
+```bash
+.venv/bin/python scripts/download_data.py
+.venv/bin/python -m src.build_kb
+.venv/bin/python -m src.retriever build-bm25
+.venv/bin/python -m src.retriever build-dense --batch-size 64
+.venv/bin/python -m src.label_index --model outputs/weak_rebuild_20261019/model.joblib \
+    --output-dir outputs/label_index_20261019
+```
+
+The label index needs the classifier in `outputs/weak_rebuild_20261019/model.joblib`, which is in the data archive.
+
+## 4. Run the interface
+
+```bash
 .venv/bin/python scripts/run_query_app.py --port 8517
 ```
 
-首次准备模型环境与固定版本权重时运行：
+Open http://localhost:8517. Type a question (English or Chinese) or set airline, comparison airlines, cabin, aspect,
+route and date in the sidebar. The page shows the answer with numbered citations, the positive/negative overview over
+all matching reviews, the airline's own ratings with a significance check, and the evidence per airline.
+Example questions:
+
+- `How is the legroom in Singapore Airlines economy class?`
+- `Flying Singapore to London in economy, which airline has the best legroom?`
+- `新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？`
+- For two named airlines, use the sidebar comparison or the Chinese phrasing
+  (`国泰航空和新加坡航空经济舱腿部空间哪家评价更好？`); the English two-airline phrasing is a known limitation.
+
+### Optional: local answer generation
+
+**Apple Silicon (MLX).** Once, create the pinned model runtime and download Qwen3-4B-Instruct-2507 (4-bit):
 
 ```bash
 .venv/bin/python scripts/setup_query_model.py
 ```
 
-页面支持“新航经济舱的座位怎么样？”和“比较新航与卡塔尔航空商务舱的餐饮评价”等问题。
-自然语言只会被解析成语料中已有的航司、舱位、航线和评价方面；检索计数由程序计算，
-生成模型不能修改筛选条件、证据编号或全量匹配数。评论数据截至 2019 年，回答不代表当前服务。
-一家航司的多方面问题也会逐项处理。例如“新加坡航空餐食、性价比和地勤怎么样？”会按提问顺序
-分别检索餐饮、性价比和地面服务，每个方面单独成段，并在回答和“原始评分汇总（按评价方面）”表中
-显式给出评价方面、原始评分字段、平均分、满分和评分数；各方面的评论证据也分标签页展示，避免把一个
-方面的评分或原文套到另一个方面。
-“新加坡飞伦敦经济舱，哪家航司腿部空间评价最好？”这类未点名航司的开放比较会先把出发地、目的地和
-舱位解析为结构化硬条件，并把 London Heathrow/LHR、London Gatwick/LGW 等语料写法归入同一目的地集合。
-系统在这个切片中按原始上位方面评分、评分数和小样本收缩值自动选择三家候选，再逐家检索细分属性原文。
-若细分属性的直接评论不足，回答会列出各候选的上位方面评分和样本数，同时明确拒绝宣布细分项冠军。
-系统还会把具体问题解析成第二层属性。例如，餐饮可区分质量与口味、分量、品种、饮品和特殊餐食；
-座位可区分腿部空间、靠背调节、舒适度、宽度、机械状况、座椅清洁度和电源；地面服务可区分值机、登机口服务、
-准点、延误处置、行李和休息室。每个属性分别召回和重排，再按属性交错合并证据，页面会显示各属性的
-直接原文覆盖数。原始数据只有上位方面评分，没有这些细分项的独立评分，因此细分结论以对应原文为依据，
-不能用餐饮或座位总体分代替分量、靠背等具体答案。
-事实型细分问题会再区分“列举有什么、是否提供、处理流程、尺寸数量、评价好坏”。例如“新航的餐食有什么吃”会进入
-具体菜品路由，从直接命中的历史评论中列出沙嗲、米饭、早餐或甜点等有引用的实例，不再返回餐饮总体评分和
-正负比例。相同机制也覆盖电影内容、座位隐私与储物、餐食服务流程、空乘沟通、转机衔接、特殊协助、附加费用、机上用品、
-客舱噪音和飞机状况；小模型负责把已筛好的证据组织成自然回答，不负责凭空决定筛选条件或编造细分事实。
-细分检索会先扫描符合航司、舱位、航线和日期条件的完整语料切片，把明确提到该属性的句子加入交叉编码器重排，
-再用混合语义检索补充没有固定关键词的表达。页面同时显示完整切片中的细分词直接命中句数、涉及评论数，以及
-当前展开的代表性原文数。Qwen 根据展开并可引用的代表性原文生成答案；完整命中数用于衡量证据覆盖，避免把尚未
-逐条展示的几百句包装成模型已经通读过的总体结论。
-回答同时使用原始 review-level 评分：六个服务方面按 1–5 分、总体体验按 1–10 分汇总，并应用与检索相同的
-航司、舱位、旅客类型、航线和日期条件。比较题在评分数充足、差值置信区间不跨 0 且超过实际意义门槛时直接给出胜者；
-评分差不够大时明确拒绝硬排名。检索到的原文负责解释评分差异，top-k 自动标签正负数不再作为比较结论。
-配对结果的人工评审界面可用 `.venv/bin/streamlit run app/query_review.py --server.port 8518` 打开；未评分的结果不会通过质量验收。
-
-2026-10-19 定稿的 1,000 句 gold 已接入复评。当前代码可重建 C 组弱监督权重；
-正式标签复评、训练监控、批量导出联调和后续验收要求见
-[定稿 gold 后续推进](docs/定稿gold后续推进.md)。分类质量尚未全部达标；529,031 条基础标签索引可由固定命令重建，
-本地生成产物不进入 Git。
-
-> 📘 **新加入的同学从这里开始**：先读 [`docs/项目执行手册.md`](docs/项目执行手册.md)。
-> 里面每个技术名词都有解释，每一步都有可直接运行的代码。
->
-> 👥 **把系统发给组员检查**：使用 [`docs/组员下载运行与验收指南.md`](docs/组员下载运行与验收指南.md)。
-> 其中说明了哪些文件会随 Git 下载、哪些本地产物需要重建，以及 macOS、Windows 的启动和验收步骤。
-
----
-
-## 快速开始
+Then keep the model server running in a second terminal while using the app:
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/ntu-ai6127-g-13/ai6127-airline-rag.git
-cd ai6127-airline-rag
-
-# 2. ⚠️ 配置 git 身份（第一次用 git 的话必做）
-#    邮箱必须是你 GitHub 账号里已验证的那个，否则提交不会算在你名下
-git config --global user.name "你的GitHub用户名"
-git config --global user.email "绑定GitHub账号的邮箱"
-
-# 3. 建独立的 Python 环境（需要 Python ≥ 3.10）
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-# 4. 装依赖（约 5–10 分钟）
-pip install -r requirements.txt
-python -m spacy download en_core_web_sm
-
-# 5. 验证环境
-python scripts/test_env.py
+outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py      # 127.0.0.1:8765
 ```
 
-看到 `全部就绪 ✅` 就说明装好了。自检会验证四件事：依赖版本、spaCy 切句、
-BM25 关键词检索、FAISS 向量检索。
-
-> ✅ **这套流程 2026-09-08 在 macOS (Apple Silicon) + Python 3.11 上完整跑通过**，
-> 依赖无冲突。实测的版本组合记在 `requirements.txt` 末尾。
-
-### 先把数据"看一眼"
-
-跑完 `python -m src.build_kb` 生成 `chunks.parquet` 之后，用这个界面直观地看表：
+**Linux GPU (Transformers).** See [`docs/Linux最小RAG链路.md`](docs/Linux最小RAG链路.md):
 
 ```bash
-source .venv/bin/activate                  # Windows: .venv\Scripts\activate
-python -m src.build_kb                     # 先建全量（约 14 分钟）
-python scripts/make_sample.py              # 可选：抽个小样本给开发用（几秒）
-streamlit run app/data_explorer.py
+.venv/bin/python scripts/setup_rag_models.py
+.venv/bin/python scripts/local_qa_server.py --backend transformers --device cuda
 ```
 
-> ⚠️ **必须先激活 venv**。直接敲 `streamlit` 很可能用到系统里另一个 streamlit
-> （macOS 上常见的是 Homebrew 装的 `/opt/homebrew/bin/streamlit`），
-> 那个环境里没有项目依赖，会报 `ModuleNotFoundError: No module named 'duckdb'`。
-> 嫌麻烦就不激活、直接指定 venv 里的那个：
->
-> ```bash
-> .venv/bin/streamlit run app/data_explorer.py     # Windows: .venv\Scripts\streamlit run ...
-> ```
->
-> 想确认自己用对了没有：`which streamlit` 的输出里应该带 `.venv`。
+The app detects the server automatically; if it is not running, answers fall back to the program-written mode.
 
-浏览器会自动打开。左边选筛选条件（航司 / 舱位 / 出行类型 / 日期 / 评分 / 关键词），
-右边四个标签页：
-
-| 标签页 | 用来干什么 |
-|---|---|
-| 📋 表格 | 翻页看原始行，可以排序、导出当前页 CSV |
-| 📖 逐条精读 | 随机抽几句，**把句子放回它所在的整条评论里**看（就是 parent-document retrieval 的效果） |
-| 📊 图表 | 六个维度的平均分、航司排名、评分分布、每年评论量、舱位×维度热力图 |
-| 🛠 自己写 SQL | 直接写 DuckDB SQL，附常用模板（含 C10 参考排名那条） |
-
-> 这个界面**只读**，不参与评分，纯粹是给大家熟悉数据用的。
-> 它和 `app/streamlit_app.py`（检索组负责的 RAG 查询界面）是两个东西，别改错文件。
-
-**看数据前先展开「各列的空值情况」**：六个维度的评分很稀疏（value 覆盖最好、ground 最差），
-而且约 **21.6%** 的评论没有日期。不知道这两件事很容易把统计数字算错。
-
-### 数据
-
-原始数据**不在 git 里**（24 MB，没必要进版本控制）。
-
-### 下载数据（一条命令）
+## 5. Tests
 
 ```bash
-pip install kagglehub          # 只需装一次
-python scripts/download_data.py
+.venv/bin/pip install pytest
+.venv/bin/python -m pytest -q
 ```
 
-自动从 Kaggle 下载、复制到 `data/raw/`、并跑自检。
-**公开数据集，不需要 Kaggle 账号或 API token。**
+## 6. Reproducing the report
 
-> 想手动下也行：https://www.kaggle.com/datasets/efehandanisman/skytrax-airline-reviews
-> 下载后把 `capstone_airline_reviews3.xlsx` 放进 `data/raw/`，再跑
-> `python scripts/profile_data.py` 自检。
+Each experiment script refuses to overwrite an existing output directory. Commands are in Appendix A of the report.
 
-**自检应该看到这些数字：**
+| Report | What | Entry point | Results (data archive) |
+|---|---|---|---|
+| Q1, §3 | Cleaning, chunking, corpus statistics | `src/clean_text.py`, `src/build_kb.py` | `data/processed/chunks.parquet` |
+| Q2/Q3, E1 | Retrieval benchmark (P@5, Recall@50, MRR, NDCG@10) | `experiments/final_auto_eval/run.py` | `outputs/final_auto_eval_20261019_v2/` |
+| Q2/Q4, E2, E5 | Query latency, RAG metrics on 20 questions | `experiments/final_rag_eval/run.py` | `outputs/final_rag_eval_20261019/` |
+| Q4, E3 | Classifier quality on the gold set | `experiments/distilled_label_index/evaluate_gold.py` | `outputs/distill_gold_audit_20261029/` |
+| Q5, E4 | LLM-to-student distillation | `experiments/distilled_label_index/` | `outputs/distill_*_20261029/`, `outputs/label_index_20261029_distilled/` |
+| Q5, E6 | Factorial ablation of X/Y/Z, targeted checks | `experiments/downstream_evaluation/`, `experiments/final_auto_eval/run.py` | see release notes |
+| Q5, E7 | Airline ranking vs. held-out ratings | `python -m experiments.downstream_evaluation.ranking` | see release notes |
 
-| 项 | 应为 |
-|---|---|
-| 原始行数 | 131,895 |
-| 其中空行 | 65,948（**数据集自带的，正常**） |
-| 有正文的评论 | **65,947** |
-| 去重后 | 61,172 |
-| **最终进知识库** | **61,167 条评论 / 546,139 句** |
-| **最终总词数** | **8,276,082** |
-| 航司数 / 时间范围 | **81** / **2002-08 ~ 2019-06** |
-| 评价维度 | **6 个**（座位、客舱服务、餐饮、娱乐、地勤、性价比——**没有 wifi**） |
-
-> ⚠️ 网上同名的航空评论数据集有好几个，规模从 8 千到 1 亿条都有。
-> **以自检数字为准**，对不上就是下错了。
-
-开发时先用真实数据的一小块（几秒生成，全量建索引要几十分钟）：
-
-```bash
-python scripts/make_sample.py        # 从真实数据切一小块供开发用
-```
-
----
-
-## 项目结构
+## 7. Repository layout
 
 ```
-├── docs/                   📘 文档（先读这里）
-│   ├── 分工与任务清单.md    ⚠️ 先看这个：你负责什么、交什么、什么时候交
-│   ├── 协作规范.md          ⚠️ 再看这个：分支、提交、什么进 git
-│   ├── 项目执行手册.md      做的时候查：每步都有可运行代码
-│   ├── 实验发现记录.md      ⭐ 边做边记，报告从这里搬
-│   ├── 选题与标注方案.md    为什么选这个题 + 标注规范
-│   └── Assignment.pdf      作业原文
-│
-├── data/
-│   ├── raw/                原始数据（不进 git）
-│   ├── processed/          清洗、切句后的数据（不进 git）
-│   └── eval/               ✅ 人工标注结果（进 git）
-│
-├── index/                  检索索引（不进 git，可重建）
-├── models/                 训练好的模型（不进 git）
-├── outputs/                中间结果（不进 git）
-│
-├── src/                    源码
-│   ├── config.py           所有路径和参数集中在这
-│   ├── build_kb.py         知识库组
-│   ├── retriever.py        检索组
-│   ├── rerank.py           检索组
-│   ├── weak_labels.py      下游组
-│   ├── classify.py         下游组
-│   ├── generate.py         下游组
-│   └── evaluate.py         评测
-│
-├── app/streamlit_app.py    RAG 查询界面（检索组）
-├── app/data_explorer.py    数据浏览界面（公共工具，谁都能改）
-├── scripts/                辅助脚本
-├── experiments/log.md      ⭐ 每做一次实验记一行
-└── report/                 报告草稿与图表
+app/streamlit_app.py        query interface (Q2)
+src/                        cleaning, knowledge base, retrieval, filters, classification, grounded QA
+scripts/                    data download, app launcher, local model server, setup helpers
+experiments/                evaluation, distillation and ablation scripts
+data/eval/                  eval.xls and the frozen 1,000-sentence gold set
+tests/                      unit tests
+report/final/               report source (LaTeX) and PDFs
+docs/                       team documentation (Chinese)
 ```
 
----
-
-## 分工
-
-> 📘 **要用数据先读 [`docs/数据使用指南.md`](docs/数据使用指南.md)** ——
-> 怎么拿到数据、31 列是什么、六个会让你算错数字的坑、各组的常用配方。
-> 五分钟看完，所有代码片段都在完整数据上实测过。
-
-> **完整分工见 [`docs/分工与任务清单.md`](docs/分工与任务清单.md)** ——
-> 每个人的任务清单、交付物、截止日、验收标准都在里面。
-
-> 🔴 **B / C 组开工前先读 [`docs/BC组推进计划.md`](docs/BC组推进计划.md)** ——
-> 开工前必做的三件事（切分支、锁版本、重建语料）、逐周排期、
-> 以及三条会让评测作废的硬规矩。**不做 §0 后面全白干。**
-
-| 小组 | 人数 | 分值 | 负责 | 主要文件 | 自己写的报告 |
-|---|---|---|---|---|---|
-| **A 知识库** | 1 | 20 | 清洗、切句、建库、抽样 | `src/build_kb.py`、`src/clean_text.py` | **Q1** |
-| **B 检索** | **3** | 40 | 两种检索 + 融合 + 重排 + 界面 + 评测 | `src/retriever.py`、`app/` | **Q2 + Q3** |
-| **C 下游** | 2 | 40 | 弱标签、分类、生成、RAG 评测 | `src/classify.py`、`src/generate.py` | **Q4 + Q5** |
-
-**没有单独的统筹岗位**——标注协调、周会、合稿、格式检查由 B 组某人兼任（约 8–10 h）。
-**也没有报告组和 PPT 组**：五个 Question 天然对应三个小组，**谁做的谁写**，
-统筹只负责把三份拼成一份 PDF，不代写章节。详见
-[分工文档第 9 节](docs/分工与任务清单.md)。
-
-标注那 1,000 句由其中 3 人共同完成（各 3–4 小时），规范见
-[`docs/选题与标注方案.md`](docs/选题与标注方案.md)。
-
----
-
-## 关键日期
-
-| 日期 | 事项 |
-|---|---|
-| **10/25** | 🔴 1,000 句标注必须完成（压缩不了的工作量） |
-| **11/01** | 所有实验跑完，指标和图表齐了 |
-| **11/07 23:59** | 🔴 报告交 Blackboard（**迟交每天扣 5%**） |
-| **11/10** | 现场展示 |
-
----
-
-## 协作约定
-
-> **完整规则见 [`docs/协作规范.md`](docs/协作规范.md)，开工前必读。** 要点：
-
-- **每人开自己的分支**，通过 Pull Request 合并，不要直接推 main
-- **卡住超过 3 天必须在群里说**，不要自己憋着
-- **每做一次实验就往 `experiments/log.md` 加一行**——报告里的表格全靠它
-- 大文件（数据、索引、模型）**走网盘，不要提交进 git**
-- **不要提交任何密钥**（`.env` 已在 `.gitignore` 里）
-- **确认自己的提交被正确关联**：推送后去仓库的 Contributors 页面看有没有自己。
-  没有的话说明 git 邮箱和 GitHub 账号对不上，按上面第 2 步重新配置
-  （不确定用哪个邮箱？去 https://github.com/settings/emails 查）
+Data: Skytrax reviews from the public Kaggle dataset
+[`efehandanisman/skytrax-airline-reviews`](https://www.kaggle.com/datasets/efehandanisman/skytrax-airline-reviews).
+Reviews end in mid-2019; answers describe historical experiences, not current service.
