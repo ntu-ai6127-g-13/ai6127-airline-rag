@@ -142,11 +142,11 @@ Q5 & 下游任务创新；消融研究 & \S\ref{sec:gen}, \S\ref{sec:exp-distill
 \section{相关工作}
 \label{sec:related}
 
-\paragraph{检索。}基于 BM25~\cite{bm25} 的稀疏检索仍是很强的基线；Sentence-BERT~\cite{sbert} 这类稠密双编码器（配合 MiniLM~\cite{minilm}）能捕捉同义改写，并可用 FAISS~\cite{faiss} 高效检索。倒数排名融合~\cite{rrf} 无需校准分数即可合并排序；在 MS MARCO~\cite{msmarco,nogueira2019} 上训练的交叉编码器是常用的二阶段重排器。BEIR~\cite{beir} 表明 BM25 在跨领域场景下仍难以超越，E1 的结果也印证了这一点。BGE~\cite{bge} 等更大的编码器在嵌入基准上得分更高，HyDE~\cite{hyde} 则用 LLM 写出的假想答案来扩展查询。我们保留 MiniLM，因为 \num{529031} 个句子必须在笔记本上完成编码；查询扩展基于固定的分类体系而不是 LLM，扩展内容可检查，而且每次查询不增加模型调用。我们用 NDCG~\cite{ndcg} 及相关排序感知指标评估。
+\paragraph{检索。}基于 BM25~\cite{bm25} 的稀疏检索仍是很强的基线；Sentence-BERT~\cite{sbert} 这类稠密双编码器（配合 MiniLM~\cite{minilm}）能捕捉同义改写，并可用 FAISS~\cite{faiss} 高效检索。倒数排名融合~\cite{rrf} 无需校准分数即可合并排序；在 MS MARCO~\cite{msmarco,nogueira2019} 上训练的交叉编码器是常用的二阶段重排器。BEIR~\cite{beir} 发现 BM25 是稳健的零样本基线，稠密检索器在跨领域场景下常常达不到它的水平，E1 中也是如此（NDCG@10：BM25 为 0.790，MiniLM 为 0.686）。BGE~\cite{bge} 等较新的编码器在 MTEB 嵌入基准上达到最优水平，HyDE~\cite{hyde} 则用 LLM 写出的假想文档的向量代替查询向量来检索。我们保留 MiniLM，因为 \num{529031} 个句子必须在笔记本上完成编码；查询扩展基于固定的分类体系而不是 LLM，扩展内容可检查，而且每次查询不增加模型调用。我们用 NDCG~\cite{ndcg} 及相关排序感知指标评估。
 
-\paragraph{方面级情感分析。}方面级情感分析~\cite{pontiki2014,zhang2023absasurvey} 经历了从 SenticNet~\cite{senticnet} 等词典与规则系统，到微调 Transformer~\cite{xu2019bert}，再到 InstructABSA~\cite{instructabsa} 等指令微调生成模型的演进，后者在 SemEval 基准上报告了最优结果。两者都需要领域内的方面标注，而我们的八方面体系除 gold 集外没有这类标注。一项对 LLM 情感分析的系统评测~\cite{zhang2024reality} 发现：LLM 在简单极性任务上零样本表现很好，但在 ABSA 这类结构化任务上不如微调的小模型，在标注稀缺时优势最大。LLM 标注可以替代部分人工标注~\cite{gilardi2023}，知识蒸馏~\cite{hinton2015} 能把昂贵模型的能力迁移到廉价模型上；零样本 NLI~\cite{yin2019,laurer2024} 是另一种无需标注的分类方法。我们的设计正是由这些结论得出：在标注稀缺处用零样本 LLM 作教师，再蒸馏成快速学生模型来标注全库（\sref{sec:cls}），NLI 则作为判断客观句的第二意见。
+\paragraph{方面级情感分析。}方面级情感分析~\cite{pontiki2014,zhang2023absasurvey} 经历了从 SenticNet~\cite{senticnet} 等基于知识的资源，到微调 Transformer~\cite{xu2019bert}，再到 InstructABSA~\cite{instructabsa} 等指令微调生成模型的演进，后者在 SemEval 基准上报告了最优结果。两者都需要领域内的方面标注，而我们的八方面体系除 gold 集外没有这类标注。一项对 LLM 情感分析的系统评测~\cite{zhang2024reality} 发现：LLM 在极性分类等较简单的任务上表现令人满意，但在 ABSA 这类需要结构化情感输出的任务上落后于微调的小模型；而在少样本、标注稀缺的设置下，LLM 明显优于小模型。LLM 标注可以替代部分人工标注~\cite{gilardi2023}，知识蒸馏~\cite{hinton2015} 能把昂贵模型的能力迁移到廉价模型上；零样本 NLI~\cite{yin2019,laurer2023} 是另一种无需标注的分类方法。我们的设计正是由这些结论得出：在标注稀缺处用零样本 LLM 作教师，再蒸馏成快速学生模型来标注全库（\sref{sec:cls}），NLI 则作为判断客观句的第二意见。
 
-\paragraph{有据生成。}检索增强生成~\cite{rag} 让生成器以检索到的段落为条件；我们采用 RAGAS~\cite{ragas} 定义的无参考回答指标（忠实度、答案相关性、上下文精确率）。ALCE~\cite{alce} 评估带来源引用的回答，Self-RAG~\cite{selfrag} 训练生成器批判自己的检索和输出。在笔记本上的 4B 模型无法再训练生成器，所以我们在模型之外保证有据：引用必须指向已展示的证据，数字必须与程序计算的计数一致，草稿不合格时用程序生成的回答替代（\sref{sec:gen}）。
+\paragraph{有据生成。}检索增强生成~\cite{rag} 让生成器以检索到的段落为条件；RAGAS~\cite{ragas} 定义了忠实度、答案相关性和上下文相关性三项无参考指标；我们采用前两项，并把第三项改在段落层面计算，称为上下文精确率。ALCE~\cite{alce} 评估带来源引用的回答，Self-RAG~\cite{selfrag} 训练生成器批判自己的检索和输出。在笔记本上的 4B 模型无法再训练生成器，所以我们在模型之外保证有据：引用必须指向已展示的证据，数字必须与程序计算的计数一致，草稿不合格时用程序生成的回答替代（\sref{sec:gen}）。
 
 %------------------------------------------------------- 知识库 (Q1)
 \section{知识库构建}
@@ -323,7 +323,7 @@ top-$k$ 只看到最相似的句子，漏掉直接提及，结论还随 $k$ 变�
 \textbf{组件} & \textbf{是什么} & \textbf{为什么} \\
 \midrule
 LLM 教师（r36） &
-Qwen3-4B-Instruct-2507~\cite{qwen3}，4-bit MLX；r36 是我们比较过的标注配置中最好的一个。两步封闭式提示（先从八个方面中选一个，再选极性）。只有当另一个独立分类器也同意时，句子才判为客观：该分类器把 DeBERTa-v3-base 零样本 NLI~\cite{laurer2024} 与一个用弱标签训练的 MiniLM 分类头取平均。 &
+Qwen3-4B-Instruct-2507~\cite{qwen3}，4-bit MLX；r36 是我们比较过的标注配置中最好的一个。两步封闭式提示（先从八个方面中选一个，再选极性）。只有当另一个独立分类器也同意时，句子才判为客观：该分类器把 DeBERTa-v3-base 零样本 NLI~\cite{laurer2023} 与一个用弱标签训练的 MiniLM 分类头取平均。 &
 我们最准确的标注器（表~\ref{tab:cls}），但每句约 0.5\,s：标完全语料约需三天。 \\
 快速学生模型 &
 TF-IDF（1--2 元语法，\num{20000} 维特征）拼接冻结的 MiniLM 向量；每个子任务一个逻辑回归；用弱标签加教师标签训练（\sref{sec:exp-distill}）。 &
@@ -640,7 +640,7 @@ v4.1 线上版本（参照） & 54.0 & 3.9 & 0.637 & 61.1 & 56.1 & 7.4 & 0.648 \
 \subsection{E5：回答是否有据可依？（Q4）}
 \label{sec:exp-rag}
 
-我们在 20 个问题上用 RAGAS 风格的指标~\cite{ragas} 评估整个系统：\emph{忠实度}（回答中有证据支持的论断占比）、\emph{答案相关性}、\emph{上下文精确率}（展示的证据中与问题相关的占比）。评判者是本地 Qwen3-4B，使用固定评分标准；它能看到展示的证据和程序算出的评分与统计，这样正确的汇总数字不会被判为无依据。
+我们在 20 个问题上用改编自 RAGAS~\cite{ragas} 的指标评估整个系统：\emph{忠实度}（回答中有证据支持的论断占比）、\emph{答案相关性}（由评判者按 0--4 打分，而 RAGAS 用嵌入相似度计算）、\emph{上下文精确率}（展示的段落中与问题相关的占比，相当于段落层面的 RAGAS 上下文相关性）。评判者是本地 Qwen3-4B，使用固定评分标准；它能看到展示的证据和程序算出的评分与统计，这样正确的汇总数字不会被判为无依据。
 
 \begin{table}[t]
 \centering\small

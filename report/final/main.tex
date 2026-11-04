@@ -167,27 +167,30 @@ Q5 & Downstream innovations; ablation studies & \S\ref{sec:gen}, \S\ref{sec:exp-
 \paragraph{Retrieval.} Sparse retrieval with BM25~\cite{bm25} remains a strong baseline; dense bi-encoders such as
 Sentence-BERT~\cite{sbert} with MiniLM~\cite{minilm} capture paraphrases and are searched efficiently with
 FAISS~\cite{faiss}. Reciprocal rank fusion~\cite{rrf} combines rankings without calibrating scores, and cross-encoders
-trained on MS MARCO~\cite{msmarco,nogueira2019} are the usual second-stage rerankers. BEIR~\cite{beir} showed that
-BM25 stays hard to beat out of domain, which E1 confirms. Larger encoders such as BGE~\cite{bge} score higher on
-embedding benchmarks, and HyDE~\cite{hyde} expands a query with an LLM-written hypothetical answer. We keep MiniLM
+trained on MS MARCO~\cite{msmarco,nogueira2019} are the usual second-stage rerankers. BEIR~\cite{beir} found BM25
+a robust zero-shot baseline that dense retrievers often fail to match out of domain, as in E1 (NDCG@10 0.790 for
+BM25 against 0.686 for MiniLM). Newer encoders such as BGE~\cite{bge} reach state-of-the-art scores on the MTEB
+embedding benchmark, and HyDE~\cite{hyde} retrieves with the embedding of an LLM-written hypothetical document instead
+of the query. We keep MiniLM
 because \num{529031} sentences must be encoded on a laptop, and expand queries from a fixed taxonomy instead of an LLM:
 the expansion is inspectable and adds no model call per query. We evaluate with NDCG~\cite{ndcg} and related
 rank-aware metrics.
 
 \paragraph{Aspect-based sentiment.} Aspect-based sentiment analysis~\cite{pontiki2014,zhang2023absasurvey} has moved
-from lexicon and rule systems such as SenticNet~\cite{senticnet} to fine-tuned transformers~\cite{xu2019bert} and
+from knowledge-based resources such as SenticNet~\cite{senticnet} to fine-tuned transformers~\cite{xu2019bert} and
 instruction-tuned generators such as InstructABSA~\cite{instructabsa}, which report state-of-the-art results on SemEval benchmarks. Both need
 in-domain aspect labels, which our eight-aspect scheme does not have beyond the gold set. A systematic study of LLMs for
-sentiment~\cite{zhang2024reality} found them strong zero-shot on simple polarity but behind fine-tuned small models on
-structured tasks such as ABSA, and strongest when labels are scarce. LLM labels can replace part of the human
+sentiment~\cite{zhang2024reality} found that they perform satisfactorily on simpler tasks such as polarity classification but lag
+behind small fine-tuned models on tasks that need structured sentiment output, such as ABSA, while clearly
+outperforming them in few-shot settings, where labels are scarce. LLM labels can replace part of the human
 annotation effort~\cite{gilardi2023}, and knowledge distillation~\cite{hinton2015} transfers an expensive model's
-behaviour into a cheaper one; zero-shot NLI~\cite{yin2019,laurer2024} is another label-free classifier. Our design
+behaviour into a cheaper one; zero-shot NLI~\cite{yin2019,laurer2023} is another label-free classifier. Our design
 follows from these results: a zero-shot LLM teacher, where labels are scarce, distilled into a fast student for the
 whole corpus (\cref{sec:cls}), with NLI as a second opinion on objectivity.
 
 \paragraph{Grounded generation.} Retrieval-augmented generation~\cite{rag} conditions a generator on retrieved
-passages; RAGAS~\cite{ragas} defines reference-free answer metrics (faithfulness, answer relevance, context
-precision) that we adopt. ALCE~\cite{alce} evaluates answers that cite their sources, and Self-RAG~\cite{selfrag}
+passages; RAGAS~\cite{ragas} defines reference-free metrics for faithfulness, answer relevance and
+context relevance; we adopt the first two and measure the third at passage level as context precision. ALCE~\cite{alce} evaluates answers that cite their sources, and Self-RAG~\cite{selfrag}
 trains the generator to critique its own retrieval and output. Training a generator is out of reach for a laptop 4B
 model, so we enforce grounding outside it: citations must point to displayed evidence, numbers must match
 program-computed counts, and a program-written answer replaces a draft that fails (\cref{sec:gen}).
@@ -419,7 +422,7 @@ symbolic--subsymbolic design.
 \textbf{Component} & \textbf{What it is} & \textbf{Why} \\
 \midrule
 LLM teacher (r36) &
-Qwen3-4B-Instruct-2507~\cite{qwen3}, 4-bit MLX; r36 is the best of the labelling configurations we compared. Two-step closed-choice prompts (one of eight aspects, then a polarity). A sentence is objective only if an independent classifier agrees: zero-shot NLI with DeBERTa-v3-base~\cite{laurer2024}, averaged with a MiniLM head trained on weak labels. &
+Qwen3-4B-Instruct-2507~\cite{qwen3}, 4-bit MLX; r36 is the best of the labelling configurations we compared. Two-step closed-choice prompts (one of eight aspects, then a polarity). A sentence is objective only if an independent classifier agrees: zero-shot NLI with DeBERTa-v3-base~\cite{laurer2023}, averaged with a MiniLM head trained on weak labels. &
 Most accurate labeller we have (\cref{tab:cls}), but $\approx$0.5\,s per sentence: about three days for the corpus. \\
 Fast student &
 TF-IDF (1--2-grams, \num{20000} features) concatenated with frozen MiniLM embeddings; one logistic regression per task; trained on weak labels plus teacher labels (\cref{sec:exp-distill}). &
@@ -870,9 +873,10 @@ diagnostic classifier (TF-IDF and logistic regression).
 \subsection{E5: Are the answers grounded? (Q4)}
 \label{sec:exp-rag}
 
-We evaluate the whole system on the 20 questions with RAGAS-style metrics~\cite{ragas}: \emph{faithfulness} (share of
-answer claims supported by evidence), \emph{answer relevance} and \emph{context precision} (share of displayed evidence
-relevant to the question). The judge is the local Qwen3-4B with a fixed rubric; it sees the displayed evidence and the
+We evaluate the whole system on the 20 questions with metrics adapted from RAGAS~\cite{ragas}: \emph{faithfulness}
+(share of answer claims supported by evidence), \emph{answer relevance} (rated 0--4 by the judge, whereas RAGAS derives
+it from embedding similarity) and \emph{context precision} (share of displayed passages relevant to the question, a
+passage-level version of RAGAS's context relevance). The judge is the local Qwen3-4B with a fixed rubric; it sees the displayed evidence and the
 program-computed ratings and tallies, so correct aggregate numbers are not marked unsupported.
 
 \begin{table}[t]
