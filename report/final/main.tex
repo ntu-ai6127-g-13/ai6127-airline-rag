@@ -83,9 +83,9 @@
 \author{%
 \begin{tabular}{@{}c@{\hspace{2.2em}}c@{\hspace{2.2em}}c@{}}
 Ren Xinghan & Sun Sijie & Zhang Yuxuan \\
-\small Matric.\ No.\ \tbd{to fill} & \small Matric.\ No.\ \tbd{to fill} & \small Matric.\ No.\ G2606145J \\[6pt]
+\small Matric.\ No.\ \tbd{to fill} & \small Matric.\ No.\ G2600457L & \small Matric.\ No.\ G2606145J \\[6pt]
 Zhu Jindou & Guo Tailai & Sun Yuxin \\
-\small Matric.\ No.\ \tbd{to fill} & \small Matric.\ No.\ \tbd{to fill} & \small Matric.\ No.\ \tbd{to fill} \\
+\small Matric.\ No.\ \tbd{to fill} & \small Matric.\ No.\ G2602966F & \small Matric.\ No.\ \tbd{to fill} \\
 \end{tabular}\\[10pt]
 AI6127 Deep Neural Networks for NLP\,---\,Group 13\\
 Nanyang Technological University}
@@ -406,7 +406,7 @@ symbolic--subsymbolic design.
 \textbf{Component} & \textbf{What it is} & \textbf{Why} \\
 \midrule
 LLM teacher (r36) &
-Qwen3-4B-Instruct-2507~\cite{qwen3}, 4-bit MLX; r36 is the best of the labelling configurations we compared. Two-step closed-choice prompts (one of eight aspects, then a polarity). A sentence is objective only if an independent NLI-based classifier agrees. &
+Qwen3-4B-Instruct-2507~\cite{qwen3}, 4-bit MLX; r36 is the best of the labelling configurations we compared. Two-step closed-choice prompts (one of eight aspects, then a polarity). A sentence is objective only if an independent classifier agrees: zero-shot NLI with DeBERTa-v3-base~\cite{laurer2024}, averaged with a MiniLM head trained on weak labels. &
 Most accurate labeller we have (\cref{tab:cls}), but $\approx$0.5\,s per sentence: about three days for the corpus. \\
 Fast student &
 TF-IDF (1--2-grams, \num{20000} features) concatenated with frozen MiniLM embeddings; one logistic regression per task; trained on weak labels plus teacher labels (\cref{sec:exp-distill}). &
@@ -421,7 +421,7 @@ Fluent answers to multi-constraint questions, no API cost, no data leaving the m
 \paragraph{Weak supervision.} A sentence that mentions exactly one aspect, according to keyword rules, inherits that
 aspect's 1--5 rating (4--5 positive, 1--2 negative, 3 dropped). This yields \num{231779} training and \num{58220}
 development sentences, split by parent review, with all gold sentences, their reviews and identical texts excluded
-(overlap verified to be zero). Weak labels are noisy and contain only 221 objective examples, which is why weak-only
+(overlap verified to be zero). Weak labels are noisy and contain only 221 objective examples (179 in the training split), which is why weak-only
 models rarely predict ``objective''.
 
 \paragraph{Preprocessing.} The cleaning of \cref{sec:kb} matters as much for classification as for retrieval: broken
@@ -519,7 +519,9 @@ the weak-label source. A written guideline fixed edge cases such as mixed sentim
 sentences are objective. Across all \num{1100} labelled sentences, the two tasks the brief requires, subjectivity and
 polarity, still exceed 80\%, but aspect agreement is 75.2\%: the 100 sentences left out include 15 that the guideline
 drops as unclear and 52 on which the three annotators chose three different aspects. Disagreements were resolved by majority vote, then by AI-assisted adjudication confirmed one by one by a
-human reviewer, who changed 9 sentences. The set has 548 negative, 371 positive and 81 objective sentences, no
+human reviewer, who changed 9 sentences. Sampling balanced the review scores (502 vs.\ 498 sentences) but not the labels: 143 sentences from high-scoring reviews
+are complaints, while only 49 from low-scoring reviews are praise. We kept this natural skew rather than resample after
+labelling, and report macro and per-class scores. The set has 548 negative, 371 positive and 81 objective sentences, no
 duplicate texts, and is stored as \nolinkurl{data/eval/eval.xls} in standard benchmark format (Appendix~\ref{app:eval}).
 
 \begin{table}[t]
@@ -805,7 +807,7 @@ sample), and 32\% of aspect and 24\% of polarity labels change. The student rema
 
 \paragraph{Status.} Because a third of the labels change, the interface switches to the new index only after the
 downstream statistics are re-run; E5 and E6 below were produced with the v4.1 labels, and E7 uses a separate
-diagnostic classifier.
+diagnostic classifier (TF-IDF and logistic regression).
 
 \subsection{E5: Are the answers grounded? (Q4)}
 \label{sec:exp-rag}
@@ -969,8 +971,8 @@ Z: direction guard vs.\ citation check only (wrong-direction answers rejected) &
 
 Sentence metrics measure local predictions and faithfulness measures grounding; neither shows whether opinion mined
 from text preserves the comparisons users make between airlines. We therefore rank airlines on economy seat experience
-twice. The \emph{text rank} uses a dedicated diagnostic classifier that finds subjective seat sentences and predicts
-their polarity; each review's share of positive sentences is averaged per airline, so every review has equal weight.
+twice. The \emph{text rank} uses a dedicated diagnostic classifier (TF-IDF 1--2-grams and logistic regression, retrained on weak
+labels without the held-out reviews) that finds subjective seat sentences and predicts their polarity; each review's share of positive sentences is averaged per airline, so every review has equal weight.
 The \emph{reference rank} is the airline's mean \texttt{seat\_comfort} rating over held-out reviews. About 20\% of parent
 reviews were held out by a fixed hash of the review ID; training excluded them, their normalised texts and the reviews
 of the \num{1100} labelled sentences (audited overlap zero), and the predictions were frozen and hashed before the
