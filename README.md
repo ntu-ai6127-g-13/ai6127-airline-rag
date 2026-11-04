@@ -122,8 +122,8 @@ ones resume from checkpoints, so replay into a new directory name. Commands are 
 | Q3, E1b | Retrieval innovations added one at a time (LLM-judged relevance; needs the model server) | `experiments/final_auto_eval/retrieval_ablation.py` | `outputs/retrieval_ablation_20261104/` |
 | Q4, E3 | Classifier quality on the gold set | `experiments/distilled_label_index/evaluate_gold.py` | `outputs/distill_gold_audit_20261029/` |
 | Q5, E4 | LLM-to-student distillation | `experiments/distilled_label_index/` | `outputs/distill_*_20261029/`, `outputs/label_index_20261029_distilled/` |
-| Q5, E6 | Factorial ablation of X/Y/Z, targeted checks | `experiments/downstream_evaluation/`, `experiments/final_auto_eval/run.py` | see release notes |
-| Q5, E7 | Airline ranking vs. held-out ratings | `python -m experiments.downstream_evaluation.ranking` | see release notes |
+| Q5, E6 | Factorial ablation of X/Y/Z (needs the model server); targeted checks | `experiments/downstream_evaluation/factorial.py`, `experiments/final_auto_eval/run.py` | `outputs/q5_factorial_20261104/`, `outputs/final_auto_eval_20261019_v2/` |
+| Q5, E7 | Airline ranking vs. held-out ratings | `python -m experiments.downstream_evaluation.freeze`, then `.ranking` | `outputs/q5_protocol_20261104/`, `outputs/q5_ranking_20261104/` |
 
 ## 7. Repository layout
 

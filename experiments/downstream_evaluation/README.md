@@ -89,6 +89,27 @@ Context Precision 的总体代理均值为 0.7583（10 个有展示证据的题�
 
 未填写的记录不会计为成功；已填子集的分数不会自动当成整套验收。历史机器评委与人评偏差的比较需要先有人评，当前仍待完成。
 
+## E6 回答端 2×2×2 析因消融（`factorial.py`）
+
+报告 E6 的三个因素：X 全量统计（完整直接匹配池的标签计数与由此得出的总体方向，同时用于生成、校验和程序回退）、
+Y 正反平衡且标签与措辞一致的示例、Z 校验 + 一次修复 + 程序回退。八种配置共享每题同一个 30 条候选池
+（排序不使用标签）、同一提示词和 4 条引用预算；X 关闭时提示词、校验和回退都看不到全量统计；
+Y 关闭时取候选池前 4 条；Z 关闭时直接返回初稿。每个 X/Y 组合一份初稿，由 Z 开/关共用。
+20 道题来自 `data/eval/query_smoke_40_20261019.json` 的 Q01–Q20，改写为固定英文句式并检查解析结果与原题的航司、舱位、细分项一致。
+生成与评委都是本机 MLX 版 Qwen3-4B（4-bit），评委沿用 `experiments/final_rag_eval/run.py` 的 `judge()`，
+每种配置给评委相同的程序统计。所有模型调用和评分写入缓存，中断后用同一命令续跑。
+
+```bash
+outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py   # 127.0.0.1:8765
+.venv/bin/python -u experiments/downstream_evaluation/factorial.py \
+  --output-dir outputs/q5_factorial_replay
+```
+
+输出：`protocol.json`（题目与配置）、`pools.json`（候选池与全量统计）、`model_calls.jsonl`、`judgements.jsonl`、
+`answers.jsonl`（初稿、校验原因、修复稿、最终回答、评分）、`per_answer.csv` 和 `results.json`
+（各配置均值、相对基线的配对差值、主效应与交互效应，均为以题目为单位的 2,000 次 bootstrap，种子 6127）。
+报告数字来自 `outputs/q5_factorial_20261104/`。读 `per_answer.csv` 时用 `dtype={'config': str}`，以保留 `000` 这类编码的前导零。
+
 ## C10 评分隔离排名
 
 ```bash
@@ -107,8 +128,10 @@ Context Precision 的总体代理均值为 0.7583（10 个有展示证据的题�
 经济舱航司纳入条件预先设为至少 30 条参照评分、15 条可预测评论；固定纳入集合后，进行 2,000 次航司内父评论配对重采样。
 并列分数使用平均名次；覆盖数、未纳入航司及区间有效次数都会输出。
 
-本轮实际结果保存在 `outputs/c_q5_ranking_20261024_v1/report.json`：58 家航司，Spearman 0.8095，
-95% 区间 [0.6820, 0.8379]；8,365 条留出评分评论中，3,152 条有可用座位情感预测。
+报告 E7 使用 2026-11-04 在 Apple M1 Pro 上的重跑：协议 `outputs/q5_protocol_20261104/`，结果
+`outputs/q5_ranking_20261104/report.json`：58 家航司，Spearman 0.8056，95% 区间 [0.6749, 0.8329]；
+8,365 条留出评分评论中，3,154 条有可用座位情感预测。（2026-10-24 在 Linux 上的首次运行为 0.8095 [0.6820, 0.8379]、3,152 条。）
+`freeze.py` 读取 `outputs/minimal_rag_models.json` 记录模型版本；Mac 上该文件记录 MLX 4-bit 生成模型，需手动创建或由 `scripts/setup_rag_models.py` 生成。
 区间反映固定航司集合内的评论采样不确定性，不包含重新训练的模型不确定性。
 它评估的是隔离的文本分类—评论聚合—航司排名分支，不代表当前 UI 使用原始评分的排名，也不检验细分腿部空间的绝对真值。
 
