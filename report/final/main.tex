@@ -110,8 +110,8 @@ labels distilled from an LLM raises three-class macro-F1 on our \num{1000}-sente
 by 7.4 points (CI $[+4.5,+10.4]$), while relabelling the whole corpus in 18\,s. On 20 end-to-end questions the guarded
 system scores 0.84 faithfulness and 0.99 answer relevance, with 16 of the 20 final answers written by the program
 fallback. A full factorial ablation of the three answer-side
-components (160 answers) finds balanced evidence plus validation the most faithful configuration ($+0.053$, CI
-$[+0.004,+0.106]$) and shows that their gains are not additive. Text-derived airline rankings agree with
+components (160 answers) finds that validation with a program-written fallback is the only component that clearly
+raises faithfulness ($+0.080$ alone, CI $[+0.041,+0.123]$) and that the gains are not additive. Text-derived airline rankings agree with
 held-out passenger ratings (Spearman $\rho=0.81$ over 58 airlines). Everything runs locally at zero API cost.
 \end{abstract}
 
@@ -520,7 +520,7 @@ a retrieval time of 4.4\,s (a separate run from \cref{tab:five}).}
 \subsection{Setup and evaluation data}
 \label{sec:data}
 
-E1--E5 and E8 run on an Apple M1 Pro (16\,GB); E6 and E7 ran on a Linux machine with an AMD Radeon RX 7800 XT.
+All experiments run on an Apple M1 Pro (16\,GB).
 Intervals are 95\% bootstrap intervals at the query, question or parent-review level (\num{10000} resamples for E1 and
 E5, \num{2000} for E4, E6 and E7). The evaluation data are: 30 airline $\times$ sub-attribute retrieval units
 (E1); 20 fixed end-to-end questions written in Chinese (12 single-airline, 5 comparisons, 3 multi-aspect; E2, E5);
@@ -904,33 +904,35 @@ The brief asks for the gain of each innovation alone and in combination. We ther
 ablation of the three factors of \cref{sec:gen}: X (full-pool statistics), Y (balanced, label-consistent examples) and
 Z (validation, one repair, program-written fallback).
 
-\paragraph{Protocol.} We use 20 English single-airline, single-attribute questions from the development smoke set
-(Appendix~\ref{app:factorial}), fixed before scoring. Each question has a frozen pool of up to 30 candidates ranked
-without labels; all eight configurations share the pool, the prompt and a budget of four citations. With X off,
-corpus counts and the overall direction are hidden from generation, validation and fallback; with Y off, the top four
-candidates are used; with Z off, the model's draft is returned unchecked. Qwen3-4B-Instruct-2507 (BF16, Transformers
-backend on an AMD Radeon RX 7800 XT) both generates and judges, using the metrics of E5 with answer relevance scored
-0--4 and rescaled. Each question gets one draft per X/Y setting, shared by its Z-off and Z-on variants, so the run produced 80 drafts,
-54 repair attempts and 160 final answers. Intervals come from 2,000
-paired bootstrap resamples over questions (seed 6127), without multiple-comparison adjustment.
+\paragraph{Protocol.} We use the 20 single-airline, single-attribute questions Q01--Q20 of the development smoke set,
+rewritten in a fixed English form (Appendix~\ref{app:factorial}) and fixed before scoring. Each question has a frozen
+pool of 30 candidates ranked without labels; all eight configurations share the pool, the prompt and a budget of four
+citations. With X off, the full-pool tally and the overall direction are hidden from generation, validation and
+fallback (the prompt rule that refers to them is replaced by one asking the model to describe the displayed evidence);
+with Y off, the top four candidates are used; with Z off, the model's draft is returned unchecked. The deployed
+Qwen3-4B-Instruct-2507 (4-bit, MLX) both generates and judges, using the judge of E5, which receives the same program
+statistics in every configuration. Each question gets one draft per X/Y setting, shared by its Z-off and Z-on
+variants, so the run produced 80 drafts, 64 repair attempts and 160 final answers (144 distinct, each judged once).
+Intervals come from 2,000 paired bootstrap resamples over questions (seed 6127), without multiple-comparison
+adjustment.
 
 \begin{table*}[t]
 \centering\small
 \caption{E6: factorial ablation (20 questions per configuration). Code XYZ, 1 = component on. $\Delta$: paired difference
-in faithfulness against the baseline, with 95\% bootstrap interval.}
+in faithfulness against the baseline, with 95\% bootstrap interval. Answer relevance was 1.000 for all 160 answers.}
 \label{tab:factorial}
 \begin{tabular}{@{}llrlrr@{}}
 \toprule
-\textbf{Code} & \textbf{Configuration} & \textbf{Faithfulness} & \textbf{$\Delta$ vs.\ baseline [95\% CI]} & \textbf{Answer rel.} & \textbf{Context prec.} \\
+\textbf{Code} & \textbf{Configuration} & \textbf{Faithfulness} & \textbf{$\Delta$ vs.\ baseline [95\% CI]} & \textbf{Context prec.} & \textbf{Citations} \\
 \midrule
-000 & Baseline & 0.887 & -- & \best{1.000} & 0.808 \\
-100 & X only & 0.860 & $-0.028$ [$-0.078$, $+0.024$] & 0.988 & 0.808 \\
-010 & Y only & 0.918 & $+0.031$ [$-0.029$, $+0.088$] & \best{1.000} & \best{0.871} \\
-001 & Z only & 0.917 & $+0.030$ [$+0.003$, $+0.063$] & \best{1.000} & 0.808 \\
-110 & X + Y & 0.902 & $+0.014$ [$-0.031$, $+0.061$] & \best{1.000} & 0.854 \\
-101 & X + Z & 0.868 & $-0.020$ [$-0.080$, $+0.039$] & 0.925 & 0.808 \\
-\rowcolor{shade} 011 & Y + Z & \best{0.940} & $+0.053$ [$+0.004$, $+0.106$] & 0.975 & \best{0.871} \\
-111 & X + Y + Z (deployed) & 0.885 & $-0.002$ [$-0.074$, $+0.065$] & 0.975 & 0.854 \\
+000 & Baseline & 0.890 & -- & 0.963 & 3.35 \\
+100 & X only & 0.841 & $-0.049$ [$-0.103$, $+0.007$] & 0.913 & 3.25 \\
+010 & Y only & 0.874 & $-0.016$ [$-0.079$, $+0.046$] & 0.925 & 3.45 \\
+\rowcolor{shade} 001 & Z only & \best{0.970} & $+0.080$ [$+0.041$, $+0.123$] & \best{0.988} & 3.90 \\
+110 & X + Y & 0.846 & $-0.045$ [$-0.097$, $+0.011$] & 0.925 & 3.10 \\
+101 & X + Z & 0.869 & $-0.022$ [$-0.077$, $+0.034$] & 0.813 & 3.10 \\
+011 & Y + Z & 0.943 & $+0.053$ [$-0.012$, $+0.112$] & 0.950 & 3.50 \\
+111 & X + Y + Z (deployed) & 0.869 & $-0.022$ [$-0.070$, $+0.027$] & 0.938 & 3.55 \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -939,7 +941,7 @@ in faithfulness against the baseline, with 95\% bootstrap interval.}
 \centering
 \begin{tikzpicture}
 \begin{axis}[paper, width=0.74\columnwidth, height=50mm,
-  xmin=-0.1, xmax=0.13, ymin=0.4, ymax=7.6, ytick={1,2,3,4,5,6,7}, y dir=reverse,
+  xmin=-0.12, xmax=0.14, ymin=0.4, ymax=7.6, ytick={1,2,3,4,5,6,7}, y dir=reverse,
   yticklabels={X only, Y only, Z only, X + Y, X + Z, Y + Z, X + Y + Z},
   ymajorgrids=false, xmajorgrids, xlabel={$\Delta$ faithfulness vs.\ baseline (95\% CI)},
   xtick={-0.1,-0.05,0,0.05,0.1}, scaled x ticks=false,
@@ -947,13 +949,13 @@ in faithfulness against the baseline, with 95\% bootstrap interval.}
   extra x ticks={0}, extra x tick labels={}, extra x tick style={grid style={draw=black, line width=0.6pt}}]
 \addplot[only marks, mark=*, mark size=2.2pt, color=s1, mark options={draw=white},
   error bars/.cd, x dir=both, x explicit, error bar style={draw=s1, line width=1.1pt}, error mark options={draw=s1, line width=1.1pt, mark size=2.2pt, rotate=90}]
-  coordinates {(-0.0278,1) -= (0.0505,0) += (0.0516,0)  (0.0305,2) -= (0.0597,0) += (0.0577,0)  (0.0301,3) -= (0.0275,0) += (0.0328,0)
-               (0.0143,4) -= (0.0454,0) += (0.0463,0)  (-0.0198,5) -= (0.0601,0) += (0.0591,0)  (0.0530,6) -= (0.0494,0) += (0.0525,0)
-               (-0.0023,7) -= (0.0716,0) += (0.0670,0)};
+  coordinates {(-0.0489,1) -= (0.0543,0) += (0.0560,0)  (-0.0163,2) -= (0.0628,0) += (0.0618,0)  (0.0796,3) -= (0.0385,0) += (0.0433,0)
+               (-0.0446,4) -= (0.0526,0) += (0.0557,0)  (-0.0218,5) -= (0.0553,0) += (0.0554,0)  (0.0530,6) -= (0.0651,0) += (0.0588,0)
+               (-0.0218,7) -= (0.0479,0) += (0.0490,0)};
 \end{axis}
 \end{tikzpicture}
 \caption{E6: faithfulness of each configuration relative to the baseline (data of \cref{tab:factorial}). Only Z alone
-and Y + Z have intervals entirely above zero.}
+has an interval entirely above zero.}
 \label{fig:factorial}
 \end{figure}
 
@@ -961,39 +963,44 @@ and Y + Z have intervals entirely above zero.}
 \centering\small
 \caption{E6: main and interaction effects (20 paired questions). A main effect is the on-minus-off difference averaged
 over the four settings of the other two factors; XY is the difference between X's effect with Y on and off, averaged
-over Z, and XYZ the difference between the XY interactions with Z on and off.}
+over Z, and XYZ the difference between the XY interactions with Z on and off. Context precision is judged with the
+answer in view, so it moves even where the displayed evidence is the same.}
 \label{tab:effects}
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrlrr@{}}
+\begin{tabular}{@{}lrlr@{}}
 \toprule
-\textbf{Effect} & \multicolumn{2}{c}{\textbf{Faithfulness [95\% CI]}} & \textbf{Rel.} & \textbf{Ctx.} \\
+\textbf{Effect} & \multicolumn{2}{c}{\textbf{Faithfulness [95\% CI]}} & \textbf{Context prec.} \\
 \midrule
-X & $-0.037$ & [$-0.075$, $+0.001$] & $-0.022$ & $-0.008$ \\
-Y & $+0.028$ & [$-0.002$, $+0.059$] & $+0.009$ & $+0.054$ \\
-Z & $+0.011$ & [$-0.015$, $+0.035$] & $-0.028$ & $0.000$ \\
-XY & $+0.003$ & [$-0.072$, $+0.070$] & $+0.044$ & $-0.017$ \\
-XZ & $-0.031$ & [$-0.076$, $+0.017$] & $-0.031$ & $0.000$ \\
-YZ & $-0.016$ & [$-0.069$, $+0.035$] & $+0.006$ & $0.000$ \\
-XYZ & $-0.017$ & [$-0.097$, $+0.060$] & $+0.063$ & $0.000$ \\
+X & $-0.063$ & [$-0.099$, $-0.026$] & $-0.059$ \\
+Y & $-0.010$ & [$-0.040$, $+0.017$] & $+0.016$ \\
+Z & $+0.050$ & [$+0.027$, $+0.073$] & $-0.009$ \\
+XY & $+0.024$ & [$-0.029$, $+0.078$] & $+0.106$ \\
+XZ & $-0.050$ & [$-0.112$, $+0.012$] & $-0.069$ \\
+YZ & $-0.007$ & [$-0.056$, $+0.044$] & $+0.056$ \\
+XYZ & $+0.006$ & [$-0.069$, $+0.076$] & $+0.113$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Results.} Y + Z is the most faithful configuration, 0.940, $+0.053$ over the baseline (CI $[+0.004,+0.106]$),
-and Z alone is also positive ($+0.030$, $[+0.003,+0.063]$) (\cref{tab:factorial,fig:factorial}). Y alone keeps answer
-relevance at 1.000 and raises context precision from 0.808 to 0.871 while using fewer citations (3.50 vs.\ 3.95 on
-average). The deployed configuration, X + Y + Z, is level with the baseline on faithfulness ($-0.002$) and X + Z lowers
-answer relevance the most ($-0.075$, $[-0.125,-0.025]$). Averaged over the other factors (\cref{tab:effects}), Y has the
-largest positive main effect, Z a small positive one and X a negative one; all three intervals include zero and the
-largest interaction is XZ. The gains are therefore not additive (all three together are level with the baseline),
-although with 20 questions no single interaction is significant. X is partly penalised by construction: it
-adds aggregate claims that the judge must verify, whereas an answer that only paraphrases quotations has little to get
-wrong. Faithfulness measures how the answer uses its context, not whether the overall opinion summary is right, which
-is what X is for; the targeted checks below measure that directly.
+\paragraph{Results.} Z alone is the most faithful configuration, 0.970, $+0.080$ over the baseline (CI
+$[+0.041,+0.123]$), and the only one whose interval lies above zero; Y + Z follows at 0.943 ($+0.053$,
+$[-0.012,+0.112]$) (\cref{tab:factorial,fig:factorial}). The deployed X + Y + Z is slightly below the baseline
+($-0.022$). Averaged over the other factors (\cref{tab:effects}), Z has a clear positive main effect ($+0.050$) and X a
+clear negative one ($-0.063$); Y's is close to zero. The largest interaction is XZ ($-0.050$, interval including zero):
+most of Z's gain disappears when X is on, so the gains are not additive. X is penalised largely by construction: it
+adds aggregate claims that the judge must verify (5.4 claims per answer with X on against 4.9 off), whereas an answer
+that only paraphrases quotations has little to get wrong. Faithfulness measures how the answer uses its context, not
+whether the overall opinion summary is right, which is what X is for; the targeted checks below measure that directly.
+Answer relevance does not separate the configurations (all 1.000), and Y shows fewer candidates on average (3.70 vs.\
+3.95) because some pools lack a counter-example. An earlier run of the same design with BF16 weights on a Linux GPU
+also found Z positive and X negative but ranked Y + Z first, so the order of the top configurations is not stable
+across weight precisions.
 
-\paragraph{Cost.} Z relies heavily on its fallback: of the 80 Z-on answers, 26 used the first draft, 7 the repair and
-47 the program-written answer, and with X on every question triggered a repair. Median generation time is 9.78\,s for
-X + Y + Z against 4.83\,s for the baseline and 4.20\,s for Y alone (shared retrieval and judging excluded).
+\paragraph{Cost.} Z relies almost entirely on its fallback: 64 of the 80 Z-on drafts were rejected (32 with X on and 32
+without), only 2 repairs passed, and 62 answers were written by the program. Program-written answers scored 0.930
+faithfulness against 0.846 for accepted drafts, so Z's gain is mostly the gain of replacing the model's prose. 22 of
+the 64 rejections were for format alone (a missing sub-attribute name or an uncited paragraph). Median generation time
+is 14.69\,s for X + Y + Z against 7.98\,s for the baseline and 6.29\,s for Y alone (shared retrieval and judging
+excluded).
 
 \paragraph{Targeted checks.} The factorial run scores final answers. Earlier checks (\cref{tab:ablation}) measured each
 component on the failure it was designed to fix, over 18 airline $\times$ sub-attribute cases with a clear full-pool
@@ -1038,14 +1045,14 @@ held-out ratings were read. An airline needs at least 30 reference and 15 predic
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth, trim=0 0 0 46, clip]{figures/airline_rank_agreement.png}
+\includegraphics[width=\columnwidth, ]{figures/airline_rank_agreement.png}
 \caption{E7: text-predicted vs.\ held-out rating rank for 58 airlines (1 = best); the dashed line marks equal ranks.
-Spearman $\rho=0.810$, 95\% CI $[0.682, 0.838]$.}
+Spearman $\rho=0.806$, 95\% CI $[0.675, 0.833]$.}
 \label{fig:rank}
 \end{figure}
 
 \paragraph{Results.} 58 airlines qualify. The held-out reference set holds \num{8365} reviews with a valid seat
-rating, \num{3152} of them with a usable text prediction. The rankings agree closely: Spearman $\rho=0.810$, 95\% CI $[0.682,0.838]$, from 2,000
+rating, \num{3154} of them with a usable text prediction. The rankings agree closely: Spearman $\rho=0.806$, 95\% CI $[0.675,0.833]$, from 2,000
 paired resamples of parent reviews over the fixed airline set (\cref{fig:rank}). Opinion mined from text and aggregated
 per review therefore preserves clear differences between airlines, which supports using it for comparison questions.
 The rating is a reference for overall seat comfort, not a gold standard for each sub-attribute, and the interval does
@@ -1090,14 +1097,15 @@ program-only path is a usable fallback under load.
 \label{sec:disc}
 
 \paragraph{Automatic judges.} Retrieval relevance and RAG metrics are automatic, and the RAG judge is the generator
-itself. An audit of the E6 judgements found 70 of 134 cached answer scorings listing more unsupported examples than the
-number of unsupported claims they counted, and reordering the same passages changed context precision for one
-question; bootstrap intervals do not capture such judge error. Human relevance judgements and blind human review of the
+itself. In E6 the judge gave every answer full relevance, so that metric carried no signal, and context
+precision changed between configurations that displayed the same passages, because the judge sees the answer when it
+rates them; bootstrap intervals do not capture such judge error. Human relevance judgements and blind human review of the
 answers, ideally with an independent judge model, would strengthen E1, E5 and E6.
 
-\paragraph{Small generator and strict checks.} 16 of 20 answers in E5 and 47 of 80 Z-on answers in E6 used the
-program-written fallback; in Q01 of E6 a repair fixed a wrong number but changed the required wording of the statistics
-sentence and was rejected. Separating semantic errors from format violations, and measuring the false-rejection rate,
+\paragraph{Small generator and strict checks.} 16 of 20 answers in E5 and 62 of 80 Z-on answers in E6 used the
+program-written fallback, and 22 of the 64 rejected E6 drafts failed on format alone. Conversely, the Q01 draft
+reported 98 positive reviews where 98 is the number of labelled reviews (78 were positive); the number check passed it
+because 98 is a permitted value, and the draft was rejected only for its format. Separating semantic errors from format violations, and measuring the false-rejection rate,
 is the next step; a larger local model or a short fine-tune on answers that passed the checks would also help.
 
 \paragraph{Classifier below target.} Aspect F1 is 70.4 against a target of 85. Since teacher labels proved more valuable
@@ -1120,10 +1128,10 @@ We built a local RAG system for airline-service questions that keeps constraints
 attributes and gives verdicts a user can verify. Four lessons stand out. First, structured constraints and
 attribute routing fixed the failing queries of \cref{tab:fixes}: hard metadata constraints alone raise NDCG@10 by 0.76
 (E1b), far more than any change of ranking model, and a general-purpose cross-encoder even hurt. Second, distilling an LLM labeller into a linear classifier recovers most of its gain in objective detection and
-about half of its gain in joint accuracy at a tiny fraction of its cost, provided selection is kept away from the test set. Third, balanced
-evidence plus validation with a program-written fallback gives the most faithful final answers (Y + Z is the best of
-eight configurations), but the gains are not additive: exact full-pool statistics fix the verdict while lowering judged
-faithfulness. Finally, airline rankings mined from text agree with held-out passenger ratings ($\rho=0.81$), which
+about half of its gain in joint accuracy at a tiny fraction of its cost, provided selection is kept away from the test set. Third, validation
+with a program-written fallback gives the most faithful final answers (Z alone is the best of eight configurations),
+but the gains are not additive: exact full-pool statistics fix the verdict while lowering judged faithfulness, and with
+a 4B generator most of Z's gain comes from replacing the model's prose. Finally, airline rankings mined from text agree with held-out passenger ratings ($\rho=0.81$), which
 supports answering comparison questions from review text.
 
 %--------------------------------------------------------------- Back matter
@@ -1183,9 +1191,10 @@ outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 .venv/bin/python -u experiments/final_auto_eval/retrieval_ablation.py \
     --output-dir outputs/retrieval_ablation_replay
 
-# factorial ablation (E6) and airline ranking (E7): Linux GPU, Transformers backend;
-# full commands in experiments/downstream_evaluation/README.md and FACTORIAL.md
-.venv/bin/python scripts/local_qa_server.py --backend transformers --device cuda
+# factorial ablation (E6; needs the model server) and airline ranking (E7);
+# details in experiments/downstream_evaluation/README.md
+.venv/bin/python -u experiments/downstream_evaluation/factorial.py \
+    --output-dir outputs/q5_factorial_replay
 P=outputs/downstream_protocol_replay
 .venv/bin/python -m experiments.downstream_evaluation.freeze --output-dir $P
 .venv/bin/python -m experiments.downstream_evaluation.ranking \
@@ -1259,21 +1268,21 @@ Q30 & 新加坡航空经济舱的餐食、性价比和地面服务分别怎么�
 Each question reads ``What do historical reviews say about [attribute] on [airline] in [cabin]?''. These IDs are
 local to E6 and unrelated to the IDs of \cref{tab:five}.
 
-\begin{center}\small
-\begin{tabular}{@{}llll@{\hspace{10mm}}llll@{}}
+\begin{center}\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llll@{\hspace{6mm}}llll@{}}
 \toprule
 \textbf{ID} & \textbf{Airline} & \textbf{Cabin} & \textbf{Attribute} & \textbf{ID} & \textbf{Airline} & \textbf{Cabin} & \textbf{Attribute} \\
 \midrule
-Q01 & Singapore Airlines & Economy & legroom & Q11 & British Airways & Prem.\ Econ. & recline / lie-flat \\
-Q02 & Air Canada rouge & Economy & legroom & Q12 & Cathay Pacific & Business & staff attitude \\
-Q03 & Spirit Airlines & Economy & baggage & Q13 & United Airlines & Economy & seat width \\
+Q01 & Singapore Airlines & Economy & legroom & Q11 & British Airways & Prem.\ Econ. & seat recline \\
+Q02 & Air Canada rouge & Economy & legroom & Q12 & Cathay Pacific & Business & cabin crew attitude \\
+Q03 & Spirit Airlines & Economy & baggage handling & Q13 & United Airlines & Economy & seat width \\
 Q04 & Alaska Airlines & Economy & delay handling & Q14 & Turkish Airlines & Economy & food quality \\
-Q05 & Emirates & Economy & refunds / changes & Q15 & AirAsia & Economy & customer support \\
-Q06 & Singapore Airlines & Economy & meal variety & Q16 & Etihad Airways & Business & recline / lie-flat \\
-Q07 & Singapore Airlines & Economy & portion size & Q17 & Frontier Airlines & Economy & baggage \\
+Q05 & Emirates & Economy & refund and rebooking & Q15 & AirAsia & Economy & customer service \\
+Q06 & Singapore Airlines & Economy & meal variety & Q16 & Etihad Airways & Business & seat recline \\
+Q07 & Singapore Airlines & Economy & meal portion size & Q17 & Frontier Airlines & Economy & baggage handling \\
 Q08 & Singapore Airlines & Economy & seat cleanliness & Q18 & American Airlines & Economy & check-in \\
-Q09 & Emirates & Economy & Wi-Fi & Q19 & Lufthansa & Economy & punctuality \\
-Q10 & Qatar Airways & Business & entertainment & Q20 & Qantas Airways & Economy & drinks \\
+Q09 & Emirates & Economy & Wi-Fi & Q19 & Lufthansa & Economy & flights running on time \\
+Q10 & Qatar Airways & Business & entertainment content & Q20 & Qantas Airways & Economy & coffee, tea and other drinks \\
 \bottomrule
 \end{tabular}
 \end{center}
