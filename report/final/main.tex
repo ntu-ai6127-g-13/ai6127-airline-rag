@@ -165,17 +165,30 @@ Q5 & Downstream innovations; ablation studies & \S\ref{sec:gen}, \S\ref{sec:exp-
 \paragraph{Retrieval.} Sparse retrieval with BM25~\cite{bm25} remains a strong baseline; dense bi-encoders such as
 Sentence-BERT~\cite{sbert} with MiniLM~\cite{minilm} capture paraphrases and are searched efficiently with
 FAISS~\cite{faiss}. Reciprocal rank fusion~\cite{rrf} combines rankings without calibrating scores, and cross-encoders
-trained on MS MARCO~\cite{msmarco,nogueira2019} are the usual second-stage rerankers. We evaluate with
-NDCG~\cite{ndcg} and related rank-aware metrics.
+trained on MS MARCO~\cite{msmarco,nogueira2019} are the usual second-stage rerankers. BEIR~\cite{beir} showed that
+BM25 stays hard to beat out of domain, which E1 confirms. Larger encoders such as BGE~\cite{bge} score higher on
+embedding benchmarks, and HyDE~\cite{hyde} expands a query with an LLM-written hypothetical answer. We keep MiniLM
+because \num{529031} sentences must be encoded on a laptop, and expand queries from a fixed taxonomy instead of an LLM:
+the expansion is inspectable and adds no model call per query. We evaluate with NDCG~\cite{ndcg} and related
+rank-aware metrics.
 
-\paragraph{Aspect-based sentiment.} Aspect-based sentiment analysis~\cite{pontiki2014} has moved from lexicon and rule
-systems such as SenticNet~\cite{senticnet} to fine-tuned transformers~\cite{xu2019bert} and to zero-shot prompting of
-large language models. LLM labels can replace part of the human annotation effort~\cite{gilardi2023}, and knowledge
-distillation~\cite{hinton2015} transfers an expensive model's behaviour into a cheaper one.
+\paragraph{Aspect-based sentiment.} Aspect-based sentiment analysis~\cite{pontiki2014,zhang2023absasurvey} has moved
+from lexicon and rule systems such as SenticNet~\cite{senticnet} to fine-tuned transformers~\cite{xu2019bert} and
+instruction-tuned generators such as InstructABSA~\cite{instructabsa}, which report state-of-the-art results on SemEval benchmarks. Both need
+in-domain aspect labels, which our eight-aspect scheme does not have beyond the gold set. A systematic study of LLMs for
+sentiment~\cite{zhang2024reality} found them strong zero-shot on simple polarity but behind fine-tuned small models on
+structured tasks such as ABSA, and strongest when labels are scarce. LLM labels can replace part of the human
+annotation effort~\cite{gilardi2023}, and knowledge distillation~\cite{hinton2015} transfers an expensive model's
+behaviour into a cheaper one; zero-shot NLI~\cite{yin2019,laurer2024} is another label-free classifier. Our design
+follows from these results: a zero-shot LLM teacher, where labels are scarce, distilled into a fast student for the
+whole corpus (\cref{sec:cls}), with NLI as a second opinion on objectivity.
 
 \paragraph{Grounded generation.} Retrieval-augmented generation~\cite{rag} conditions a generator on retrieved
 passages; RAGAS~\cite{ragas} defines reference-free answer metrics (faithfulness, answer relevance, context
-precision) that we adopt.
+precision) that we adopt. ALCE~\cite{alce} evaluates answers that cite their sources, and Self-RAG~\cite{selfrag}
+trains the generator to critique its own retrieval and output. Training a generator is out of reach for a laptop 4B
+model, so we enforce grounding outside it: citations must point to displayed evidence, numbers must match
+program-computed counts, and a program-written answer replaces a draft that fails (\cref{sec:gen}).
 
 %------------------------------------------------------- Knowledge base (Q1)
 \section{Knowledge Base Construction}
@@ -355,7 +368,7 @@ are metadata and timeline search: a route or date-window question must not be an
 Sub-attribute routing (R2) is query expansion driven by a taxonomy of 46 sub-attributes (Appendix~\ref{app:taxonomy})
 rather than by pseudo-relevance feedback, which would drift towards the dominant aspect of the top documents. The
 full-slice scan (R3) makes counts such as ``95 direct legroom sentences in 86 reviews'' exact instead of dependent on
-$k$, which is what allows the verdict to be computed over all evidence.
+$k$, which is what allows the verdict to be computed over all evidence. E1b (\cref{tab:innov}) measures each change.
 
 \begin{table*}[t]
 \centering\small
@@ -469,28 +482,32 @@ JSON keeps the original.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.86\textwidth]{figures/ui_single.png}
+\begin{minipage}[b]{0.64\textwidth}
+\includegraphics[width=\linewidth]{figures/ui_single.png}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.33\textwidth}
 \caption{The interface, single-airline question in English mode. The parser detected airline, aspect (seat) and
 sub-attribute (legroom). The program-written answer cites four sentences; the overview counts 131 matching reviews, 98
-of them with a clear direction (79.6\% positive).}
+of them with a clear direction (79.6\% positive). The sidebar holds the structured filters (airline, airlines to
+compare, cabin, aspect, evidence polarity, and route and date under the last expander).}
 \label{fig:ui}
+\end{minipage}
 \end{figure*}
 
 \begin{figure*}[t]
 \centering
-\begin{subfigure}[t]{0.44\textwidth}
-\includegraphics[height=78mm]{figures/ui_compare_answer.png}
-\caption{Answer, full-pool tally and rating test.}
+\begin{subfigure}[t]{0.548\textwidth}
+\includegraphics[width=\linewidth]{figures/ui_compare_answer.png}
+\caption{Answer, with the rating test, and full-pool tally.}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.55\textwidth}
-\raggedleft
-\includegraphics[height=78mm]{figures/ui_compare_evidence.png}
+\begin{subfigure}[t]{0.432\textwidth}
+\includegraphics[width=\linewidth]{figures/ui_compare_evidence.png}
 \caption{Evidence tab with coverage counts.}
 \end{subfigure}
 \caption{Comparison of Cathay Pacific and Singapore Airlines on economy legroom. Singapore Airlines' higher
 seat-comfort rating (3.83 vs.\ 3.46 of 5) is significant and reported for the parent aspect; the legroom tallies (72.5\%
 vs.\ 79.6\% positive) are reported as not decisive. The evidence tab shows 95 direct legroom sentences in 86 reviews and
-a retrieval time of 4.5\,s (a separate run from \cref{tab:five}).}
+a retrieval time of 4.4\,s (a separate run from \cref{tab:five}).}
 \label{fig:ui-compare}
 \end{figure*}
 
@@ -598,6 +615,47 @@ a long comfort description, over short sentences that name the attribute. We the
 that already mention the requested sub-attribute. Success@10 is 1.0 everywhere, so differences are about ordering and
 coverage. These relevance labels are reproducible but favour explicit mentions, which advantages BM25 and under-counts dense
 paraphrases (``knees touching the seat in front''); human judgements would make the comparison stronger.
+
+\paragraph{Which innovation matters? (E1b)} E1 fixes the constraints and the query and varies the retriever. To
+measure the innovations of \cref{tab:fixes} themselves, we rebuild the 30 units from the first version upwards
+(\cref{tab:innov}). Relevance here does not reuse the expansion vocabulary: a hit counts only if it satisfies the
+question's constraints, checked from metadata, and the local Qwen3-4B, shown only the attribute's English name, says
+the sentence is about it (yes/no, 620 judgements). The judge answered 22 of 23 hand-written calibration sentences
+correctly; a spot check of 40 random judgements found 6 errors, mostly generic complaints about the airline accepted as
+relevant, so absolute precision is somewhat optimistic for every row.
+
+\begin{table*}[t]
+\centering\small
+\caption{E1b: the retrieval innovations of \cref{tab:fixes} added one at a time on the 30 units of E1, all with hybrid
+retrieval and RRF. \emph{In scope}: share of the top 10 that satisfies the question's airline, cabin and other
+constraints (exact, from metadata). P@5, MRR and NDCG@10 (binary) count a hit as relevant only if it is in scope and
+the LLM judge says it is about the attribute. \emph{Direct}: share of the top 10 that names the sub-attribute
+explicitly (keyword match; shares vocabulary with R2). $\Delta$: NDCG@10 change from the row above, with 95\%
+bootstrap interval.}
+\label{tab:innov}
+\begin{tabular}{@{}lrrrrrl@{}}
+\toprule
+\textbf{Configuration} & \textbf{In scope} & \textbf{P@5} & \textbf{MRR} & \textbf{NDCG@10} & \textbf{Direct} & \textbf{$\Delta$NDCG@10 [95\% CI]} \\
+\midrule
+First version: question as typed, whole corpus & 0.213 & 0.053 & 0.102 & 0.057 & 0.000 & \\
++ parsed into English keywords (cross-lingual) & 0.350 & 0.160 & 0.389 & 0.173 & 0.070 & $+0.116$ [$+0.060$, $+0.175$] \\
++ R1 hard metadata constraints & \best{1.000} & 0.953 & \best{1.000} & 0.934 & 0.670 & $+0.761$ [$+0.673$, $+0.838$] \\
+\rowcolor{shade} + R2 sub-attribute expansion (deployed) & \best{1.000} & \best{0.967} & 0.983 & \best{0.951} & \best{0.837} & $+0.016$ [$-0.022$, $+0.057$] \\
+\midrule
+Deployed without R1 & 0.160 & 0.127 & 0.297 & 0.121 & 0.097 & $-0.830$ [$-0.892$, $-0.763$] \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Hard constraints are by far the largest gain. Without them only 16--35\% of the top 10 come from the requested airline
+and cabin, because the sentence about legroom rarely names the airline; with them every hit does, and NDCG@10 rises by
+0.761. Parsing the Chinese question into English keywords lifts NDCG@10 from 0.057 to 0.173, since neither BM25 nor
+the English MiniLM can match Chinese text to an English corpus. Sub-attribute expansion adds little once constraints
+are in place ($+0.016$, not significant): in a slice of one airline and cabin, the attribute name alone already finds
+on-topic sentences. What it raises is the share of hits that name the sub-attribute explicitly (0.67 to 0.84), which
+the full-slice scan (R3) relies on. R3 itself needs no ranking metric: even the best configuration's top 50 holds only
+38\% of the direct-mention sentences (Recall@50, \cref{tab:retrieval}), so a verdict computed from the top $k$ would
+see a minority of the evidence.
 
 \subsection{E2: How fast is a query? (Q2)}
 \label{sec:exp-speed}
@@ -1058,8 +1116,8 @@ experiences, not current service.
 
 We built a local RAG system for airline-service questions that keeps constraints, works at the level of fine-grained
 attributes and gives verdicts a user can verify. Four lessons stand out. First, structured constraints and
-attribute routing fixed the failing queries of \cref{tab:fixes}, which no change of ranking model addressed, and a
-general-purpose cross-encoder even hurt. Second, distilling an LLM labeller into a linear classifier recovers most of its gain in objective detection and
+attribute routing fixed the failing queries of \cref{tab:fixes}: hard metadata constraints alone raise NDCG@10 by 0.76
+(E1b), far more than any change of ranking model, and a general-purpose cross-encoder even hurt. Second, distilling an LLM labeller into a linear classifier recovers most of its gain in objective detection and
 about half of its gain in joint accuracy at a tiny fraction of its cost, provided selection is kept away from the test set. Third, balanced
 evidence plus validation with a program-written fallback gives the most faithful final answers (Y + Z is the best of
 eight configurations), but the gains are not additive: exact full-pool statistics fix the verdict while lowering judged
@@ -1119,6 +1177,9 @@ outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 # retrieval benchmark and targeted checks (E1, E6); RAG metrics and latency (E2, E5)
 .venv/bin/python -u experiments/final_auto_eval/run.py --output-dir outputs/final_auto_eval_replay
 .venv/bin/python -u experiments/final_rag_eval/run.py --output-dir outputs/final_rag_eval_replay
+# retrieval innovation ablation (E1b); the LLM judge needs the model server running
+.venv/bin/python -u experiments/final_auto_eval/retrieval_ablation.py \
+    --output-dir outputs/retrieval_ablation_replay
 
 # factorial ablation (E6) and airline ranking (E7): Linux GPU, Transformers backend;
 # full commands in experiments/downstream_evaluation/README.md and FACTORIAL.md

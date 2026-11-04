@@ -119,6 +119,7 @@ ones resume from checkpoints, so replay into a new directory name. Commands are 
 | Q2/Q3, E1 | Retrieval benchmark (P@5, Recall@50, MRR, NDCG@10) | `experiments/final_auto_eval/run.py` | `outputs/final_auto_eval_20261019_v2/` |
 | Q2/Q4, E2, E5 | Query latency, RAG metrics on 20 questions | `experiments/final_rag_eval/run.py` | `outputs/final_rag_eval_20261019/` |
 | Q2, E2 | Retrieval components timed alone | `experiments/final_auto_eval/component_latency.py` | `outputs/component_latency_20261104/` |
+| Q3, E1b | Retrieval innovations added one at a time (LLM-judged relevance; needs the model server) | `experiments/final_auto_eval/retrieval_ablation.py` | `outputs/retrieval_ablation_20261104/` |
 | Q4, E3 | Classifier quality on the gold set | `experiments/distilled_label_index/evaluate_gold.py` | `outputs/distill_gold_audit_20261029/` |
 | Q5, E4 | LLM-to-student distillation | `experiments/distilled_label_index/` | `outputs/distill_*_20261029/`, `outputs/label_index_20261029_distilled/` |
 | Q5, E6 | Factorial ablation of X/Y/Z, targeted checks | `experiments/downstream_evaluation/`, `experiments/final_auto_eval/run.py` | see release notes |
