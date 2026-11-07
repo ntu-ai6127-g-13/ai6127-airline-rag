@@ -1221,9 +1221,15 @@ python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
 outputs/query_quality_runtime/venv311/bin/python scripts/local_qa_server.py
 .venv/bin/python scripts/run_query_app.py --port 8517
 
-# retrieval benchmark and targeted checks (E1, E6); RAG metrics and latency (E2, E5)
+# retrieval benchmark and targeted checks (E1, E6)
 .venv/bin/python -u experiments/final_auto_eval/run.py --output-dir outputs/final_auto_eval_replay
-.venv/bin/python -u experiments/final_rag_eval/run.py --output-dir outputs/final_rag_eval_replay
+# RAG metrics and latency on the English questions (E2, E5, E8)
+.venv/bin/python -u experiments/final_rag_eval/run.py --phase full \
+    --cases data/eval/query_en_20_20261105.json --output-dir outputs/final_rag_eval_replay
+.venv/bin/python experiments/final_rag_eval/program_only_latency.py \
+    --cases data/eval/query_en_20_20261105.json --output-dir outputs/program_only_replay
+# Chinese questions, with the seven-question cumulative run quoted in E6
+.venv/bin/python -u experiments/final_rag_eval/run.py --output-dir outputs/final_rag_eval_zh_replay
 # retrieval innovation ablation (E1b); the LLM judge needs the model server running
 .venv/bin/python -u experiments/final_auto_eval/retrieval_ablation.py \
     --output-dir outputs/retrieval_ablation_replay
