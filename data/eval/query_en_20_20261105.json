@@ -1,0 +1,214 @@
+[
+  {
+    "id": "Q01",
+    "language": "en",
+    "question": "How is the legroom in Singapore Airlines economy class?",
+    "aspect": "seat",
+    "subtopics": [
+      "legroom"
+    ],
+    "source_question_zh": "新加坡航空经济舱的腿部空间好不好？"
+  },
+  {
+    "id": "Q02",
+    "language": "en",
+    "question": "How is the legroom in Air Canada rouge economy class?",
+    "aspect": "seat",
+    "subtopics": [
+      "legroom"
+    ],
+    "source_question_zh": "Air Canada rouge经济舱的腿部空间怎么样？"
+  },
+  {
+    "id": "Q03",
+    "language": "en",
+    "question": "How is the baggage handling of Spirit Airlines in economy class?",
+    "aspect": "ground",
+    "subtopics": [
+      "baggage"
+    ],
+    "source_question_zh": "Spirit Airlines经济舱的行李服务怎么样？"
+  },
+  {
+    "id": "Q04",
+    "language": "en",
+    "question": "What do reviews say about delay and cancellation handling on Alaska Airlines in economy class?",
+    "aspect": "ground",
+    "subtopics": [
+      "delay_handling"
+    ],
+    "source_question_zh": "Alaska Airlines经济舱遇到延误或取消时处理得怎么样？"
+  },
+  {
+    "id": "Q05",
+    "language": "en",
+    "question": "What do reviews say about refunds and rebooking on Emirates in economy class?",
+    "aspect": "value",
+    "subtopics": [
+      "refund"
+    ],
+    "source_question_zh": "阿联酋航空经济舱的退款和改签处理怎么样？"
+  },
+  {
+    "id": "Q06",
+    "language": "en",
+    "question": "How is the meal variety and choice in Singapore Airlines economy class?",
+    "aspect": "food",
+    "subtopics": [
+      "variety"
+    ],
+    "source_question_zh": "新加坡航空经济舱餐食的品种和选择怎么样？"
+  },
+  {
+    "id": "Q07",
+    "language": "en",
+    "question": "How is the meal portion size in Singapore Airlines economy class?",
+    "aspect": "food",
+    "subtopics": [
+      "portion"
+    ],
+    "source_question_zh": "新加坡航空经济舱餐食分量够不够？"
+  },
+  {
+    "id": "Q08",
+    "language": "en",
+    "question": "How is the seat cleanliness in Singapore Airlines economy class?",
+    "aspect": "seat",
+    "subtopics": [
+      "seat_cleanliness"
+    ],
+    "source_question_zh": "新加坡航空经济舱座椅清洁度怎么样？"
+  },
+  {
+    "id": "Q09",
+    "language": "en",
+    "question": "How is the inflight Wi-Fi connection and speed on Emirates in economy class?",
+    "aspect": "entertainment",
+    "subtopics": [
+      "wifi"
+    ],
+    "source_question_zh": "阿联酋航空经济舱机上Wi-Fi连接和速度怎么样？"
+  },
+  {
+    "id": "Q10",
+    "language": "en",
+    "question": "How are the movie selection and entertainment content in Qatar Airways business class?",
+    "aspect": "entertainment",
+    "subtopics": [
+      "content"
+    ],
+    "source_question_zh": "卡塔尔航空商务舱的电影选择和娱乐内容怎么样？"
+  },
+  {
+    "id": "Q11",
+    "language": "en",
+    "question": "How is the seat recline in British Airways premium economy?",
+    "aspect": "seat",
+    "subtopics": [
+      "recline"
+    ],
+    "source_question_zh": "英国航空超级经济舱座椅靠背调节怎么样？"
+  },
+  {
+    "id": "Q12",
+    "language": "en",
+    "question": "How is the cabin crew attitude in Cathay Pacific business class?",
+    "aspect": "staff",
+    "subtopics": [
+      "attitude"
+    ],
+    "source_question_zh": "国泰航空商务舱空乘服务态度怎么样？"
+  },
+  {
+    "id": "Q21",
+    "language": "en",
+    "question": "Compare the meal variety and choice of Singapore Airlines and Emirates in economy class: which is better?",
+    "aspect": "food",
+    "subtopics": [
+      "variety"
+    ],
+    "comparison": true,
+    "source_question_zh": "比较新加坡航空和阿联酋航空经济舱的餐食品种与选择，哪家更好？"
+  },
+  {
+    "id": "Q22",
+    "language": "en",
+    "question": "Which has better movies and entertainment content in economy class, Singapore Airlines or United Airlines?",
+    "aspect": "entertainment",
+    "subtopics": [
+      "content"
+    ],
+    "comparison": true,
+    "source_question_zh": "新加坡航空和United Airlines经济舱的电影与娱乐内容哪家更好？"
+  },
+  {
+    "id": "Q23",
+    "language": "en",
+    "question": "Which has better seat recline and lie-flat seats in business class, Qatar Airways or British Airways?",
+    "aspect": "seat",
+    "subtopics": [
+      "recline"
+    ],
+    "comparison": true,
+    "source_question_zh": "卡塔尔航空和英国航空商务舱座椅靠背调节与躺平哪家更好？"
+  },
+  {
+    "id": "Q24",
+    "language": "en",
+    "question": "Which gets better reviews for economy legroom, Cathay Pacific or Singapore Airlines?",
+    "aspect": "seat",
+    "subtopics": [
+      "legroom"
+    ],
+    "comparison": true,
+    "source_question_zh": "国泰航空和新加坡航空经济舱腿部空间哪家评价更好？"
+  },
+  {
+    "id": "Q25",
+    "language": "en",
+    "question": "Which has better lie-flat seats in business class, Emirates or Etihad Airways?",
+    "aspect": "seat",
+    "subtopics": [
+      "recline"
+    ],
+    "comparison": true,
+    "source_question_zh": "阿联酋航空和Etihad Airways商务舱座椅躺平能力哪家更好？"
+  },
+  {
+    "id": "Q28",
+    "language": "en",
+    "question": "How are the legroom, seat recline, seat comfort and seat cleanliness in Singapore Airlines economy class?",
+    "aspect": "seat",
+    "subtopics": [
+      "legroom",
+      "recline",
+      "comfort",
+      "seat_cleanliness"
+    ],
+    "source_question_zh": "新加坡航空经济舱的腿部空间、靠背调节、座椅舒适度和座椅清洁度分别怎么样？"
+  },
+  {
+    "id": "Q29",
+    "language": "en",
+    "question": "How are the meal quality, portion size and variety in Singapore Airlines economy class?",
+    "aspect": "food",
+    "subtopics": [
+      "quality",
+      "portion",
+      "variety"
+    ],
+    "source_question_zh": "新加坡航空经济舱餐食的质量、分量和品种分别怎么样？"
+  },
+  {
+    "id": "Q30",
+    "language": "en",
+    "question": "How are the food, the value for money and the ground service (check-in and boarding) in Singapore Airlines economy class?",
+    "aspect": "food",
+    "aspects": [
+      "food",
+      "value",
+      "ground"
+    ],
+    "source_question_zh": "新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？"
+  }
+]

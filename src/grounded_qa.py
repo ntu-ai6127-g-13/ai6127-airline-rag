@@ -15,6 +15,13 @@ from src.question_parser import SUBTOPIC_NAMES
 
 DEFAULT_ENDPOINT = "http://127.0.0.1:8765"
 _CITATION_RE = re.compile(r"\[([A-Z]?\d+)\]")
+_CITATION_LIST_RE = re.compile(r"\[([A-Z]?\d+(?:\s*,\s*[A-Z]?\d+)+)\]")
+_EN_ANSWER_RULES = """
+8. Write at most 220 words in total and at most 70 words per requested subtopic or aspect.
+9. Every paragraph must contain at least one citation. Put each citation in its own brackets, such as [1][2], never [1, 2]. Do not add a closing paragraph.
+10. Use only numbers that appear in the payload or the evidence; do not add years, rankings, or derived figures.
+11. When parent_aspect_rating_summary is present, state each airline's rating mean exactly as given, such as 3.83/5.
+12. When requested_aspects is nonempty, give each aspect its own paragraph that names the aspect and states its rating, scale and number of ratings, such as 3.88/5 (704 ratings)."""
 _PARAGRAPH_RE = re.compile(r"\n+")
 _ASPECT_NAMES = {"seat": "座椅舒适度", "staff": "空乘服务", "food": "餐饮",
                  "entertainment": "机上娱乐", "ground": "地面服务", "value": "性价比",
@@ -334,6 +341,12 @@ Rules:
             {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
 
 
+def _split_citation_lists(text: str) -> str:
+    """Rewrite [1, 2] as [1][2] so the citations are checked like any other."""
+    return _CITATION_LIST_RE.sub(
+        lambda match: "".join(f"[{item.strip()}]" for item in match.group(1).split(",")), text)
+
+
 def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | None = None,
                     require_rating_winner: bool = True,
                     required_subtopics: tuple[str, ...] = (),
@@ -342,15 +355,21 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
                     require_all_rating_values: bool = False,
                     allow_aggregate_counts: bool = False,
                     language: str = "zh",
-                    expected_subtopic_directions: dict[str, str] | None = None) -> tuple[bool, list[str]]:
+                    expected_subtopic_directions: dict[str, str] | None = None,
+                    english_calibrated: bool = False) -> tuple[bool, list[str]]:
     """Reject unknown/missing citations and obvious prompt-protocol leakage."""
     reasons = []
+    def mentions(name: str, key: str, paragraph: str) -> bool:
+        if not english_calibrated:
+            return name in paragraph
+        lowered = paragraph.casefold()
+        return name.casefold() in lowered or key.replace("_", " ").casefold() in lowered
     clean = text.strip()
     cited = set(_CITATION_RE.findall(clean))
     if not clean: reasons.append("empty_answer")
     if not cited: reasons.append("missing_citations")
     if cited - valid_ids: reasons.append("unknown_citations:" + ",".join(sorted(cited - valid_ids)))
-    if len(clean) > 1600: reasons.append("answer_too_long")
+    if len(clean) > (2400 if english_calibrated else 1600): reasons.append("answer_too_long")
     if any(token in clean.casefold() for token in ("<|im_start|>", "program_computed_retrieved_sample", '"evidence"')):
         reasons.append("protocol_leak")
     if language == "en" and re.search(r"[\u3400-\u9fff]", clean):
@@ -388,7 +407,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     topic_paragraphs = {}
     for topic in required_subtopics:
         name = (_SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES).get(topic, topic)
-        containing = [index for index, paragraph in enumerate(paragraphs) if name in paragraph]
+        containing = [index for index, paragraph in enumerate(paragraphs) if mentions(name, topic, paragraph)]
         topic_paragraphs[topic] = containing
         if not containing:
             reasons.append("missing_subtopic:" + topic)
@@ -421,11 +440,11 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if len(required_subtopics) > 1:
         used = set()
         assigned = []
-        names = [(_SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES).get(topic, topic)
+        names = [((_SUBTOPIC_NAMES_EN if language == "en" else SUBTOPIC_NAMES).get(topic, topic), topic)
                  for topic in required_subtopics]
         for indices in topic_paragraphs.values():
             choices = [index for index in indices if index not in used]
-            choices.sort(key=lambda index: (sum(name in paragraphs[index] for name in names), index))
+            choices.sort(key=lambda index: (sum(mentions(name, key, paragraphs[index]) for name, key in names), index))
             available = choices[0] if choices else None
             if available is not None:
                 used.add(available)
@@ -438,7 +457,7 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     summaries = (rating_summary or {}).get("rating_summaries", {})
     for aspect in required_aspects:
         name = (_ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES).get(aspect, aspect)
-        containing = [index for index, paragraph in enumerate(paragraphs) if name in paragraph]
+        containing = [index for index, paragraph in enumerate(paragraphs) if mentions(name, aspect, paragraph)]
         aspect_paragraphs[aspect] = containing
         if not containing:
             reasons.append("missing_aspect:" + aspect)
@@ -455,11 +474,11 @@ def validate_answer(text: str, valid_ids: set[str], *, rating_summary: dict | No
     if len(required_aspects) > 1:
         used = set()
         assigned = []
-        names = [(_ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES).get(aspect, aspect)
+        names = [((_ASPECT_NAMES_EN if language == "en" else _ASPECT_NAMES).get(aspect, aspect), aspect)
                  for aspect in required_aspects]
         for indices in aspect_paragraphs.values():
             choices = [index for index in indices if index not in used]
-            choices.sort(key=lambda index: (sum(name in paragraphs[index] for name in names), index))
+            choices.sort(key=lambda index: (sum(mentions(name, key, paragraphs[index]) for name, key in names), index))
             available = choices[0] if choices else None
             if available is not None:
                 used.add(available)
@@ -1308,8 +1327,14 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
     try:
         if on_stream:
             on_stream("", "start")
-        payload = _generate(messages, endpoint=endpoint, timeout=timeout, on_stream=on_stream)
+        english = language == "en"
+        if english:
+            messages = [{**messages[0], "content": messages[0]["content"] + _EN_ANSWER_RULES}, *messages[1:]]
+        max_tokens = 640 if english else 480
+        payload = _generate(messages, endpoint=endpoint, timeout=timeout, on_stream=on_stream, max_tokens=max_tokens)
         text = str(payload.get("text", "")).strip()
+        if english:
+            text = _split_citation_lists(text)
         model_seconds = float(payload.get("seconds", 0.0))
         valid, errors = validate_answer(text, valid_ids, rating_summary=validation_rating,
                                         require_rating_winner=(not bool(result.get("subtopics"))
@@ -1320,7 +1345,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
                                         require_all_rating_values=require_all_rating_values,
                                         allow_aggregate_counts=allow_aggregate_counts,
                                         language=language,
-                                        expected_subtopic_directions=expected_subtopic_directions)
+                                        expected_subtopic_directions=expected_subtopic_directions,
+                                        english_calibrated=english)
         if valid:
             if on_stream:
                 on_stream(text, "complete")
@@ -1345,8 +1371,10 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
         if on_stream:
             on_stream("", "reset")
         repaired_payload = _generate(repair_messages, endpoint=endpoint, timeout=timeout,
-                                     on_stream=on_stream)
+                                     on_stream=on_stream, max_tokens=max_tokens)
         repaired = str(repaired_payload.get("text", "")).strip()
+        if english:
+            repaired = _split_citation_lists(repaired)
         model_seconds += float(repaired_payload.get("seconds", 0.0))
         repaired_valid, repaired_errors = validate_answer(
             repaired, valid_ids, rating_summary=validation_rating,
@@ -1357,7 +1385,8 @@ def answer_question(question: str, result: dict, *, endpoint: str = DEFAULT_ENDP
             require_all_rating_values=require_all_rating_values,
             allow_aggregate_counts=allow_aggregate_counts,
             language=language,
-            expected_subtopic_directions=expected_subtopic_directions)
+            expected_subtopic_directions=expected_subtopic_directions,
+            english_calibrated=english)
         if repaired_valid:
             if on_stream:
                 on_stream(repaired, "complete")
