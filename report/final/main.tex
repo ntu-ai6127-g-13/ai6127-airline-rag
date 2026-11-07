@@ -3,7 +3,6 @@
 % Experimental-report (paper) layout: two columns, Times.
 %
 % Build:  latexmk -xelatex main.tex   then copy main.pdf to 13.pdf
-%         (XeLaTeX is needed only for the Chinese queries in Appendix C.)
 %
 % The brief (docs/Assignment.pdf) asks for:
 %   - names AND matriculation numbers of all members on the first page
@@ -23,8 +22,6 @@
   ItalicFont=*-italic, BoldItalicFont=*-bolditalic, Scale=MatchLowercase]
 \setmonofont{texgyrecursor}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
   ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
-\usepackage{xeCJK}
-\setCJKmainfont{Songti SC}[AutoFakeSlant=0.18]
 
 \usepackage[table]{xcolor}
 \usepackage{graphicx}
@@ -91,6 +88,13 @@ AI6127 Deep Neural Networks for NLP\,---\,Group 13\\
 Nanyang Technological University}
 \date{7 November 2026}
 
+% first-line indent on every body paragraph, including the first after a heading and run-in \paragraph heads
+\usepackage{indentfirst}
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\parindent}%
+  {3.25ex \@plus 1ex \@minus .2ex}{-1em}{\normalfont\normalsize\bfseries}}
+\makeatother
+
 \begin{document}
 \maketitle
 
@@ -108,7 +112,7 @@ sub-attribute queries the hybrid retriever reaches NDCG@10 0.810 and MRR 0.961, 
 \emph{lowers} NDCG@10 by 0.066 (a significant drop). A linear student trained on weak labels plus labels distilled from an LLM raises three-class
 macro-F1 on our \num{1000}-sentence human-labelled set from 57.2 (the rule-based baseline classifier) to 78.5 and joint
 aspect--polarity accuracy by 7.4 points, and relabels the whole corpus in 18\,s. On 20 end-to-end questions the guarded
-system scores 0.84 faithfulness and 0.99 answer relevance, with 16 of the 20 final answers written by the program
+system scores 0.86 faithfulness and 0.98 answer relevance, with 13 of the 20 final answers written by the program
 fallback. A full factorial ablation of the three answer-side
 components (160 answers) finds that validation with a program-written fallback is the only component that clearly
 raises faithfulness ($+0.080$ alone) and that the gains are not additive. Text-derived airline rankings agree with
@@ -133,7 +137,7 @@ whole design:
   \item \textbf{The verdict must be traceable.} The overall direction is computed over all matching reviews, and every claim in an answer cites a review sentence.
 \end{enumerate}
 
-\noindent The contributions of this report are:
+The contributions of this report are:
 \begin{itemize}
   \item A cleaned, sentence-level knowledge base with structured metadata, and an audit of the data problems that would otherwise damage retrieval (\cref{sec:kb}).
   \item A retrieval pipeline that turns constraints into filters and routes 46 sub-attributes with query expansion, evaluated with rank-aware metrics and bootstrap intervals, including a negative result for cross-encoder reranking (\cref{sec:method,sec:exp-ret}).
@@ -141,7 +145,7 @@ whole design:
   \item Three answer-side components (full-pool statistics, balanced and label-consistent evidence, validation with repair and fallback) evaluated in a full $2^3$ factorial ablation, and an airline-ranking validation against held-out passenger ratings (\cref{sec:exp-abl,sec:exp-rank}).
 \end{itemize}
 
-\noindent The brief poses five questions; \cref{tab:map} shows where each is answered. Experiments are numbered
+The brief poses five questions; \cref{tab:map} shows where each is answered. Experiments are numbered
 E1--E8 (E1b is a follow-up to E1) and described in \cref{sec:exp}.
 
 \begin{table}[t]
@@ -303,7 +307,7 @@ over all matching reviews, the rating summary and the evidence. Typical queries:
 Airlines economy?} (one sub-attribute); \emph{Flying Singapore to London in economy, which airline has the best
 legroom?} (route constraint, open comparison); \emph{Compare Qatar Airways and British Airways business class seat
 recline} (two airlines); \emph{Singapore Airlines economy: food, value for money and ground service?} (several
-aspects); and the Chinese \emph{阿联酋航空经济舱的退款和改签处理怎么样？} (Emirates refunds and rebooking).
+aspects); and, asked in Chinese, \emph{How are refunds and rebooking handled on Emirates in economy class?}
 
 %--------------------------------------------------------------- Method
 \section{Proposed System}
@@ -393,7 +397,7 @@ Route words treated as keywords; results mixed routes and cabins, and the rankin
 ``How clean are Singapore Airlines seats?'' &
 Fell back to the seat-comfort rating and generic comfort sentences. &
 \textbf{Sub-attribute routing with query expansion.} Seat cleanliness is one of 46 sub-attributes with expansion terms; answers now cite crumbs, coffee stains and dirty tray tables. \\
-``新航经济舱的腿部空间好不好？'' (Chinese) &
+``Is the legroom in Singapore Airlines economy good?'' (asked in Chinese) &
 Unsupported: corpus and encoder are English-only. &
 \textbf{Cross-lingual querying.} Chinese airline, cabin and attribute names map to canonical values and English expansion terms; evidence is shown translated with the original kept. \\
 ``What food do they serve on Singapore Airlines?'' &
@@ -535,7 +539,7 @@ a retrieval time of 4.4\,s (a separate run from \cref{tab:five}).}
 We run eight experiments, E1--E8, each headed by the question it answers; E1b is a follow-up to E1. All run on an
 Apple M1 Pro (16\,GB). Intervals are 95\% bootstrap intervals at the query, question or parent-review level (\num{10000} resamples for E1 and
 E5, \num{2000} for E4, E6 and E7). The evaluation data are: 30 airline $\times$ sub-attribute retrieval units
-(E1); 20 fixed end-to-end questions written in Chinese (12 single-airline, 5 comparisons, 3 multi-aspect; E2, E5);
+(E1); 20 fixed end-to-end questions (12 single-airline, 5 comparisons, 3 multi-aspect; E2, E5);
 a \num{1000}-sentence human-labelled gold set (E3, E4); 20 English single-attribute questions for the factorial
 ablation (E6, Appendix~\ref{app:factorial}); and held-out passenger ratings for the airline ranking (E7).
 
@@ -683,11 +687,11 @@ selection; \emph{first token} is measured from submission; \emph{total} runs unt
 mitigate by streaming. Timed alone over the full pool without filters (the 30 E1 queries, warm medians), BM25 top-20 takes 503\,ms, FAISS
 top-20 20\,ms, hybrid retrieval (both top-100 lists and RRF) 519\,ms and cross-encoder reranking of 100 candidates
 108\,ms (\nolinkurl{experiments/final_auto_eval/component_latency.py}); scoring all sentences with BM25 dominates. With the LLM off, the
-program-written path averaged 5.0\,s per question over the 40-question development set (Appendix~\ref{app:eval}).
+program-written path averaged 5.8\,s per warm question (median 3.8\,s) over the same 20 questions.
 
 \begin{table}[t]
 \centering\small
-\caption{E2: five representative queries (asked in Chinese; original wording and results in Appendix~\ref{app:queries}).
+\caption{E2: five representative queries (wording and results in Appendix~\ref{app:queries}).
 Answer: model draft (D), repaired draft (R) or program-written (P). The All-20 rows include the cold first question.}
 \label{tab:five}
 \setlength{\tabcolsep}{3.5pt}
@@ -695,14 +699,14 @@ Answer: model draft (D), repaired draft (R) or program-written (P). The All-20 r
 \toprule
 & \textbf{Query} & \textbf{Retr.} & \textbf{1st tok.} & \textbf{Total} & \textbf{Ans.} \\
 \midrule
-Q05 & Emirates economy: refunds and rebooking? & 2.2\,s & 23.8\,s & 26.8\,s & D \\
-Q10 & Qatar business: film selection? & 2.2\,s & 18.4\,s & 33.6\,s & R \\
-Q24 & Cathay Pacific vs.\ Singapore Airlines economy legroom? & 5.1\,s & 28.4\,s & 57.8\,s & R \\
-Q28 & Singapore Airlines economy: legroom, recline, comfort, cleanliness? & 9.7\,s & 27.4\,s & 53.6\,s & P \\
-Q30 & Singapore Airlines economy: food, value, ground service? & 6.9\,s & 50.8\,s & 82.0\,s & P \\
+Q05 & Emirates economy: refunds and rebooking? & 3.0\,s & 11.2\,s & 25.6\,s & P \\
+Q10 & Qatar business: movies and entertainment? & 3.6\,s & 11.6\,s & 27.9\,s & R \\
+Q24 & Cathay Pacific vs.\ Singapore Airlines economy legroom? & 6.5\,s & 23.5\,s & 51.6\,s & P \\
+Q28 & Singapore Airlines economy: legroom, recline, comfort, cleanliness? & 16.0\,s & 26.8\,s & 45.9\,s & R \\
+Q30 & Singapore Airlines economy: food, value, ground service? & 12.8\,s & 32.2\,s & 40.0\,s & D \\
 \midrule
-\multicolumn{2}{@{}l}{\textit{All 20: median}} & 2.9\,s & 24.3\,s & 40.8\,s & \\
-\multicolumn{2}{@{}l}{\textit{All 20: P95}} & 10.5\,s & 41.9\,s & 72.3\,s & \\
+\multicolumn{2}{@{}l}{\textit{All 20: median}} & 4.0\,s & 12.6\,s & 29.9\,s & \\
+\multicolumn{2}{@{}l}{\textit{All 20: P95}} & 16.5\,s & 32.4\,s & 57.4\,s & \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -711,12 +715,12 @@ Q30 & Singapore Airlines economy: food, value, ground service? & 6.9\,s & 50.8\,
 \centering
 \begin{tikzpicture}
 \begin{axis}[paper, xbar stacked, width=\columnwidth, height=40mm, barlegend, bar width=7pt,
-  xmin=0, xmax=85, xlabel={seconds}, ymajorgrids=false, xmajorgrids,
+  xmin=0, xmax=60, xlabel={seconds}, ymajorgrids=false, xmajorgrids,
   symbolic y coords={Q30,Q28,Q24,Q10,Q05}, ytick=data, y dir=reverse,
   legend style={at={(0.5,1.03)},anchor=south, legend columns=2}, enlarge y limits=0.15]
-\addplot[fill=s1, draw=white] coordinates {(2.2,Q05) (2.2,Q10) (5.1,Q24) (9.7,Q28) (6.9,Q30)};
-\addplot[fill=s2, draw=white] coordinates {(21.6,Q05) (16.2,Q10) (23.3,Q24) (17.7,Q28) (43.9,Q30)};
-\addplot[fill=s3, draw=white] coordinates {(3.0,Q05) (15.2,Q10) (29.4,Q24) (26.2,Q28) (31.2,Q30)};
+\addplot[fill=s1, draw=white] coordinates {(3.0,Q05) (3.6,Q10) (6.5,Q24) (16.0,Q28) (12.8,Q30)};
+\addplot[fill=s2, draw=white] coordinates {(8.3,Q05) (8.0,Q10) (17.1,Q24) (10.9,Q28) (19.4,Q30)};
+\addplot[fill=s3, draw=white] coordinates {(14.4,Q05) (16.3,Q10) (28.1,Q24) (19.0,Q28) (7.8,Q30)};
 \legend{retrieval, wait for first token, generation + checks + repair}
 \end{axis}
 \end{tikzpicture}
@@ -900,20 +904,23 @@ program-computed ratings and tallies, so correct aggregate numbers are not marke
 \toprule
 \textbf{Metric} & \textbf{Score} & \textbf{95\% CI} \\
 \midrule
-Faithfulness & 0.843 & [0.800, 0.890] \\
-Answer relevance & 0.988 & [0.963, 1.000] \\
-Context precision & 0.600 & [0.517, 0.681] \\
+Faithfulness & 0.859 & [0.816, 0.903] \\
+Answer relevance & 0.975 & [0.938, 1.000] \\
+Context precision & 0.738 & [0.667, 0.805] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Results.} Answers stay on topic and are mostly grounded (\cref{tab:rag}). Context precision is the weakest:
-about 40\% of displayed sentences were judged not directly relevant, partly because we deliberately show a
+about 26\% of displayed sentences were judged not directly relevant, partly because we deliberately show a
 counter-example and broader-aspect context (E6). It is not comparable with the 0.81--0.99 of E6: E5 judges up to
-12 evidence sentences per airline on Chinese questions that include comparisons and several aspects, while E6 judges
+12 evidence sentences per airline on questions that include comparisons and several aspects, while E6 judges
 at most four passages about one attribute. The scores describe the \emph{system}: the model's first draft was used
-for 1 question, its repair for 3 and the program-written answer for 16, because the 4B model's drafts often failed the
-strict citation or number checks. Since generator and judge are the same model, these are reproducible automatic
+for 4 questions, its repair for 3 and the program-written answer for 13, because the 4B model's drafts often failed the
+strict citation or number checks. Three checks had been calibrated on Chinese answers and were adjusted for English after a
+first run in which no English draft passed: the length limit, exact matching of sub-attribute names, and citation lists
+such as [1, 2]. The citation and number checks are unchanged; the change was tried on development questions outside these
+20, which were then run once. E6 predates the change. Since generator and judge are the same model, these are reproducible automatic
 proxies, not independent human scores.
 
 \subsection{E6: What does each answer-side component buy? (Q5)}
@@ -924,7 +931,7 @@ ablation of the three factors of \cref{sec:gen}: X (full-pool statistics), Y (ba
 Z (validation, one repair, program-written fallback).
 
 \paragraph{Protocol.} We use the 20 single-airline, single-attribute questions Q01--Q20 of the 40-question
-development set, rewritten in a fixed English form (Q05 and Q10 are therefore English versions of Q05 and Q10 in
+development set, rewritten in a fixed English form (Q05 and Q10 cover the same airline, cabin and attribute as Q05 and Q10 in
 \cref{tab:five}) (Appendix~\ref{app:factorial}) and fixed before scoring. Each question has a frozen
 pool of 30 candidates ranked without labels; all eight configurations share the pool, the prompt and a budget of four
 citations. With X off, the full-pool tally and the overall direction are hidden from generation, validation and
@@ -1096,10 +1103,10 @@ the \num{529031} retrievable ones.}
 \toprule
 \textbf{Measure} & \textbf{Value} \\
 \midrule
-Retrieval and evidence selection & 2.9\,s (10.5\,s) \\
-Submission to first streamed token & 24.3\,s (41.9\,s) \\
-Submission to final checked answer & 40.8\,s (72.3\,s) \\
-Program-only answer (LLM off) & 5.0\,s / query \\
+Retrieval and evidence selection & 4.0\,s (16.5\,s) \\
+Submission to first streamed token & 12.6\,s (32.4\,s) \\
+Submission to final checked answer & 29.9\,s (57.4\,s) \\
+Program-only answer (LLM off, warm mean) & 5.8\,s / query \\
 Short LLM request (120 tokens), 1 or 2 at once & $\approx$1\,s each, serialised \\
 \midrule
 Student labelling of \num{529031} sentences & 18\,s \\
@@ -1130,7 +1137,7 @@ precision changed between configurations that displayed the same passages, becau
 rates them; bootstrap intervals do not capture such judge error. Human relevance judgements and blind human review of the
 answers, ideally with an independent judge model, would strengthen E1, E5 and E6.
 
-\paragraph{Small generator and strict checks.} 16 of 20 answers in E5 and 62 of 80 Z-on answers in E6 used the
+\paragraph{Small generator and strict checks.} 13 of 20 answers in E5 and 62 of 80 Z-on answers in E6 used the
 program-written fallback, and 22 of the 64 rejected E6 drafts failed on format alone. Conversely, the E6 drafts for Q01 (Singapore Airlines legroom) with X on
 reported 98 positive reviews, where 98 is the number of directional reviews (78 were positive); the number check passed
 them because 98 is a permitted value, and with Z on they were rejected only for their format. Separating semantic errors from format violations, and measuring the false-rejection rate,
@@ -1168,15 +1175,15 @@ supports answering comparison questions from review text.
 
 \textbf{Release page:} \url{https://github.com/ntu-ai6127-g-13/ai6127-airline-rag/releases/tag/v1.0-submission}
 
-\textbf{Data archive (OneDrive):} \url{https://entuedu-my.sharepoint.com/:u:/g/personal/xinghan001_e_ntu_edu_sg/IQCwqK-roSRlTqWCAQKF-4cVAeI5S3GVpr3f17kuL-p8SxE?e=CAbWg4}\\
+\textbf{Data archive (OneDrive):} \url{https://entuedu-my.sharepoint.com/:u:/g/personal/xinghan001_e_ntu_edu_sg/IQAJkguUFJ54Qq1uPa92cQoiAcTu2lNCYXIwP1Yd5xjqEBM?e=XsnEsa}\\
 Mirror: \url{https://github.com/ntu-ai6127-g-13/ai6127-airline-rag/releases/download/v1.0-submission/ai6127-g13-data.zip}\\
 \nolinkurl{chunks.parquet} (knowledge base), \texttt{eval.xls} and the frozen gold CSV, the 20 evaluation questions with
 retrieved evidence and generated answers, the 30-query retrieval benchmark with per-query results, label indexes
 (v4.1 and distilled), classifier predictions on gold, teacher labels, the ablation case files, the factorial-ablation run (protocol, prompts, 160 answers, judge scores) and the
 airline-ranking predictions.
 
-\textbf{Code archive (OneDrive):} \url{https://entuedu-my.sharepoint.com/:u:/g/personal/xinghan001_e_ntu_edu_sg/IQBECeqNHIgDTbFj0_iIUtxjAU3FRFcjbpk30SIczEmKwaE?e=ydcAya}\\
-Mirror: \url{https://github.com/ntu-ai6127-g-13/ai6127-airline-rag/archive/refs/tags/v1.0-submission.zip}\\
+\textbf{Code archive (OneDrive):} \url{https://entuedu-my.sharepoint.com/:u:/g/personal/xinghan001_e_ntu_edu_sg/IQA-SBSZI0HBRbvgrguj0S6MAWRcZtSZ7XKx8286QYqX2Wc?e=T3D0ZE}\\
+Mirror: \url{https://github.com/ntu-ai6127-g-13/ai6127-airline-rag/releases/download/v1.0-submission/ai6127-g13-code.zip}\\
 \nolinkurl{src/}, \nolinkurl{app/}, \nolinkurl{scripts/}, \nolinkurl{experiments/}, \nolinkurl{tests/},
 \nolinkurl{requirements.txt} and a README with build and run instructions.
 
@@ -1268,7 +1275,7 @@ IDs and provenance & sentence, review and chunk IDs; review status & Joins back 
 \paragraph{Question sets.} \nolinkurl{data/eval/query_smoke_40_20261019.json} is a JSON array of 40 questions, each
 with \texttt{id}, \texttt{language}, \texttt{question}, the expected \texttt{aspect}/\texttt{aspects}, the expected
 \texttt{subtopics} (sub-attributes) and a \texttt{comparison} flag. E1 parses Q01--Q25 into the 30 airline $\times$
-sub-attribute units; E2 and E5 use Q01--Q12, Q21--Q25 and Q28--Q30; E6 uses Q01--Q20 in a fixed English form (Appendix~\ref{app:factorial}). Results are JSONL with one record per question
+sub-attribute units; E2 and E5 use Q01--Q12, Q21--Q25 and Q28--Q30 in the English wording of \nolinkurl{data/eval/query_en_20_20261105.json}; E6 uses Q01--Q20 in a fixed English form (Appendix~\ref{app:factorial}). Results are JSONL with one record per question
 (\texttt{case}, \texttt{parsed}, \texttt{result} with the retrieved evidence and timings, \texttt{answer} with text,
 mode and citations, and \texttt{judge}), or CSV with one row per query and method.
 
@@ -1276,18 +1283,18 @@ mode and citations, and \texttt{judge}), or CSV with one row per query and metho
 \label{app:queries}
 
 Counts are reviews that directly match the attribute; percentages are over those with a clear direction. Full answers,
-with citations and evidence, are in \nolinkurl{outputs/final_rag_eval_20261019/answers.jsonl}.
+with citations and evidence, are in \nolinkurl{outputs/final_rag_eval_en_20261107/answers.jsonl}; the code changes of this run are archived with it.
 
 \begin{center}\small
 \begin{tabularx}{\textwidth}{@{}lP{62mm}Y@{}}
 \toprule
 \textbf{ID} & \textbf{Question as asked} & \textbf{Result} \\
 \midrule
-Q05 & 阿联酋航空经济舱的退款和改签处理怎么样？ & Negative: 19 of 19 directional reviews (24 matches) negative; cites unpaid refunds after repeated contact and cancellation and seat fees. \\
-Q10 & 卡塔尔航空商务舱的电影选择和娱乐内容怎么样？ & Mixed: 15 positive, 15 negative (86 matches); a wide film selection versus dated content and poor TV choice. \\
-Q24 & 国泰航空和新加坡航空经济舱腿部空间哪家评价更好？ & No clear winner on legroom: Cathay Pacific 72.5\% positive (50/69), Singapore Airlines 79.6\% (78/98); Singapore's seat rating is higher (3.83 vs.\ 3.46 of 5). \\
-Q28 & 新加坡航空经济舱的腿部空间、靠背调节、座椅舒适度和座椅清洁度分别怎么样？ & Legroom positive (78/98, 79.6\%); recline mixed (14/26); seat comfort positive (97/123, 78.9\%); cleanliness too few to decide (7/10). \\
-Q30 & 新加坡航空经济舱的餐食、性价比和地面服务分别怎么样？ & Food 65.5\% positive (289/441, rating 3.88); value 34.6\% positive (75/217, rating 3.88); ground service 43.6\% positive (163/374, rating 3.99). \\
+Q05 & What do reviews say about refunds and rebooking on Emirates in economy class? & Negative: 19 of 19 directional reviews (24 matches) negative; cites a refund not paid for a cancelled ticket and a refund promised by staff but never received. \\
+Q10 & How are the movie selection and entertainment content in Qatar Airways business class? & Mixed: 15 positive, 15 negative (86 matches); a large movie selection versus few classics or new releases and poor TV choice. \\
+Q24 & Which gets better reviews for economy legroom, Cathay Pacific or Singapore Airlines? & No clear winner on legroom: Cathay Pacific 72.5\% positive (50/69), Singapore Airlines 79.6\% (78/98); Singapore's seat rating is higher (3.83 vs.\ 3.46 of 5). \\
+Q28 & How are the legroom, seat recline, seat comfort and seat cleanliness in Singapore Airlines economy class? & Legroom positive (78/98, 79.6\%); recline mixed (14/26); seat comfort positive (97/123, 78.9\%); cleanliness too few to decide (7/10). \\
+Q30 & How are the food, the value for money and the ground service (check-in and boarding) in Singapore Airlines economy class? & Food 3.88 of 5 (704 ratings), value 3.88 (717), ground service 3.99 (425), each with cited praise and complaints (e.g.\ long check-in queues). \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -1296,8 +1303,8 @@ Q30 & 新加坡航空经济舱的餐食、性价比和地面服务分别怎么�
 \label{app:factorial}
 
 Each question reads ``What do historical reviews say about [attribute] on [airline] in [cabin]?''. The IDs are
-those of the 40-question development set (Appendix~\ref{app:eval}); Q05 and Q10 are English versions of the Chinese Q05
-and Q10 in \cref{tab:five}.
+those of the 40-question development set (Appendix~\ref{app:eval}); Q05 and Q10 cover the same airline, cabin and attribute
+as Q05 and Q10 in \cref{tab:five}.
 
 \begin{center}\small\setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}llll@{\hspace{6mm}}llll@{}}

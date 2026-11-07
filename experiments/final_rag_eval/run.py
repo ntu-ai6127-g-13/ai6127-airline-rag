@@ -29,6 +29,7 @@ from src.grounded_qa import (  # noqa: E402
     _balanced_polarity_examples,
     _generate,
     _single_subtopic_direction,
+    _SUBTOPIC_NAMES_EN,
     answer_question,
     collect_evidence,
 )
@@ -167,7 +168,18 @@ def direction_from_rows(rows: list[dict]) -> str:
 
 
 def ablation_answer(question: str, airline: str, topic: str, direction: str,
-                    rows: list[dict]) -> str:
+                    rows: list[dict], language: str = "zh") -> str:
+    if language == "en":
+        direction_name = {"positive": "leans positive", "negative": "leans negative", "mixed": "is mixed",
+                          "insufficient_evidence": "is insufficient"}.get(direction, "is insufficient")
+        quotes = []
+        for index, row in enumerate(rows, 1):
+            text = str(row.get("text", "")).strip().replace("\n", " ")
+            quotes.append(f"\"{text[:149] + '…' if len(text) > 150 else text}\"[{index}]")
+        return (f"On {_SUBTOPIC_NAMES_EN.get(topic, topic)} for {airline or 'the selected airline'}, "
+                f"the review evidence {direction_name}. Representative reviews include "
+                f"{'; '.join(quotes) if quotes else 'no direct review to cite'}. "
+                "These reviews describe past experiences and do not represent every flight.")
     topic_name = SUBTOPIC_NAMES.get(topic, topic)
     airline_name = airline or "所选航司"
     direction_name = {"positive": "偏正面", "negative": "偏负面", "mixed": "正负接近",
@@ -291,7 +303,8 @@ def run_ablation(cases: list[dict], frame: pd.DataFrame, endpoint: str) -> tuple
             "D_consistency_filter": (full_direction, consistent),
         }
         for variant, (direction, evidence_rows) in variants.items():
-            answer = ablation_answer(case["question"], airline, topic, direction, evidence_rows)
+            answer = ablation_answer(case["question"], airline, topic, direction, evidence_rows,
+                                     language=case.get("language", "zh"))
             evidence = [{**row, "citation_id": str(index)}
                         for index, row in enumerate(evidence_rows, 1)]
             judged = judge(case["question"], answer, evidence, endpoint=endpoint,
@@ -393,13 +406,15 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     parser.add_argument("--phase", choices=("all", "full", "ablation"), default="all")
+    parser.add_argument("--cases", type=Path, default=CASES,
+                        help="question file; data/eval/query_en_20_20261105.json holds the English versions")
     args = parser.parse_args()
     if args.output_dir.exists() and args.phase in {"all", "full"}:
         raise SystemExit(f"Refusing to overwrite {args.output_dir}")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
     frame = pd.read_parquet(CHUNKS, columns=["airline", "route_from", "route_to"])
-    cases = json.loads(CASES.read_text())
+    cases = json.loads(args.cases.read_text())
     if args.phase in {"all", "full"}:
         full_rows, cached = run_full(
             cases, frame, args.endpoint, args.output_dir / "full_checkpoint.jsonl")
@@ -428,6 +443,7 @@ def main() -> int:
             "answer_relevance": "0-4 rubric normalized to 0-1",
             "context_precision": "judge-relevant displayed passages / all displayed passages",
         },
+        "cases": str(args.cases.relative_to(ROOT) if args.cases.is_absolute() else args.cases),
         "full_system": full_summary,
         "common_metric_ablation": ablation_summary,
         "run_invocation_elapsed_seconds": round(elapsed, 3),
